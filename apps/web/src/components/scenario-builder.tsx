@@ -305,7 +305,10 @@ export function ScenarioBuilder() {
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [storedScenariosOpen, setStoredScenariosOpen] = useState(false);
 
-  const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
+  const validationIssues = useMemo(
+    () => getScenarioValidationIssues(scenario),
+    [scenario],
+  );
   const validationSuccess = validationIssues.length === 0;
   const groupedIssues = useMemo(
     () => groupValidationIssues(validationIssues),
@@ -337,7 +340,8 @@ export function ScenarioBuilder() {
   const eventsByTarget = useMemo(() => {
     const grouped = new Map<string, SimulationEvent[]>();
     for (const target of scenario.targets) grouped.set(target.id, []);
-    for (const event of sortEvents(scenario.events)) {
+    // Preserve authoring/array order so edit-mode rows stay stable while times change.
+    for (const event of scenario.events) {
       grouped.get(event.targetId)?.push(event);
     }
     return grouped;
@@ -345,7 +349,7 @@ export function ScenarioBuilder() {
 
   const draftTargetPositionPoints = useMemo(() => {
     if (!draft.targetId) return [];
-    return (eventsByTarget.get(draft.targetId) ?? []).flatMap((event) => {
+    return sortEvents(eventsByTarget.get(draft.targetId) ?? []).flatMap((event) => {
       if (!event.position) return [];
       return [
         {
@@ -377,14 +381,12 @@ export function ScenarioBuilder() {
           const nextScenario = coerceEditableScenario(selected.payload, selected.id);
           setScenario(nextScenario);
           setDraft(createEventDraft(nextScenario.targets[0]?.id));
-          setValidationIssues(getScenarioValidationIssues(nextScenario));
         } else {
           const blank = blankScenario();
           const record = await saveScenarioDraft(blank);
           setActiveRecordId(record.id);
           setScenario(blank);
           setDraft(createEventDraft());
-          setValidationIssues(getScenarioValidationIssues(blank));
           setRecords(await listScenarios());
         }
       } finally {
@@ -399,9 +401,7 @@ export function ScenarioBuilder() {
   }, [scenarioId]);
 
   function applyValidation(nextScenario: SimulationScenario) {
-    const issues = getScenarioValidationIssues(nextScenario);
-    setValidationIssues(issues);
-    return issues;
+    return getScenarioValidationIssues(nextScenario);
   }
 
   function updateScenario(patch: Partial<SimulationScenario>) {
@@ -459,7 +459,7 @@ export function ScenarioBuilder() {
       return;
     }
     updateScenario({
-      events: sortEvents([...scenario.events, nextEvent]),
+      events: [...scenario.events, nextEvent],
     });
     setDraft(createEventDraft(draft.targetId));
   }
@@ -493,7 +493,6 @@ export function ScenarioBuilder() {
       setActiveRecordId(blank.id);
       setScenario(blank);
       setDraft(createEventDraft());
-      setValidationIssues(getScenarioValidationIssues(blank));
       setRecords(await listScenarios());
       void navigate({ to: "/builder", search: { scenarioId: blank.id } });
       return;
@@ -506,7 +505,6 @@ export function ScenarioBuilder() {
     setActiveRecordId(nextRecord.id);
     setScenario(nextScenario);
     setDraft(createEventDraft(nextScenario.targets[0]?.id));
-    setValidationIssues(getScenarioValidationIssues(nextScenario));
     void navigate({ to: "/builder", search: { scenarioId: nextRecord.id } });
   }
 
@@ -549,7 +547,6 @@ export function ScenarioBuilder() {
     const demo = createDemoScenario(Date.now(), Math.random, { vehicleSelection });
     setScenario(demo);
     setDraft(createEventDraft(demo.targets[0]?.id));
-    setValidationIssues(getScenarioValidationIssues(demo));
     toast.success(
       `Loaded ${demo.targets.length} ${vehicleSelection === "random" ? "mixed" : vehicleSelection} target${demo.targets.length === 1 ? "" : "s"}.`,
     );
@@ -664,9 +661,7 @@ export function ScenarioBuilder() {
 
   function updateEvent(next: SimulationEvent) {
     updateScenario({
-      events: sortEvents(
-        scenario.events.map((event) => (event.id === next.id ? next : event)),
-      ),
+      events: scenario.events.map((event) => (event.id === next.id ? next : event)),
     });
   }
 
@@ -1183,6 +1178,7 @@ export function ScenarioBuilder() {
                     value={draft.position}
                     onChange={(position) => setDraft((current) => ({ ...current, position }))}
                     existingPoints={draftTargetPositionPoints}
+                    previewAt={draft.at}
                     trailColor={selectedDraftTarget?.color}
                   />
                 </Suspense>
@@ -1301,9 +1297,14 @@ export function ScenarioBuilder() {
                 <ScrollArea className="h-[min(28rem,50vh)] pr-3">
                   <div className="flex flex-col gap-3">
                     {scenario.targets.map((target) => {
-                      const events = eventsByTarget.get(target.id) ?? [];
-                      const firstAt = events[0]?.at;
-                      const lastAt = events.at(-1)?.at;
+                      const placementEvents = eventsByTarget.get(target.id) ?? [];
+                      const events =
+                        timelineMode === "edit"
+                          ? placementEvents
+                          : sortEvents(placementEvents);
+                      const timedEvents = sortEvents(placementEvents);
+                      const firstAt = timedEvents[0]?.at;
+                      const lastAt = timedEvents.at(-1)?.at;
                       let previousPosition: PositionPayload | undefined;
                       return (
                         <Collapsible
@@ -1517,7 +1518,7 @@ export function ScenarioBuilder() {
             if (!open) setRouteTargetId(null);
           }}
           onGenerate={(events, summary) => {
-            updateScenario({ events: sortEvents([...scenario.events, ...events]) });
+            updateScenario({ events: [...scenario.events, ...events] });
             toast.success(summary);
             setRouteTargetId(null);
           }}

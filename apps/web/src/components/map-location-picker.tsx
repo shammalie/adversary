@@ -39,6 +39,8 @@ import type { PositionPayload } from "@/types/target";
 
 const EVENT_TRAIL_SOURCE = "schedule-event-trail";
 const EVENT_TRAIL_LAYER = "schedule-event-trail";
+const EVENT_NEIGHBOR_SOURCE = "schedule-event-neighbors";
+const EVENT_NEIGHBOR_LAYER = "schedule-event-neighbors";
 const DEFAULT_TRAIL_COLOR = "#38bdf8";
 
 export interface ExistingMapPoint {
@@ -54,6 +56,8 @@ interface MapLocationPickerProps {
   idPrefix?: string;
   /** Existing position events for the selected target, any order (sorted by `at` for display). */
   existingPoints?: ExistingMapPoint[];
+  /** Draft event time used to connect the picker marker to nearest existing points. */
+  previewAt?: string;
   trailColor?: string;
 }
 
@@ -103,26 +107,108 @@ function buildTrailCollection(
   };
 }
 
-function ensureTrailLayer(map: MapLibreMap, data: TrailFeatureCollection) {
-  const source = map.getSource(EVENT_TRAIL_SOURCE) as GeoJSONSource | undefined;
+/** Previous/next existing points relative to `at` (sorted points required). */
+function findTimeNeighbors(points: ExistingMapPoint[], at: string) {
+  let previous: ExistingMapPoint | null = null;
+  let next: ExistingMapPoint | null = null;
+  for (const point of points) {
+    if (point.at <= at) {
+      previous = point;
+    } else {
+      next = point;
+      break;
+    }
+  }
+  return { previous, next };
+}
+
+function buildNeighborCollection(
+  draft: { latitude: number; longitude: number },
+  points: ExistingMapPoint[],
+  at: string | undefined,
+  color: string,
+): TrailFeatureCollection {
+  if (!at || points.length === 0) return EMPTY_TRAIL;
+
+  const { previous, next } = findTimeNeighbors(points, at);
+  const draftCoord: [number, number] = [draft.longitude, draft.latitude];
+  const features: TrailFeatureCollection["features"] = [];
+
+  if (previous) {
+    features.push({
+      type: "Feature",
+      properties: { color },
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [previous.longitude, previous.latitude],
+          draftCoord,
+        ],
+      },
+    });
+  }
+  if (next) {
+    features.push({
+      type: "Feature",
+      properties: { color },
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          draftCoord,
+          [next.longitude, next.latitude],
+        ],
+      },
+    });
+  }
+
+  return features.length === 0 ? EMPTY_TRAIL : { type: "FeatureCollection", features };
+}
+
+function ensureLineLayer(
+  map: MapLibreMap,
+  sourceId: string,
+  layerId: string,
+  data: TrailFeatureCollection,
+  paint: {
+    "line-color": string | ["get", string];
+    "line-width": number;
+    "line-opacity": number;
+    "line-dasharray"?: [number, number];
+  },
+) {
+  const source = map.getSource(sourceId) as GeoJSONSource | undefined;
   if (!source) {
-    map.addSource(EVENT_TRAIL_SOURCE, {
+    map.addSource(sourceId, {
       type: "geojson",
       data,
     });
     map.addLayer({
-      id: EVENT_TRAIL_LAYER,
+      id: layerId,
       type: "line",
-      source: EVENT_TRAIL_SOURCE,
-      paint: {
-        "line-color": ["get", "color"],
-        "line-width": 2,
-        "line-opacity": 0.85,
-      },
+      source: sourceId,
+      paint,
     });
     return;
   }
   source.setData(data);
+}
+
+function ensureOverlayLayers(
+  map: MapLibreMap,
+  trailData: TrailFeatureCollection,
+  neighborData: TrailFeatureCollection,
+) {
+  ensureLineLayer(map, EVENT_TRAIL_SOURCE, EVENT_TRAIL_LAYER, trailData, {
+    "line-color": ["get", "color"],
+    "line-width": 2,
+    "line-opacity": 0.85,
+  });
+  ensureLineLayer(map, EVENT_NEIGHBOR_SOURCE, EVENT_NEIGHBOR_LAYER, neighborData, {
+    "line-color": ["get", "color"],
+    "line-width": 2,
+    "line-opacity": 0.95,
+    "line-dasharray": [1.5, 1.5],
+  });
 }
 
 export function MapLocationPicker({
@@ -130,6 +216,7 @@ export function MapLocationPicker({
   onChange,
   idPrefix = "map-point",
   existingPoints = [],
+  previewAt,
   trailColor = DEFAULT_TRAIL_COLOR,
 }: MapLocationPickerProps) {
   const { mapStyle, activeRegion } = useMapData();
@@ -138,6 +225,7 @@ export function MapLocationPicker({
   const markerRef = useRef<Marker | null>(null);
   const eventMarkersRef = useRef(new Map<string, Marker>());
   const trailCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL);
+  const neighborCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL);
   const onChangeRef = useRef(onChange);
   const valueRef = useRef(value);
   const fittedPointsKeyRef = useRef<string | null>(null);
@@ -168,6 +256,11 @@ export function MapLocationPicker({
         )
         .join("|"),
     [sortedExistingPoints],
+  );
+
+  const timeNeighbors = useMemo(
+    () => (previewAt ? findTimeNeighbors(sortedExistingPoints, previewAt) : null),
+    [previewAt, sortedExistingPoints],
   );
 
   const outsideRegion =
@@ -219,7 +312,7 @@ export function MapLocationPicker({
       });
     });
     map.on("load", () => {
-      ensureTrailLayer(map, trailCollectionRef.current);
+      ensureOverlayLayers(map, trailCollectionRef.current, neighborCollectionRef.current);
       setMapReady(true);
     });
 
@@ -244,7 +337,7 @@ export function MapLocationPicker({
 
     const restoreOverlay = () => {
       if (!map.isStyleLoaded()) return;
-      ensureTrailLayer(map, trailCollectionRef.current);
+      ensureOverlayLayers(map, trailCollectionRef.current, neighborCollectionRef.current);
     };
 
     map.on("style.load", restoreOverlay);
@@ -267,9 +360,16 @@ export function MapLocationPicker({
     if (!map || !mapReady) return;
 
     const trailCollection = buildTrailCollection(sortedExistingPoints, trailColor);
+    const neighborCollection = buildNeighborCollection(
+      value,
+      sortedExistingPoints,
+      previewAt,
+      trailColor,
+    );
     trailCollectionRef.current = trailCollection;
+    neighborCollectionRef.current = neighborCollection;
     if (map.isStyleLoaded()) {
-      ensureTrailLayer(map, trailCollection);
+      ensureOverlayLayers(map, trailCollection, neighborCollection);
     }
 
     const nextIds = new Set(sortedExistingPoints.map((point) => point.id));
@@ -315,6 +415,7 @@ export function MapLocationPicker({
   }, [
     existingPointsKey,
     mapReady,
+    previewAt,
     sortedExistingPoints,
     trailColor,
     value.latitude,
@@ -388,7 +489,11 @@ export function MapLocationPicker({
         <p className="text-sm text-muted-foreground" role="status">
           Showing {sortedExistingPoints.length} existing position
           {sortedExistingPoints.length === 1 ? "" : "s"} for this target
-          {sortedExistingPoints.length > 1 ? ", connected in time order" : ""}.
+          {sortedExistingPoints.length > 1 ? ", connected in time order" : ""}
+          {timeNeighbors?.previous || timeNeighbors?.next
+            ? "; dashed lines link the draft to its nearest events by time"
+            : ""}
+          .
         </p>
       ) : null}
       {outsideRegion ? (
