@@ -1,8 +1,14 @@
 import { Toaster } from "@adversary/ui/components/sonner";
-import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import {
+  HeadContent,
+  Outlet,
+  createRootRouteWithContext,
+} from "@tanstack/react-router";
 
+import { RouterDevtoolsGate } from "@/components/router-devtools-gate";
 import Header from "@/components/header";
+import { SimulationProvider } from "@/components/simulation-provider";
+import { ThemeColorSync } from "@/components/theme-color-sync";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "../index.css";
@@ -14,11 +20,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "adversary",
+        title: "Adversary",
       },
       {
         name: "description",
-        content: "adversary is a web application",
+        content:
+          "Frontend target-tracking simulation and operations dashboard.",
       },
     ],
     links: [
@@ -40,13 +47,16 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="grid grid-rows-[auto_1fr] h-svh">
-          <Header />
-          <Outlet />
-        </div>
+        <ThemeColorSync />
+        <SimulationProvider>
+          <div className="grid min-h-svh grid-rows-[auto_1fr]">
+            <Header />
+            <Outlet />
+          </div>
+        </SimulationProvider>
         <Toaster richColors />
       </ThemeProvider>
-      <TanStackRouterDevtools position="bottom-left" />
+      <RouterDevtoolsGate />
     </>
   );
 }

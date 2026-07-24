@@ -1,1 +1,155 @@
 @import "@adversary/ui/globals.css";
+
+/*
+ * App-level ops theme: light tokens match the dark cyan ops aesthetic with WCAG 2.1 AA contrast.
+ * Scoped with :not(.dark) so these :root overrides cannot beat .dark tokens (same element, later file).
+ * Shared shadcn defaults remain in @adversary/ui; overrides and ops chrome live here.
+ */
+:root:not(.dark) {
+  --background: oklch(0.985 0.004 210);
+  --foreground: oklch(0.2 0.02 232);
+  --card: oklch(0.995 0.003 210);
+  --card-foreground: oklch(0.2 0.02 232);
+  --popover: oklch(0.995 0.003 210);
+  --popover-foreground: oklch(0.2 0.02 232);
+  /* Cyan primary — dark enough for white/near-white label text (AA) */
+  --primary: oklch(0.42 0.1 211);
+  --primary-foreground: oklch(0.99 0.004 197);
+  --secondary: oklch(0.94 0.012 210);
+  --secondary-foreground: oklch(0.22 0.025 232);
+  --muted: oklch(0.94 0.01 210);
+  --muted-foreground: oklch(0.42 0.03 220);
+  --accent: oklch(0.93 0.02 211);
+  --accent-foreground: oklch(0.22 0.025 232);
+  --destructive: oklch(0.5 0.2 25);
+  --border: oklch(0.86 0.02 214);
+  --input: oklch(0.86 0.02 214);
+  --ring: oklch(0.42 0.1 211);
+  --sidebar: oklch(0.97 0.006 210);
+  --sidebar-foreground: oklch(0.2 0.02 232);
+  --sidebar-primary: oklch(0.42 0.1 211);
+  --sidebar-primary-foreground: oklch(0.99 0.004 197);
+  --sidebar-accent: oklch(0.94 0.012 210);
+  --sidebar-accent-foreground: oklch(0.22 0.025 232);
+  --sidebar-border: oklch(0.86 0.02 214);
+  --sidebar-ring: oklch(0.42 0.1 211);
+  --theme-color: #f5f8f9;
+  color-scheme: light;
+}
+
+.dark {
+  --theme-color: #0c1014;
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--primary) 8%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--primary) 8%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .dark body {
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px);
+  }
+}
+
+@layer components {
+  .tracking-marker {
+    position: relative;
+    display: grid;
+    width: 1.75rem;
+    height: 1.75rem;
+    place-items: center;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--foreground);
+    transition:
+      width 180ms ease,
+      height 180ms ease;
+  }
+
+  .tracking-marker svg {
+    width: 1rem;
+    height: 1rem;
+    transform: rotate(var(--marker-rotate, 0deg));
+    filter: drop-shadow(0 0 1.5px var(--background)) drop-shadow(0 1px 2px color-mix(in oklab, var(--background) 70%, transparent));
+    transition: transform 180ms ease;
+  }
+
+  .tracking-marker[data-selected="true"] {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .tracking-marker[data-selected="true"] svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .tracking-marker[data-tracked="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 2px solid var(--target-color);
+    pointer-events: none;
+    animation: tracking-marker-pulse 1.8s ease-out infinite;
+  }
+
+  .critical-rail {
+    border-color: color-mix(in oklab, var(--destructive) 55%, transparent);
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--destructive) 18%, transparent),
+      var(--card)
+    );
+    color: var(--foreground);
+  }
+
+  .operational-pulse {
+    animation: operational-pulse 1.8s ease-out infinite;
+  }
+
+  @keyframes operational-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 0%, transparent);
+    }
+  }
+
+  @keyframes tracking-marker-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.65;
+    }
+    100% {
+      transform: scale(2.35);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .operational-pulse {
+      animation: none;
+    }
+
+    .tracking-marker[data-tracked="true"]::after {
+      animation: none;
+      opacity: 0.45;
+      transform: scale(1.35);
+    }
+
+    .tracking-marker,
+    .tracking-marker svg {
+      transition: none;
+    }
+  }
+}
