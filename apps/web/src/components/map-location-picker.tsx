@@ -1,5 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { AttributionControl, Map as MapLibreMap, Marker } from "maplibre-gl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AttributionControl,
+  LngLatBounds,
+  Map as MapLibreMap,
+  Marker,
+  type GeoJSONSource,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MinusIcon, PlusIcon } from "lucide-react";
 
@@ -31,29 +37,138 @@ import {
 } from "@/lib/speed-units";
 import type { PositionPayload } from "@/types/target";
 
+const EVENT_TRAIL_SOURCE = "schedule-event-trail";
+const EVENT_TRAIL_LAYER = "schedule-event-trail";
+const DEFAULT_TRAIL_COLOR = "#38bdf8";
+
+export interface ExistingMapPoint {
+  id: string;
+  latitude: number;
+  longitude: number;
+  at: string;
+}
+
 interface MapLocationPickerProps {
   value: PositionPayload;
   onChange: (value: PositionPayload) => void;
   idPrefix?: string;
+  /** Existing position events for the selected target, any order (sorted by `at` for display). */
+  existingPoints?: ExistingMapPoint[];
+  trailColor?: string;
+}
+
+type TrailFeatureCollection = {
+  type: "FeatureCollection";
+  features: Array<{
+    type: "Feature";
+    properties: { color: string };
+    geometry: {
+      type: "LineString";
+      coordinates: Array<[number, number]>;
+    };
+  }>;
+};
+
+const EMPTY_TRAIL: TrailFeatureCollection = {
+  type: "FeatureCollection",
+  features: [],
+};
+
+function createEventPointElement(point: ExistingMapPoint, color: string) {
+  const element = document.createElement("div");
+  element.className = "schedule-event-point";
+  element.style.setProperty("--event-point-color", color);
+  element.title = new Date(point.at).toLocaleString();
+  element.setAttribute("aria-hidden", "true");
+  return element;
+}
+
+function buildTrailCollection(
+  points: ExistingMapPoint[],
+  color: string,
+): TrailFeatureCollection {
+  if (points.length < 2) return EMPTY_TRAIL;
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: { color },
+        geometry: {
+          type: "LineString",
+          coordinates: points.map((point) => [point.longitude, point.latitude]),
+        },
+      },
+    ],
+  };
+}
+
+function ensureTrailLayer(map: MapLibreMap, data: TrailFeatureCollection) {
+  const source = map.getSource(EVENT_TRAIL_SOURCE) as GeoJSONSource | undefined;
+  if (!source) {
+    map.addSource(EVENT_TRAIL_SOURCE, {
+      type: "geojson",
+      data,
+    });
+    map.addLayer({
+      id: EVENT_TRAIL_LAYER,
+      type: "line",
+      source: EVENT_TRAIL_SOURCE,
+      paint: {
+        "line-color": ["get", "color"],
+        "line-width": 2,
+        "line-opacity": 0.85,
+      },
+    });
+    return;
+  }
+  source.setData(data);
 }
 
 export function MapLocationPicker({
   value,
   onChange,
   idPrefix = "map-point",
+  existingPoints = [],
+  trailColor = DEFAULT_TRAIL_COLOR,
 }: MapLocationPickerProps) {
   const { mapStyle, activeRegion } = useMapData();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  const eventMarkersRef = useRef(new Map<string, Marker>());
+  const trailCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL);
   const onChangeRef = useRef(onChange);
   const valueRef = useRef(value);
+  const fittedPointsKeyRef = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [speedUnit, setSpeedUnit] = useState<SpeedUnit>("kt");
   const [speedDraft, setSpeedDraft] = useState("");
   const skipSpeedSyncRef = useRef(false);
   onChangeRef.current = onChange;
   valueRef.current = value;
+
+  const sortedExistingPoints = useMemo(
+    () =>
+      existingPoints
+        .filter(
+          (point) =>
+            Number.isFinite(point.latitude) && Number.isFinite(point.longitude),
+        )
+        .toSorted((a, b) => a.at.localeCompare(b.at) || a.id.localeCompare(b.id)),
+    [existingPoints],
+  );
+
+  const existingPointsKey = useMemo(
+    () =>
+      sortedExistingPoints
+        .map(
+          (point) =>
+            `${point.id}:${point.latitude}:${point.longitude}:${point.at}`,
+        )
+        .join("|"),
+    [sortedExistingPoints],
+  );
 
   const outsideRegion =
     activeRegion && !isWithinBounds(value.latitude, value.longitude, activeRegion.bounds);
@@ -103,11 +218,18 @@ export function MapLocationPicker({
         longitude: Number(event.lngLat.lng.toFixed(6)),
       });
     });
-    map.on("load", () => setMapReady(true));
+    map.on("load", () => {
+      ensureTrailLayer(map, trailCollectionRef.current);
+      setMapReady(true);
+    });
 
     markerRef.current = marker;
     mapRef.current = map;
     return () => {
+      for (const eventMarker of eventMarkersRef.current.values()) {
+        eventMarker.remove();
+      }
+      eventMarkersRef.current.clear();
       marker.remove();
       map.remove();
       markerRef.current = null;
@@ -119,14 +241,85 @@ export function MapLocationPicker({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
+
+    const restoreOverlay = () => {
+      if (!map.isStyleLoaded()) return;
+      ensureTrailLayer(map, trailCollectionRef.current);
+    };
+
+    map.on("style.load", restoreOverlay);
     void map.setStyle(mapStyle);
+    return () => {
+      map.off("style.load", restoreOverlay);
+    };
   }, [mapReady, mapStyle]);
 
   useEffect(() => {
     if (!mapReady || !markerRef.current) return;
     markerRef.current.setLngLat([value.longitude, value.latitude]);
-    mapRef.current?.setCenter([value.longitude, value.latitude]);
-  }, [mapReady, value.latitude, value.longitude]);
+    if (sortedExistingPoints.length === 0) {
+      mapRef.current?.setCenter([value.longitude, value.latitude]);
+    }
+  }, [mapReady, sortedExistingPoints.length, value.latitude, value.longitude]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const trailCollection = buildTrailCollection(sortedExistingPoints, trailColor);
+    trailCollectionRef.current = trailCollection;
+    if (map.isStyleLoaded()) {
+      ensureTrailLayer(map, trailCollection);
+    }
+
+    const nextIds = new Set(sortedExistingPoints.map((point) => point.id));
+    for (const [id, marker] of eventMarkersRef.current) {
+      if (!nextIds.has(id)) {
+        marker.remove();
+        eventMarkersRef.current.delete(id);
+      }
+    }
+
+    for (const point of sortedExistingPoints) {
+      let marker = eventMarkersRef.current.get(point.id);
+      if (!marker) {
+        marker = new Marker({
+          element: createEventPointElement(point, trailColor),
+          anchor: "center",
+        })
+          .setLngLat([point.longitude, point.latitude])
+          .addTo(map);
+        eventMarkersRef.current.set(point.id, marker);
+      } else {
+        marker.setLngLat([point.longitude, point.latitude]);
+        const element = marker.getElement();
+        element.style.setProperty("--event-point-color", trailColor);
+        element.title = new Date(point.at).toLocaleString();
+      }
+    }
+
+    if (sortedExistingPoints.length === 0) {
+      fittedPointsKeyRef.current = null;
+      return;
+    }
+
+    if (fittedPointsKeyRef.current === existingPointsKey) return;
+    fittedPointsKeyRef.current = existingPointsKey;
+
+    const bounds = new LngLatBounds();
+    for (const point of sortedExistingPoints) {
+      bounds.extend([point.longitude, point.latitude]);
+    }
+    bounds.extend([value.longitude, value.latitude]);
+    map.fitBounds(bounds, { padding: 40, maxZoom: 12, duration: 0 });
+  }, [
+    existingPointsKey,
+    mapReady,
+    sortedExistingPoints,
+    trailColor,
+    value.latitude,
+    value.longitude,
+  ]);
 
   function updateCoordinate(field: "latitude" | "longitude" | "altitude", raw: string) {
     const parsed = Number(raw);
@@ -191,6 +384,13 @@ export function MapLocationPicker({
           </ButtonGroup>
         </div>
       </div>
+      {sortedExistingPoints.length > 0 ? (
+        <p className="text-sm text-muted-foreground" role="status">
+          Showing {sortedExistingPoints.length} existing position
+          {sortedExistingPoints.length === 1 ? "" : "s"} for this target
+          {sortedExistingPoints.length > 1 ? ", connected in time order" : ""}.
+        </p>
+      ) : null}
       {outsideRegion ? (
         <p
           className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"

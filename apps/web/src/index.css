@@ -58,6 +58,16 @@
 }
 
 @layer components {
+  .schedule-event-point {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: var(--event-point-color, #38bdf8);
+    border: 1.5px solid color-mix(in oklab, var(--background) 80%, white);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--event-point-color, #38bdf8) 45%, transparent);
+    pointer-events: none;
+  }
+
   .tracking-marker {
     position: relative;
     display: grid;

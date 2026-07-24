@@ -343,6 +343,21 @@ export function ScenarioBuilder() {
     return grouped;
   }, [scenario.events, scenario.targets]);
 
+  const draftTargetPositionPoints = useMemo(() => {
+    if (!draft.targetId) return [];
+    return (eventsByTarget.get(draft.targetId) ?? []).flatMap((event) => {
+      if (!event.position) return [];
+      return [
+        {
+          id: event.id,
+          latitude: event.position.latitude,
+          longitude: event.position.longitude,
+          at: event.at,
+        },
+      ];
+    });
+  }, [draft.targetId, eventsByTarget]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -1167,6 +1182,8 @@ export function ScenarioBuilder() {
                     idPrefix="event-position"
                     value={draft.position}
                     onChange={(position) => setDraft((current) => ({ ...current, position }))}
+                    existingPoints={draftTargetPositionPoints}
+                    trailColor={selectedDraftTarget?.color}
                   />
                 </Suspense>
               ) : null}
