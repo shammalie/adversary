@@ -40,6 +40,8 @@ interface TrackingMapProps {
   targets: MapTargetDisplay[] | RuntimeTargetState[];
   selectedTargetId?: string;
   trackedTargetIds?: string[];
+  /** When true, only tracked contacts are drawn on the map. */
+  showTrackedOnly?: boolean;
   highlightedEventId?: string;
   mode?: MapMode;
   cameraMode?: CameraMode;
@@ -49,6 +51,11 @@ interface TrackingMapProps {
   fitTargetsKey?: string;
   continuousMotion?: boolean;
 }
+
+const OVERVIEW_MAX_ZOOM = 12;
+/** Track frames as tightly as possible while keeping every tracked contact on screen. */
+const TRACK_MAX_ZOOM = 16;
+const FIT_PADDING = 48;
 
 type TrailFeatureCollection = {
   type: "FeatureCollection";
@@ -129,6 +136,39 @@ function isOutsideViewport(
   );
 }
 
+/** True when track camera should reframe — zoom in/out or recenter to keep a tight fit. */
+function needsTrackRefit(map: MapLibreMap, tracked: MapTargetDisplay[], bounds: LngLatBoundsLike) {
+  const anyOutside = tracked.some(
+    (target) =>
+      target.position &&
+      isOutsideViewport(map, target.position.latitude, target.position.longitude),
+  );
+  if (anyOutside) return true;
+
+  const camera = map.cameraForBounds(bounds, {
+    padding: FIT_PADDING,
+    maxZoom: TRACK_MAX_ZOOM,
+  });
+  if (!camera || typeof camera.zoom !== "number") return true;
+
+  // Zoom in (or out) when the ideal framing differs from the current view.
+  if (Math.abs(camera.zoom - map.getZoom()) > 0.2) return true;
+
+  const current = map.getCenter();
+  if (camera.center) {
+    const targetLng = Array.isArray(camera.center)
+      ? camera.center[0]
+      : "lng" in camera.center
+        ? camera.center.lng
+        : camera.center.lon;
+    const targetLat = Array.isArray(camera.center) ? camera.center[1] : camera.center.lat;
+    if (Math.abs(current.lng - targetLng) > 1e-5 || Math.abs(current.lat - targetLat) > 1e-5) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function buildTrailCoordinates(
   target: MapTargetDisplay,
 ): Array<[number, number]> {
@@ -171,6 +211,7 @@ export function TrackingMap({
   targets,
   selectedTargetId,
   trackedTargetIds = [],
+  showTrackedOnly = false,
   highlightedEventId,
   mode = "2d",
   cameraMode = "overview",
@@ -187,6 +228,7 @@ export function TrackingMap({
   const markerAnimationsRef = useRef(new Map<string, number>());
   const selectHandlerRef = useRef(onSelectTarget);
   const fittedKeyRef = useRef<string | null>(null);
+  const overviewVisibleKeyRef = useRef<string>("");
   const trailCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL_COLLECTION);
   const cameraModeRef = useRef(cameraMode);
   const [mapReady, setMapReady] = useState(false);
@@ -194,9 +236,14 @@ export function TrackingMap({
   cameraModeRef.current = cameraMode;
 
   const displayTargets = useMemo(() => targets.map(toDisplayTarget), [targets]);
+  const trackedSet = useMemo(() => new Set(trackedTargetIds), [trackedTargetIds]);
+  const visibleTargets = useMemo(() => {
+    if (!showTrackedOnly || trackedSet.size === 0) return displayTargets;
+    return displayTargets.filter((target) => trackedSet.has(target.targetId));
+  }, [displayTargets, showTrackedOnly, trackedSet]);
   const targetsMotionKey = useMemo(
     () =>
-      displayTargets
+      visibleTargets
         .map((target) => {
           const position = target.position;
           const lastTrail = target.trail.at(-1);
@@ -211,9 +258,8 @@ export function TrackingMap({
           ].join(":");
         })
         .join("|"),
-    [displayTargets],
+    [visibleTargets],
   );
-  const trackedSet = new Set(trackedTargetIds);
   const interactive = cameraMode === "pan";
 
   useEffect(() => {
@@ -344,7 +390,7 @@ export function TrackingMap({
     const map = mapRef.current;
     if (!map || !mapReady) return;
 
-    const positionedTargets = displayTargets.filter((target) => target.position);
+    const positionedTargets = visibleTargets.filter((target) => target.position);
     const activeIds = new Set(positionedTargets.map((target) => target.targetId));
     for (const [targetId, marker] of markersRef.current) {
       if (!activeIds.has(targetId)) {
@@ -439,7 +485,8 @@ export function TrackingMap({
     onSelectTarget,
     selectedTargetId,
     targetsMotionKey,
-    trackedTargetIds,
+    trackedSet,
+    visibleTargets,
   ]);
 
   useEffect(() => {
@@ -447,61 +494,66 @@ export function TrackingMap({
     if (!map || !mapReady || cameraMode === "pan") return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reduced ? 0 : 700;
+    const duration = reduced || continuousMotion ? 0 : 700;
 
     if (cameraMode === "track") {
       const tracked = displayTargets.filter(
         (target) => trackedSet.has(target.targetId) && target.position,
       );
       if (tracked.length === 0) return;
-      if (tracked.length === 1) {
-        const position = tracked[0]?.position;
-        if (!position) return;
-        map.easeTo({
-          center: [position.longitude, position.latitude],
-          duration: reduced ? 0 : 450,
-        });
-        return;
-      }
-      const anyOutside = tracked.some(
-        (target) =>
-          target.position &&
-          isOutsideViewport(map, target.position.latitude, target.position.longitude),
-      );
-      if (!anyOutside) return;
       const bounds = buildBounds(tracked);
       if (!bounds) return;
-      map.fitBounds(bounds, { padding: 48, duration, maxZoom: 12 });
+      if (!needsTrackRefit(map, tracked, bounds)) return;
+      // Fit as tightly as possible while keeping every tracked contact in view.
+      map.fitBounds(bounds, {
+        padding: FIT_PADDING,
+        duration: reduced || continuousMotion ? 0 : 450,
+        maxZoom: TRACK_MAX_ZOOM,
+      });
       return;
     }
 
-    const positioned = displayTargets.filter((target) => target.position);
+    const positioned = visibleTargets.filter((target) => target.position);
     if (positioned.length === 0) return;
+    const visibleKey = positioned
+      .map((target) => target.targetId)
+      .toSorted()
+      .join("|");
+    const visibilityChanged = overviewVisibleKeyRef.current !== visibleKey;
+    overviewVisibleKeyRef.current = visibleKey;
     const anyOutside = positioned.some(
       (target) =>
         target.position &&
         isOutsideViewport(map, target.position.latitude, target.position.longitude),
     );
-    if (!anyOutside && fittedKeyRef.current) return;
+    if (!anyOutside && !visibilityChanged && fittedKeyRef.current) return;
     const bounds = buildBounds(positioned);
     if (!bounds) return;
     if (fitTargetsKey) fittedKeyRef.current = fitTargetsKey;
-    map.fitBounds(bounds, { padding: 48, duration, maxZoom: 12 });
-  }, [cameraMode, displayTargets, fitTargetsKey, mapReady, trackedTargetIds]);
+    map.fitBounds(bounds, { padding: FIT_PADDING, duration, maxZoom: OVERVIEW_MAX_ZOOM });
+  }, [
+    cameraMode,
+    continuousMotion,
+    displayTargets,
+    fitTargetsKey,
+    mapReady,
+    trackedSet,
+    visibleTargets,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady || !fitTargetsKey || cameraMode !== "overview") return;
     if (fittedKeyRef.current === fitTargetsKey) return;
-    const bounds = buildBounds(displayTargets);
+    const bounds = buildBounds(visibleTargets);
     if (!bounds) return;
     fittedKeyRef.current = fitTargetsKey;
     map.fitBounds(bounds, {
-      padding: 48,
+      padding: FIT_PADDING,
       duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
-      maxZoom: 12,
+      maxZoom: OVERVIEW_MAX_ZOOM,
     });
-  }, [cameraMode, displayTargets, fitTargetsKey, mapReady]);
+  }, [cameraMode, fitTargetsKey, mapReady, visibleTargets]);
 
   function zoomBy(delta: number) {
     const map = mapRef.current;
@@ -522,10 +574,10 @@ export function TrackingMap({
   }
 
   return (
-    <div className="relative h-full min-h-[22rem] w-full overflow-hidden rounded-lg bg-muted">
+    <div className="relative h-full min-h-0 w-full overflow-hidden rounded-lg bg-muted">
       <div
         ref={containerRef}
-        className="h-full min-h-[22rem] w-full"
+        className="h-full min-h-0 w-full"
         role="region"
         aria-label={`${mode === "globe" ? "3D globe" : "2D map"} target tracking view`}
       />

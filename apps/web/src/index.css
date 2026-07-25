@@ -58,6 +58,20 @@
 }
 
 @layer components {
+  .preview-event-graph.react-flow {
+    width: 100%;
+    height: 100%;
+    background: color-mix(in oklab, var(--muted) 35%, var(--background));
+    --event-kind-position: var(--primary);
+    --event-kind-message: oklch(0.55 0.14 70);
+    --event-kind-both: oklch(0.48 0.1 165);
+  }
+
+  .dark .preview-event-graph.react-flow {
+    --event-kind-message: oklch(0.78 0.12 75);
+    --event-kind-both: oklch(0.72 0.12 170);
+  }
+
   .schedule-event-point {
     width: 0.625rem;
     height: 0.625rem;

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+  <title>Signal Rise</title>
+  <!-- Three ascending bars at a lean  dynamic, audio/signal -->
+  <rect x="5" y="18" width="5.5" height="10" rx="1.4" transform="rotate(-8 7.75 23)"/>
+  <rect x="13" y="11" width="5.5" height="17" rx="1.4" transform="rotate(-8 15.75 19.5)"/>
+  <rect x="21" y="4" width="5.5" height="24" rx="1.4" transform="rotate(-8 23.75 16)"/>
+</svg>

@@ -9,17 +9,20 @@ import type {
 } from "@/types/target";
 import { AFFILIATIONS, TARGET_STATUSES, VEHICLE_CATEGORIES } from "@/types/target";
 
-export type DemoVehicleSelection = "random" | VehicleCategory;
+export type DemoVehicleSelection = "random" | readonly VehicleCategory[];
 
 export interface CreateDemoScenarioOptions {
-  /** When `"random"`, each target picks a category. Otherwise all targets use that category. */
+  /**
+   * `"random"` — each target picks any vehicle category.
+   * A non-empty category list — each target picks from that pool (single type if length 1).
+   */
   vehicleSelection?: DemoVehicleSelection;
   /** When omitted, a count in `[2, 100]` is chosen at random. */
   targetCount?: number;
 }
 
-const MIN_DEMO_TARGETS = 2;
-const MAX_DEMO_TARGETS = 100;
+export const MIN_DEMO_TARGETS = 2;
+export const MAX_DEMO_TARGETS = 100;
 
 const CALLSIGN_PREFIXES = [
   "VIPER",
@@ -75,28 +78,31 @@ function resolveTargetCount(random: () => number, override?: number) {
   return MIN_DEMO_TARGETS + Math.floor(random() * (MAX_DEMO_TARGETS - MIN_DEMO_TARGETS + 1));
 }
 
+/**
+ * Parses a demo target-size input. Valid values are integers in (1, 100] i.e. 2–100.
+ * Returns `null` when empty or invalid.
+ */
+export function parseDemoTargetCount(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const value = Number(trimmed);
+  if (!Number.isInteger(value) || value <= 1 || value > MAX_DEMO_TARGETS) return null;
+  return value;
+}
+
 function resolveCategory(
   selection: DemoVehicleSelection,
   random: () => number,
 ): VehicleCategory {
-  if (selection !== "random") return selection;
-  return pickOne(VEHICLE_CATEGORIES, random);
+  if (selection === "random" || selection.length === 0) {
+    return pickOne(VEHICLE_CATEGORIES, random);
+  }
+  return pickOne(selection, random);
 }
 
-const DEMO_COLORS = [
-  "#22d3ee",
-  "#f59e0b",
-  "#a78bfa",
-  "#34d399",
-  "#f472b6",
-  "#60a5fa",
-  "#fb7185",
-  "#fbbf24",
-  "#2dd4bf",
-  "#c084fc",
-  "#4ade80",
-  "#38bdf8",
-] as const;
+import { TARGET_COLOR_OPTIONS } from "@/lib/target-colors";
+
+const DEMO_COLORS = TARGET_COLOR_OPTIONS.dark.map((option) => option.value);
 
 function demoColor(index: number) {
   return DEMO_COLORS[index % DEMO_COLORS.length]!;
@@ -118,18 +124,28 @@ function demoStartPoint(category: VehicleCategory, random: () => number) {
   };
 }
 
+function formatCategoryLabel(category: VehicleCategory) {
+  return `${category[0]!.toUpperCase()}${category.slice(1)}`;
+}
+
 function demoName(selection: DemoVehicleSelection, targetCount: number) {
-  if (selection === "random") {
+  if (selection === "random" || selection.length === 0) {
     return `Random demo (${targetCount} targets)`;
   }
-  return `${selection[0]!.toUpperCase()}${selection.slice(1)} demo (${targetCount} targets)`;
+  if (selection.length === 1) {
+    return `${formatCategoryLabel(selection[0]!)} demo (${targetCount} targets)`;
+  }
+  return `Mixed demo (${targetCount} targets)`;
 }
 
 function demoDescription(selection: DemoVehicleSelection, targetCount: number) {
-  if (selection === "random") {
+  if (selection === "random" || selection.length === 0) {
     return `Generated demonstration with ${targetCount} contacts across mixed vehicle types.`;
   }
-  return `Generated demonstration with ${targetCount} ${selection} contacts.`;
+  if (selection.length === 1) {
+    return `Generated demonstration with ${targetCount} ${selection[0]} contacts.`;
+  }
+  return `Generated demonstration with ${targetCount} contacts from ${selection.join(", ")}.`;
 }
 
 /**

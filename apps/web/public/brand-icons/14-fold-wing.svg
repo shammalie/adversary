@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+  <title>Fold Wing</title>
+  <!-- Two overlapping parallelograms  aircraft abstracted, motion -->
+  <path d="M3 20 L17 5 H24 L10 20 Z" opacity="0.45"/>
+  <path d="M8 27 L22 12 H29 L15 27 Z"/>
+</svg>

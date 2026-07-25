@@ -24,6 +24,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@ad
 import { Input } from "@adversary/ui/components/input";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -39,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@adversary/ui/components/select";
+import { Switch } from "@adversary/ui/components/switch";
 import { Textarea } from "@adversary/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@adversary/ui/components/toggle-group";
 import { ScrollArea } from "@adversary/ui/components/scroll-area";
@@ -51,19 +53,22 @@ import {
   CircleAlertIcon,
   DownloadIcon,
   FolderOpenIcon,
+  MapIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
-  RadarIcon,
   RadioIcon,
   RouteIcon,
   SaveIcon,
+  ShuffleIcon,
   SparklesIcon,
   Trash2Icon,
+  WaypointsIcon,
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 
+import { BrandMark } from "@/components/brand-mark";
 import Loader from "@/components/loader";
 
 import { DateTimePicker } from "@/components/date-time-picker";
@@ -73,12 +78,21 @@ import {
 } from "@/components/grouped-timeline-event";
 import { GenerateRouteDialog } from "@/components/generate-route-dialog";
 import { useSimulation } from "@/components/simulation-provider";
+import { useTheme } from "@/components/theme-provider";
 import {
   createDemoScenario,
   defaultTargetProfile,
+  MAX_DEMO_TARGETS,
+  MIN_DEMO_TARGETS,
+  parseDemoTargetCount,
   type DemoVehicleSelection,
 } from "@/lib/demo-scenario";
-import { createEventDraft, eventFromDraft } from "@/lib/event-draft";
+import {
+  createDraftForTargetChange,
+  createEventDraft,
+  createFollowOnDraft,
+  eventFromDraft,
+} from "@/lib/event-draft";
 import { derivePositionSnapshot } from "@/lib/position-telemetry";
 import { addPriorityTerm, matchPriorityTerms, removePriorityTerm } from "@/lib/priority-terms";
 import { sortEvents } from "@/lib/simulation-engine";
@@ -102,6 +116,14 @@ import {
   type ValidationIssue,
 } from "@/lib/scenario-validation-ui";
 import { validateScenario } from "@/lib/simulation-schema";
+import {
+  findTargetColorLabel,
+  nextTargetColor,
+  normalizeHex,
+  randomUnusedTargetColor,
+  resolveTargetColorTheme,
+  targetColorOptionList,
+} from "@/lib/target-colors";
 import { PREVIEW_SPEEDS, describePreviewEvent, useBuilderPreview } from "@/lib/use-builder-preview";
 import { VEHICLE_CATEGORIES } from "@/types/target";
 import type {
@@ -133,8 +155,11 @@ const MapLocationPicker = lazy(() =>
 const TrackingMap = lazy(() =>
   import("@/components/tracking-map").then((module) => ({ default: module.TrackingMap })),
 );
-
-const TARGET_COLORS = ["#22d3ee", "#f59e0b", "#a78bfa", "#34d399", "#fb7185"];
+const PreviewEventGraph = lazy(() =>
+  import("@/components/preview-event-graph").then((module) => ({
+    default: module.PreviewEventGraph,
+  })),
+);
 
 function blankScenario(): SimulationScenario {
   const now = new Date().toISOString();
@@ -288,6 +313,8 @@ export function ScenarioBuilder() {
   const search = useSearch({ strict: false }) as { scenarioId?: string };
   const scenarioId = search.scenarioId;
   const { runtime, start } = useSimulation();
+  const { resolvedTheme } = useTheme();
+  const colorTheme = resolveTargetColorTheme(resolvedTheme);
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState<StoredScenarioRecord[]>([]);
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
@@ -296,14 +323,33 @@ export function ScenarioBuilder() {
   const [priorityInput, setPriorityInput] = useState("");
   const [routeTargetId, setRouteTargetId] = useState<string | null>(null);
   const [timelineMode, setTimelineMode] = useState<"view" | "edit">("view");
+  const [previewViewMode, setPreviewViewMode] = useState<"map" | "graph">("map");
   const [cameraMode, setCameraMode] = useState<"overview" | "pan">("overview");
   const [highlightTargetId, setHighlightTargetId] = useState<string | null>(null);
   const [highlightEventId, setHighlightEventId] = useState<string | null>(null);
-  const [openTargetIds, setOpenTargetIds] = useState<Record<string, boolean>>({});
+  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [previewGraphTargetId, setPreviewGraphTargetId] = useState<string | null>(null);
   const [openTimelineIds, setOpenTimelineIds] = useState<Record<string, boolean>>({});
   const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [storedScenariosOpen, setStoredScenariosOpen] = useState(false);
+  const [demoMenuOpen, setDemoMenuOpen] = useState(false);
+  const [demoVehicleRandom, setDemoVehicleRandom] = useState(true);
+  const [demoVehicleCategories, setDemoVehicleCategories] = useState<VehicleCategory[]>([]);
+  const [demoTargetCountInput, setDemoTargetCountInput] = useState("10");
+
+  const demoTargetCount = parseDemoTargetCount(demoTargetCountInput);
+  const demoTargetCountInvalid =
+    demoTargetCountInput.trim().length > 0 && demoTargetCount === null;
+  const demoVehicleSelection: DemoVehicleSelection = demoVehicleRandom
+    ? "random"
+    : demoVehicleCategories;
+
+  useEffect(() => {
+    if (demoVehicleCategories.length === 0 && !demoVehicleRandom) {
+      setDemoVehicleRandom(true);
+    }
+  }, [demoVehicleCategories.length, demoVehicleRandom]);
 
   const validationIssues = useMemo(
     () => getScenarioValidationIssues(scenario),
@@ -333,6 +379,12 @@ export function ScenarioBuilder() {
   }, [storedScenarioOptions]);
 
   const selectedDraftTarget = scenario.targets.find((target) => target.id === draft.targetId);
+  const selectedTarget =
+    scenario.targets.find((target) => target.id === selectedTargetId) ?? null;
+  const previewGraphTarget =
+    scenario.targets.find((target) => target.id === previewGraphTargetId) ??
+    scenario.targets[0] ??
+    null;
   const priorityMatches = draft.includeMessage
     ? matchPriorityTerms(draft.message, scenario.priorityTerms)
     : [];
@@ -346,6 +398,15 @@ export function ScenarioBuilder() {
     }
     return grouped;
   }, [scenario.events, scenario.targets]);
+
+  const graphCurrentEventId = useMemo(() => {
+    if (!previewGraphTarget) return null;
+    const targetEvents = eventsByTarget.get(previewGraphTarget.id) ?? [];
+    const due = targetEvents.filter(
+      (event) => Date.parse(event.at) <= preview.previewTimeMs,
+    );
+    return sortEvents(due).at(-1)?.id ?? null;
+  }, [eventsByTarget, preview.previewTimeMs, previewGraphTarget]);
 
   const draftTargetPositionPoints = useMemo(() => {
     if (!draft.targetId) return [];
@@ -361,6 +422,23 @@ export function ScenarioBuilder() {
       ];
     });
   }, [draft.targetId, eventsByTarget]);
+
+  useEffect(() => {
+    if (selectedTargetId && scenario.targets.some((target) => target.id === selectedTargetId)) {
+      return;
+    }
+    setSelectedTargetId(scenario.targets[0]?.id ?? null);
+  }, [scenario.targets, selectedTargetId]);
+
+  useEffect(() => {
+    if (
+      previewGraphTargetId &&
+      scenario.targets.some((target) => target.id === previewGraphTargetId)
+    ) {
+      return;
+    }
+    setPreviewGraphTargetId(scenario.targets[0]?.id ?? null);
+  }, [previewGraphTargetId, scenario.targets]);
 
   useEffect(() => {
     let cancelled = false;
@@ -380,12 +458,23 @@ export function ScenarioBuilder() {
           setActiveRecordId(selected.id);
           const nextScenario = coerceEditableScenario(selected.payload, selected.id);
           setScenario(nextScenario);
-          setDraft(createEventDraft(nextScenario.targets[0]?.id));
+          setSelectedTargetId(nextScenario.targets[0]?.id ?? null);
+          const firstTargetId = nextScenario.targets[0]?.id;
+          setDraft(
+            firstTargetId
+              ? createDraftForTargetChange(
+                  firstTargetId,
+                  nextScenario.events,
+                  createEventDraft().at,
+                )
+              : createEventDraft(),
+          );
         } else {
           const blank = blankScenario();
           const record = await saveScenarioDraft(blank);
           setActiveRecordId(record.id);
           setScenario(blank);
+          setSelectedTargetId(null);
           setDraft(createEventDraft());
           setRecords(await listScenarios());
         }
@@ -430,18 +519,38 @@ export function ScenarioBuilder() {
           id: targetId,
           callsign: `CONTACT ${String(index + 1).padStart(2, "0")}`,
           revealOnFirstEvent: true,
-          color: TARGET_COLORS[index % TARGET_COLORS.length] ?? "#22d3ee",
+          color: nextTargetColor(
+            scenario.targets.map((target) => target.color),
+            colorTheme,
+          ),
           profile: defaultTargetProfile(),
         },
       ],
     });
-    setDraft((current) => ({ ...current, targetId: current.targetId || targetId }));
+    setSelectedTargetId(targetId);
+    setDraft((current) =>
+      current.targetId
+        ? current
+        : createDraftForTargetChange(targetId, scenario.events, current.at),
+    );
   }
 
   function removeTarget(targetId: string) {
+    const remaining = scenario.targets.filter((target) => target.id !== targetId);
+    const remainingEvents = scenario.events.filter((event) => event.targetId !== targetId);
     updateScenario({
-      targets: scenario.targets.filter((target) => target.id !== targetId),
-      events: scenario.events.filter((event) => event.targetId !== targetId),
+      targets: remaining,
+      events: remainingEvents,
+    });
+    setSelectedTargetId((current) => {
+      if (current !== targetId) return current;
+      return remaining[0]?.id ?? null;
+    });
+    setDraft((current) => {
+      if (current.targetId !== targetId) return current;
+      const nextTargetId = remaining[0]?.id ?? "";
+      if (!nextTargetId) return createEventDraft();
+      return createDraftForTargetChange(nextTargetId, remainingEvents, current.at);
     });
   }
 
@@ -461,7 +570,13 @@ export function ScenarioBuilder() {
     updateScenario({
       events: [...scenario.events, nextEvent],
     });
-    setDraft(createEventDraft(draft.targetId));
+    // Same target: keep switch state + map pin; clear message; step time +5m.
+    setDraft(createFollowOnDraft(draft));
+  }
+
+  function selectEventTarget(targetId: string) {
+    // Different target: switches back to defaults; map uses that target's last position.
+    setDraft((current) => createDraftForTargetChange(targetId, scenario.events, current.at));
   }
 
   function save() {
@@ -492,6 +607,7 @@ export function ScenarioBuilder() {
       await saveScenarioDraft(blank);
       setActiveRecordId(blank.id);
       setScenario(blank);
+      setSelectedTargetId(null);
       setDraft(createEventDraft());
       setRecords(await listScenarios());
       void navigate({ to: "/builder", search: { scenarioId: blank.id } });
@@ -504,7 +620,19 @@ export function ScenarioBuilder() {
     const nextScenario = coerceEditableScenario(nextRecord.payload, nextRecord.id);
     setActiveRecordId(nextRecord.id);
     setScenario(nextScenario);
-    setDraft(createEventDraft(nextScenario.targets[0]?.id));
+    setSelectedTargetId(nextScenario.targets[0]?.id ?? null);
+    {
+      const firstTargetId = nextScenario.targets[0]?.id;
+      setDraft(
+        firstTargetId
+          ? createDraftForTargetChange(
+              firstTargetId,
+              nextScenario.events,
+              createEventDraft().at,
+            )
+          : createEventDraft(),
+      );
+    }
     void navigate({ to: "/builder", search: { scenarioId: nextRecord.id } });
   }
 
@@ -543,12 +671,52 @@ export function ScenarioBuilder() {
     setSelectedScenarioIds(selected ? storedScenarioOptions.map((record) => record.id) : []);
   }
 
-  function loadRandomDemo(vehicleSelection: DemoVehicleSelection) {
-    const demo = createDemoScenario(Date.now(), Math.random, { vehicleSelection });
+  function selectDemoVehicleRandom() {
+    setDemoVehicleRandom(true);
+    setDemoVehicleCategories([]);
+  }
+
+  function toggleDemoVehicleCategory(category: VehicleCategory, checked: boolean) {
+    setDemoVehicleRandom(false);
+    setDemoVehicleCategories((current) => {
+      if (checked) {
+        return current.includes(category) ? current : [...current, category];
+      }
+      return current.filter((entry) => entry !== category);
+    });
+  }
+
+  function loadRandomDemo() {
+    if (demoTargetCount === null) {
+      toast.error(`Enter a target size between ${MIN_DEMO_TARGETS} and ${MAX_DEMO_TARGETS}.`);
+      return;
+    }
+    if (!demoVehicleRandom && demoVehicleCategories.length === 0) {
+      toast.error("Select Random or at least one vehicle type.");
+      return;
+    }
+    const demo = createDemoScenario(Date.now(), Math.random, {
+      vehicleSelection: demoVehicleSelection,
+      targetCount: demoTargetCount,
+    });
     setScenario(demo);
-    setDraft(createEventDraft(demo.targets[0]?.id));
+    setSelectedTargetId(demo.targets[0]?.id ?? null);
+    {
+      const firstTargetId = demo.targets[0]?.id;
+      setDraft(
+        firstTargetId
+          ? createDraftForTargetChange(firstTargetId, demo.events, createEventDraft().at)
+          : createEventDraft(),
+      );
+    }
+    setDemoMenuOpen(false);
+    const typeLabel = demoVehicleRandom
+      ? "mixed"
+      : demoVehicleCategories.length === 1
+        ? demoVehicleCategories[0]
+        : demoVehicleCategories.join("/");
     toast.success(
-      `Loaded ${demo.targets.length} ${vehicleSelection === "random" ? "mixed" : vehicleSelection} target${demo.targets.length === 1 ? "" : "s"}.`,
+      `Loaded ${demo.targets.length} ${typeLabel} target${demo.targets.length === 1 ? "" : "s"}.`,
     );
   }
 
@@ -567,11 +735,6 @@ export function ScenarioBuilder() {
       start(scenario);
       await navigate({ to: "/operations" });
     })();
-  }
-
-  function isTargetExpanded(targetId: string) {
-    if (targetId in openTargetIds) return openTargetIds[targetId]!;
-    return scenario.targets.length <= 2;
   }
 
   function isTimelineExpanded(targetId: string) {
@@ -609,10 +772,10 @@ export function ScenarioBuilder() {
       const index = Number(targetMatch[1]);
       const target = scenario.targets[index];
       if (target) {
-        setOpenTargetIds((current) => ({ ...current, [target.id]: true }));
+        setSelectedTargetId(target.id);
         setHighlightTargetId(target.id);
         document
-          .getElementById(`target-card-${target.id}`)
+          .getElementById("targets-section")
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
         if (focusId) setPendingFocusId(focusId);
         return;
@@ -658,6 +821,12 @@ export function ScenarioBuilder() {
   }, [highlightEventId]);
 
   const routeTarget = scenario.targets.find((target) => target.id === routeTargetId);
+  const selectedTargetIssues = selectedTarget
+    ? getIssuesForTarget(validationIssues, selectedTarget.id, scenario)
+    : [];
+  const selectedInvalidProfileFields = selectedTargetIssues
+    .map((issue) => issue.field ?? "")
+    .filter((field) => field.startsWith("profile."));
 
   function updateEvent(next: SimulationEvent) {
     updateScenario({
@@ -684,7 +853,7 @@ export function ScenarioBuilder() {
       <section className="flex flex-col justify-between gap-4 border-b border-border/70 pb-5 md:flex-row md:items-end">
         <div className="flex max-w-3xl flex-col gap-2">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-primary">
-            <RadarIcon className="size-4" aria-hidden="true" />
+            <BrandMark className="size-4" />
             Scenario authoring
           </div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Simulation builder</h1>
@@ -738,31 +907,78 @@ export function ScenarioBuilder() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : null}
-          <DropdownMenu>
+          <DropdownMenu open={demoMenuOpen} onOpenChange={setDemoMenuOpen}>
             <DropdownMenuTrigger render={<Button variant="outline" />}>
               <SparklesIcon data-icon="inline-start" />
               Load random demo
               <ChevronDownIcon data-icon="inline-end" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Vehicle type</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => loadRandomDemo("random")}
+                <DropdownMenuCheckboxItem
+                  checked={demoVehicleRandom}
+                  onCheckedChange={(checked) => {
+                    if (checked) selectDemoVehicleRandom();
+                  }}
                 >
                   Random
-                </DropdownMenuItem>
+                </DropdownMenuCheckboxItem>
                 <DropdownMenuSeparator />
                 {VEHICLE_CATEGORIES.map((category) => (
-                  <DropdownMenuItem
+                  <DropdownMenuCheckboxItem
                     key={category}
                     className="capitalize"
-                    onClick={() => loadRandomDemo(category)}
+                    checked={demoVehicleCategories.includes(category)}
+                    onCheckedChange={(checked) => {
+                      toggleDemoVehicleCategory(category, checked === true);
+                    }}
                   >
                     {category}
-                  </DropdownMenuItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <div
+                className="px-1.5 py-1.5"
+                onKeyDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Field data-invalid={demoTargetCountInvalid || undefined}>
+                  <FieldLabel htmlFor="demo-target-count">Target size</FieldLabel>
+                  <Input
+                    id="demo-target-count"
+                    type="number"
+                    inputMode="numeric"
+                    min={MIN_DEMO_TARGETS}
+                    max={MAX_DEMO_TARGETS}
+                    step={1}
+                    value={demoTargetCountInput}
+                    onChange={(event) => setDemoTargetCountInput(event.target.value)}
+                    aria-invalid={demoTargetCountInvalid || undefined}
+                    aria-describedby={
+                      demoTargetCountInvalid ? "demo-target-count-error" : "demo-target-count-hint"
+                    }
+                  />
+                  {demoTargetCountInvalid ? (
+                    <FieldError id="demo-target-count-error">
+                      Enter an integer greater than 1 and at most {MAX_DEMO_TARGETS}.
+                    </FieldError>
+                  ) : (
+                    <FieldDescription id="demo-target-count-hint">
+                      {MIN_DEMO_TARGETS}–{MAX_DEMO_TARGETS} contacts
+                    </FieldDescription>
+                  )}
+                </Field>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                disabled={demoTargetCount === null}
+                onClick={() => loadRandomDemo()}
+              >
+                <SparklesIcon />
+                Load demo
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           {runtime?.status === "running" ? (
@@ -898,234 +1114,383 @@ export function ScenarioBuilder() {
         </Button>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div className="flex flex-col gap-4">
-          <Card id="scenario-profile">
-            <CardHeader>
-              <CardTitle>Operation profile</CardTitle>
-              <CardDescription>Stored only in this browser unless exported.</CardDescription>
-              <CardAction>
-                <Badge variant={validationSuccess ? "secondary" : "outline"}>
-                  {validationSuccess ? "Ready" : `Draft · ${validationIssues.length}`}
+      <Card id="scenario-profile">
+        <CardHeader>
+          <CardTitle>Operation profile</CardTitle>
+          <CardDescription>Stored only in this browser unless exported.</CardDescription>
+          <CardAction>
+            <Badge variant={validationSuccess ? "secondary" : "outline"}>
+              {validationSuccess ? "Ready" : `Draft · ${validationIssues.length}`}
+            </Badge>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <FieldGroup>
+            <Field data-invalid={fieldHasIssue(validationIssues, "name") || undefined}>
+              <FieldLabel htmlFor="scenario-name">Scenario name</FieldLabel>
+              <Input
+                id="scenario-name"
+                value={scenario.name}
+                onChange={(event) => updateScenario({ name: event.target.value })}
+                aria-invalid={fieldHasIssue(validationIssues, "name")}
+              />
+              {fieldHasIssue(validationIssues, "name") ? (
+                <FieldError>
+                  {validationIssues.find((issue) => issue.path === "name")?.message ??
+                    "Scenario name is invalid."}
+                </FieldError>
+              ) : null}
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="scenario-description">Brief</FieldLabel>
+              <Textarea
+                id="scenario-description"
+                value={scenario.description}
+                onChange={(event) => updateScenario({ description: event.target.value })}
+                placeholder="Purpose, location, and operator notes"
+              />
+            </Field>
+          </FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="priority-term-input">Priority terms</FieldLabel>
+            <div className="flex gap-2">
+              <Input
+                id="priority-term-input"
+                value={priorityInput}
+                onChange={(event) => setPriorityInput(event.target.value)}
+                placeholder='e.g. "critical" or "proximity threshold"'
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addPriorityTermFromInput();
+                  }
+                }}
+              />
+              <Button variant="outline" onClick={addPriorityTermFromInput}>
+                Add
+              </Button>
+            </div>
+            <FieldDescription>
+              Whole-word and exact-phrase matches are case-insensitive across all message
+              events.
+            </FieldDescription>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {scenario.priorityTerms.map((term) => (
+                <Badge key={term} variant="secondary" className="gap-1">
+                  {term}
+                  <button
+                    type="button"
+                    className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={`Remove priority term ${term}`}
+                    onClick={() =>
+                      updateScenario({
+                        priorityTerms: removePriorityTerm(scenario.priorityTerms, term),
+                      })
+                    }
+                  >
+                    ×
+                  </button>
                 </Badge>
-              </CardAction>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <FieldGroup>
-                <Field data-invalid={fieldHasIssue(validationIssues, "name") || undefined}>
-                  <FieldLabel htmlFor="scenario-name">Scenario name</FieldLabel>
+              ))}
+            </div>
+          </Field>
+        </CardContent>
+      </Card>
+
+      <section className="overflow-hidden rounded-lg border bg-card shadow-sm" aria-labelledby="compose-banner-title">
+        <div className="flex items-center justify-between bg-foreground px-3.5 py-2.5 text-background">
+          <h2 id="compose-banner-title" className="text-xs font-semibold uppercase tracking-[0.08em]">
+            Compose
+          </h2>
+          <span className="text-xs text-background/60">targets + event</span>
+        </div>
+        <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,0.68fr)]">
+          <div id="targets-section" className="flex min-w-0 flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <strong className="text-sm">Targets</strong>
+              <Button variant="outline" size="sm" onClick={addTarget}>
+                <PlusIcon data-icon="inline-start" />
+                Add target
+              </Button>
+            </div>
+
+            <div
+              className={cn(
+                "flex flex-col gap-3 rounded-lg border bg-card p-3 shadow-sm",
+                selectedTarget &&
+                  highlightTargetId === selectedTarget.id &&
+                  "ring-2 ring-destructive",
+                selectedTarget &&
+                  selectedTargetIssues.length > 0 &&
+                  "border-destructive/40",
+              )}
+            >
+              <div className="border-b border-border pb-2">
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  {selectedTarget ? "Edit target" : "Target form"}
+                </p>
+                {selectedTarget ? (
+                  <p className="mt-0.5 truncate text-sm font-medium">{selectedTarget.callsign}</p>
+                ) : null}
+              </div>
+              {selectedTarget ? (
+              <FieldGroup className="flex flex-col gap-3">
+                <Field
+                  data-invalid={
+                    selectedTargetIssues.some((issue) => issue.field === "callsign") ||
+                    undefined
+                  }
+                >
+                  <FieldLabel htmlFor={`${selectedTarget.id}-callsign`}>Callsign</FieldLabel>
                   <Input
-                    id="scenario-name"
-                    value={scenario.name}
-                    onChange={(event) => updateScenario({ name: event.target.value })}
-                    aria-invalid={fieldHasIssue(validationIssues, "name")}
+                    id={`${selectedTarget.id}-callsign`}
+                    value={selectedTarget.callsign}
+                    onChange={(event) =>
+                      updateTarget(selectedTarget.id, {
+                        callsign: event.target.value.toLocaleUpperCase(),
+                      })
+                    }
+                    aria-invalid={selectedTargetIssues.some(
+                      (issue) => issue.field === "callsign",
+                    )}
                   />
-                  {fieldHasIssue(validationIssues, "name") ? (
-                    <FieldError>
-                      {validationIssues.find((issue) => issue.path === "name")?.message ??
-                        "Scenario name is invalid."}
-                    </FieldError>
-                  ) : null}
+                  {selectedTargetIssues
+                    .filter((issue) => issue.field === "callsign")
+                    .map((issue) => (
+                      <FieldError key={issue.message}>{issue.message}</FieldError>
+                    ))}
                 </Field>
-                <Field>
-                  <FieldLabel htmlFor="scenario-description">Brief</FieldLabel>
-                  <Textarea
-                    id="scenario-description"
-                    value={scenario.description}
-                    onChange={(event) => updateScenario({ description: event.target.value })}
-                    placeholder="Purpose, location, and operator notes"
+                <Field orientation="horizontal">
+                  <Checkbox
+                    id={`${selectedTarget.id}-reveal`}
+                    checked={selectedTarget.revealOnFirstEvent}
+                    onCheckedChange={(checked) =>
+                      updateTarget(selectedTarget.id, {
+                        revealOnFirstEvent: checked === true,
+                      })
+                    }
                   />
+                  <FieldLabel htmlFor={`${selectedTarget.id}-reveal`}>
+                    Reveal on first event
+                  </FieldLabel>
                 </Field>
-              </FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="priority-term-input">Priority terms</FieldLabel>
-                <div className="flex gap-2">
-                  <Input
-                    id="priority-term-input"
-                    value={priorityInput}
-                    onChange={(event) => setPriorityInput(event.target.value)}
-                    placeholder='e.g. "critical" or "proximity threshold"'
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        addPriorityTermFromInput();
-                      }
-                    }}
-                  />
-                  <Button variant="outline" onClick={addPriorityTermFromInput}>
-                    Add
-                  </Button>
-                </div>
-                <FieldDescription>
-                  Whole-word and exact-phrase matches are case-insensitive across all message
-                  events.
-                </FieldDescription>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {scenario.priorityTerms.map((term) => (
-                    <Badge key={term} variant="secondary" className="gap-1">
-                      {term}
-                      <button
-                        type="button"
-                        className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label={`Remove priority term ${term}`}
-                        onClick={() =>
-                          updateScenario({
-                            priorityTerms: removePriorityTerm(scenario.priorityTerms, term),
-                          })
+                <Field
+                  data-invalid={
+                    selectedTargetIssues.some((issue) => issue.field === "color") || undefined
+                  }
+                >
+                  <FieldLabel id={`${selectedTarget.id}-color-label`}>Color</FieldLabel>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select
+                      value={normalizeHex(selectedTarget.color) ?? selectedTarget.color}
+                      onValueChange={(value) => {
+                        if (!value) return;
+                        updateTarget(selectedTarget.id, { color: String(value) });
+                      }}
+                    >
+                      <SelectTrigger
+                        className="min-w-[12rem] flex-1"
+                        aria-labelledby={`${selectedTarget.id}-color-label`}
+                        aria-invalid={
+                          selectedTargetIssues.some((issue) => issue.field === "color") || undefined
                         }
                       >
-                        ×
-                      </button>
-                    </Badge>
+                        <SelectValue placeholder="Choose color">
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="size-3.5 shrink-0 rounded-full border border-border"
+                              style={{ backgroundColor: selectedTarget.color }}
+                              aria-hidden="true"
+                            />
+                            {findTargetColorLabel(colorTheme, selectedTarget.color)}
+                          </span>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        <SelectGroup>
+                          {targetColorOptionList(colorTheme, selectedTarget.color).map((option) => {
+                            const takenBy = scenario.targets.find(
+                              (target) =>
+                                target.id !== selectedTarget.id &&
+                                normalizeHex(target.color) === option.value,
+                            );
+                            return (
+                              <SelectItem
+                                key={option.id}
+                                value={option.value}
+                                disabled={Boolean(takenBy)}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span
+                                    className="size-3.5 shrink-0 rounded-full border border-border"
+                                    style={{ backgroundColor: option.value }}
+                                    aria-hidden="true"
+                                  />
+                                  <span>{option.label}</span>
+                                  {takenBy ? (
+                                    <span className="text-muted-foreground">
+                                      · {takenBy.callsign}
+                                    </span>
+                                  ) : null}
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      aria-label="Pick a random unused color"
+                      onClick={() => {
+                        const otherColors = scenario.targets
+                          .filter((target) => target.id !== selectedTarget.id)
+                          .map((target) => target.color);
+                        const next = randomUnusedTargetColor(otherColors, colorTheme, {
+                          preferDifferentFrom: selectedTarget.color,
+                        });
+                        if (!next) {
+                          toast.error("Every palette color is already assigned to a target.");
+                          return;
+                        }
+                        updateTarget(selectedTarget.id, { color: next });
+                      }}
+                    >
+                      <ShuffleIcon data-icon="inline-start" />
+                      Random
+                    </Button>
+                  </div>
+                  <FieldDescription>
+                    {colorTheme === "light" ? "Light" : "Dark"}-mode palette (AA). Random skips
+                    colors already used by other targets.
+                  </FieldDescription>
+                </Field>
+                <TargetProfileFields
+                  idPrefix={selectedTarget.id}
+                  profile={selectedTarget.profile}
+                  onChange={(profile) => updateTarget(selectedTarget.id, { profile })}
+                  invalidFields={selectedInvalidProfileFields}
+                />
+                {selectedTargetIssues
+                  .filter((issue) => issue.field === "color" || issue.field === "id")
+                  .map((issue) => (
+                    <FieldError key={issue.message}>{issue.message}</FieldError>
                   ))}
-                </div>
-              </Field>
-            </CardContent>
-          </Card>
-
-          <Card id="targets-section">
-            <CardHeader>
-              <CardTitle>Target definitions</CardTitle>
-              <CardDescription>
-                Full profiles are stored up front and optionally masked until the first event.
-              </CardDescription>
-              <CardAction>
-                <Button variant="outline" size="sm" onClick={addTarget}>
-                  <PlusIcon data-icon="inline-start" />
-                  Add target
-                </Button>
-              </CardAction>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {scenario.targets.length === 0 ? (
-                <p className="rounded-lg border border-dashed p-5 text-center text-xs text-muted-foreground">
-                  No targets defined.
-                </p>
+              </FieldGroup>
               ) : (
-                <ScrollArea className="h-[min(28rem,50vh)] pr-3">
-                  <div className="flex flex-col gap-3">
+                <p className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
+                  No targets defined. Add a target to begin.
+                </p>
+              )}
+            </div>
+
+            <div className="flex min-h-0 flex-col gap-2 rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  Target list
+                </p>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {scenario.targets.length}
+                </span>
+              </div>
+              {scenario.targets.length > 0 ? (
+                <ScrollArea className="h-[min(14rem,28vh)] pr-2">
+                  <ul className="flex flex-col gap-1" role="listbox" aria-label="Targets">
                     {scenario.targets.map((target) => {
-                      const targetIssues = getIssuesForTarget(validationIssues, target.id, scenario);
-                      const invalidProfileFields = targetIssues
-                        .map((issue) => issue.field ?? "")
-                        .filter((field) => field.startsWith("profile."));
+                      const targetIssues = getIssuesForTarget(
+                        validationIssues,
+                        target.id,
+                        scenario,
+                      );
+                      const selected = target.id === selectedTargetId;
                       return (
-                        <Collapsible
-                          key={target.id}
-                          open={isTargetExpanded(target.id)}
-                          onOpenChange={(open) =>
-                            setOpenTargetIds((current) => ({ ...current, [target.id]: open }))
-                          }
-                        >
-                          <div
+                        <li key={target.id} className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
                             id={`target-card-${target.id}`}
                             className={cn(
-                              "rounded-lg border bg-muted/20",
+                              "flex min-w-0 flex-1 items-center gap-2 rounded-md border border-transparent bg-card px-2 py-1.5 text-left text-sm outline-none hover:bg-background focus-visible:ring-2 focus-visible:ring-ring",
+                              selected && "border-border bg-background shadow-sm",
                               highlightTargetId === target.id && "ring-2 ring-destructive",
                               targetIssues.length > 0 && "border-destructive/40",
                             )}
+                            onClick={() => setSelectedTargetId(target.id)}
                           >
-                            <div className="flex items-center gap-2 px-3 py-2">
-                              <span
-                                className="size-2.5 shrink-0 rounded-full"
-                                style={{ backgroundColor: target.color }}
-                                aria-hidden="true"
-                              />
-                              <CollapsibleTrigger className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                                <span className="truncate text-sm font-medium">{target.callsign}</span>
-                                <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
-                              </CollapsibleTrigger>
-                              <Button
-                                size="icon-sm"
-                                variant="ghost"
-                                aria-label={`Remove ${target.callsign}`}
-                                onClick={() => removeTarget(target.id)}
-                              >
-                                <Trash2Icon />
-                              </Button>
-                            </div>
-                            <CollapsibleContent className="border-t px-3 py-3">
-                              <FieldGroup className="flex flex-col gap-3">
-                                <Field
-                                  data-invalid={
-                                    targetIssues.some((issue) => issue.field === "callsign") ||
-                                    undefined
-                                  }
-                                >
-                                  <FieldLabel htmlFor={`${target.id}-callsign`}>Callsign</FieldLabel>
-                                  <Input
-                                    id={`${target.id}-callsign`}
-                                    value={target.callsign}
-                                    onChange={(event) =>
-                                      updateTarget(target.id, {
-                                        callsign: event.target.value.toLocaleUpperCase(),
-                                      })
-                                    }
-                                    aria-invalid={targetIssues.some(
-                                      (issue) => issue.field === "callsign",
-                                    )}
-                                  />
-                                  {targetIssues
-                                    .filter((issue) => issue.field === "callsign")
-                                    .map((issue) => (
-                                      <FieldError key={issue.message}>{issue.message}</FieldError>
-                                    ))}
-                                </Field>
-                                <Field orientation="horizontal">
-                                  <Checkbox
-                                    id={`${target.id}-reveal`}
-                                    checked={target.revealOnFirstEvent}
-                                    onCheckedChange={(checked) =>
-                                      updateTarget(target.id, {
-                                        revealOnFirstEvent: checked === true,
-                                      })
-                                    }
-                                  />
-                                  <FieldLabel htmlFor={`${target.id}-reveal`}>
-                                    Reveal on first event
-                                  </FieldLabel>
-                                </Field>
-                                <TargetProfileFields
-                                  idPrefix={target.id}
-                                  profile={target.profile}
-                                  onChange={(profile) => updateTarget(target.id, { profile })}
-                                  invalidFields={invalidProfileFields}
-                                />
-                                {targetIssues
-                                  .filter((issue) => issue.field === "color" || issue.field === "id")
-                                  .map((issue) => (
-                                    <FieldError key={issue.message}>{issue.message}</FieldError>
-                                  ))}
-                              </FieldGroup>
-                            </CollapsibleContent>
-                          </div>
-                        </Collapsible>
+                            <span
+                              className="size-2.5 shrink-0 rounded-full"
+                              style={{ backgroundColor: target.color }}
+                              aria-hidden="true"
+                            />
+                            <span className="truncate font-medium">{target.callsign}</span>
+                          </button>
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            aria-label={`Remove ${target.callsign}`}
+                            onClick={() => removeTarget(target.id)}
+                          >
+                            <Trash2Icon />
+                          </Button>
+                        </li>
                       );
                     })}
-                  </div>
+                  </ul>
                 </ScrollArea>
+              ) : (
+                <p className="py-3 text-center text-xs text-muted-foreground">
+                  Saved targets appear here.
+                </p>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Schedule event</CardTitle>
-            <CardDescription>
-              Events may include position data, a message, or both. Priority is derived from
-              scenario terms.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-5">
-            <FieldGroup className="grid gap-4 md:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-border pb-2">
+              <strong className="text-sm">Event</strong>
+              <Button
+                size="sm"
+                onClick={addEvent}
+                disabled={scenario.targets.length === 0}
+              >
+                <PlusIcon data-icon="inline-start" />
+                Add to timeline
+              </Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <Field orientation="horizontal" className="w-auto gap-2">
+                <Switch
+                  id="include-position"
+                  checked={draft.includePosition}
+                  onCheckedChange={(checked) =>
+                    setDraft((current) => ({ ...current, includePosition: checked }))
+                  }
+                />
+                <FieldLabel htmlFor="include-position">Position</FieldLabel>
+              </Field>
+              <Field orientation="horizontal" className="w-auto gap-2">
+                <Switch
+                  id="include-message"
+                  checked={draft.includeMessage}
+                  onCheckedChange={(checked) =>
+                    setDraft((current) => ({ ...current, includeMessage: checked }))
+                  }
+                />
+                <FieldLabel htmlFor="include-message">Message</FieldLabel>
+              </Field>
+            </div>
+            <FieldGroup className="grid gap-3 sm:grid-cols-2">
               <Field data-disabled={scenario.targets.length === 0 ? true : undefined}>
                 <FieldLabel>Target</FieldLabel>
                 <Select
                   value={draft.targetId}
-                  onValueChange={(value) =>
-                    value && setDraft((current) => ({ ...current, targetId: String(value) }))
-                  }
+                  onValueChange={(value) => {
+                    if (!value || value === draft.targetId) return;
+                    selectEventTarget(String(value));
+                  }}
                   disabled={scenario.targets.length === 0}
                 >
                   <SelectTrigger className="w-full" aria-label="Event target">
@@ -1144,7 +1509,7 @@ export function ScenarioBuilder() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field className="md:col-span-2">
+              <Field>
                 <FieldLabel htmlFor="event-at">Event date and time</FieldLabel>
                 <DateTimePicker
                   id="event-at"
@@ -1153,82 +1518,75 @@ export function ScenarioBuilder() {
                 />
               </Field>
             </FieldGroup>
-
-            <div className="flex flex-col gap-4 rounded-lg border p-4">
-              <Field orientation="horizontal">
-                <Checkbox
-                  id="include-position"
-                  checked={draft.includePosition}
-                  onCheckedChange={(checked) =>
-                    setDraft((current) => ({ ...current, includePosition: checked === true }))
-                  }
+            <div
+              className={cn(
+                "flex flex-col gap-3 rounded-lg border p-3",
+                !draft.includePosition && "opacity-50",
+              )}
+              aria-disabled={!draft.includePosition || undefined}
+            >
+              <Suspense
+                fallback={
+                  <div className="grid h-[min(40vh,22rem)] place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                    Loading map picker…
+                  </div>
+                }
+              >
+                <MapLocationPicker
+                  idPrefix="event-position"
+                  value={draft.position}
+                  onChange={(position) => setDraft((current) => ({ ...current, position }))}
+                  existingPoints={draftTargetPositionPoints}
+                  previewAt={draft.at}
+                  trailColor={selectedDraftTarget?.color}
+                  mapClassName="h-[min(40vh,22rem)]"
+                  disabled={!draft.includePosition}
                 />
-                <FieldLabel htmlFor="include-position">Position</FieldLabel>
-              </Field>
-              {draft.includePosition ? (
-                <Suspense
-                  fallback={
-                    <div className="grid h-56 place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
-                      Loading map picker…
-                    </div>
-                  }
-                >
-                  <MapLocationPicker
-                    idPrefix="event-position"
-                    value={draft.position}
-                    onChange={(position) => setDraft((current) => ({ ...current, position }))}
-                    existingPoints={draftTargetPositionPoints}
-                    previewAt={draft.at}
-                    trailColor={selectedDraftTarget?.color}
-                  />
-                </Suspense>
+              </Suspense>
+            </div>
+            <div
+              className={cn(
+                "flex flex-col gap-2 rounded-lg border p-3",
+                !draft.includeMessage && "opacity-50",
+              )}
+              aria-disabled={!draft.includeMessage || undefined}
+            >
+              <FieldLabel htmlFor="event-message">Message</FieldLabel>
+              <Textarea
+                id="event-message"
+                value={draft.message}
+                disabled={!draft.includeMessage}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, message: event.target.value }))
+                }
+                placeholder="Operator note or intelligence message"
+              />
+              {draft.includeMessage && priorityMatches.length > 0 ? (
+                <p className="text-sm text-destructive" role="status">
+                  Priority match: {priorityMatches.join(", ")}
+                </p>
               ) : null}
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="flex flex-col gap-3 rounded-lg border p-4">
-              <Field orientation="horizontal">
-                <Checkbox
-                  id="include-message"
-                  checked={draft.includeMessage}
-                  onCheckedChange={(checked) =>
-                    setDraft((current) => ({ ...current, includeMessage: checked === true }))
-                  }
-                />
-                <FieldLabel htmlFor="include-message">Message</FieldLabel>
-              </Field>
-              {draft.includeMessage ? (
-                <>
-                  <Textarea
-                    id="event-message"
-                    value={draft.message}
-                    onChange={(event) =>
-                      setDraft((current) => ({ ...current, message: event.target.value }))
-                    }
-                    placeholder="Operator note or intelligence message"
-                  />
-                  {priorityMatches.length > 0 ? (
-                    <p className="text-sm text-destructive" role="status">
-                      Priority match: {priorityMatches.join(", ")}
-                    </p>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
-
-            <Button onClick={addEvent} disabled={scenario.targets.length === 0}>
-              <PlusIcon data-icon="inline-start" />
-              Add to timeline
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <Card id="events-section">
-          <CardHeader>
-            <CardTitle>Grouped timeline</CardTitle>
-            <CardDescription>{scenario.events.length} scheduled ingest events</CardDescription>
-            <CardAction className="flex flex-wrap items-center gap-2">
+      <section className="overflow-hidden rounded-lg border bg-card shadow-sm" aria-labelledby="review-banner-title">
+        <div className="flex items-center justify-between bg-foreground px-3.5 py-2.5 text-background">
+          <h2 id="review-banner-title" className="text-xs font-semibold uppercase tracking-[0.08em]">
+            Review
+          </h2>
+          <span className="text-xs text-background/60">timeline + map / graph preview</span>
+        </div>
+        <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,0.68fr)]">
+          <div id="events-section" className="flex min-w-0 flex-col gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-border pb-2">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <strong className="text-sm">Grouped timeline</strong>
+                <span className="text-xs text-muted-foreground">
+                  {scenario.events.length} scheduled ingest events
+                </span>
+              </div>
               <ToggleGroup
                 value={[timelineMode]}
                 onValueChange={(values) => {
@@ -1247,36 +1605,14 @@ export function ScenarioBuilder() {
                   Edit
                 </ToggleGroupItem>
               </ToggleGroup>
-              <Button variant="outline" size="sm" onClick={save}>
-                <SaveIcon data-icon="inline-start" />
-                Save
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!validationSuccess}
-                onClick={() => {
-                  const issues = applyValidation(scenario);
-                  if (issues.length > 0) {
-                    toast.error("Resolve validation issues before exporting.");
-                    return;
-                  }
-                  downloadScenario(scenario);
-                }}
-              >
-                <DownloadIcon data-icon="inline-start" />
-                Export
-              </Button>
-            </CardAction>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+            </div>
             {scenario.targets.length === 0 ? (
-              <p className="rounded-lg border border-dashed p-5 text-center text-xs text-muted-foreground">
+              <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">
                 Add targets to build a grouped timeline.
               </p>
             ) : (
               <>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   <Button
                     variant="outline"
                     size="sm"
@@ -1294,8 +1630,8 @@ export function ScenarioBuilder() {
                     Collapse all
                   </Button>
                 </div>
-                <ScrollArea className="h-[min(28rem,50vh)] pr-3">
-                  <div className="flex flex-col gap-3">
+                <ScrollArea className="h-[min(36rem,58vh)] pr-2">
+                  <div className="flex flex-col gap-1.5">
                     {scenario.targets.map((target) => {
                       const placementEvents = eventsByTarget.get(target.id) ?? [];
                       const events =
@@ -1305,46 +1641,59 @@ export function ScenarioBuilder() {
                       const timedEvents = sortEvents(placementEvents);
                       const firstAt = timedEvents[0]?.at;
                       const lastAt = timedEvents.at(-1)?.at;
+                      const graphSelected = previewGraphTargetId === target.id;
                       let previousPosition: PositionPayload | undefined;
                       return (
                         <Collapsible
                           key={target.id}
                           open={isTimelineExpanded(target.id)}
-                          onOpenChange={(open) =>
-                            setOpenTimelineIds((current) => ({ ...current, [target.id]: open }))
-                          }
+                          onOpenChange={(open) => {
+                            setOpenTimelineIds((current) => ({ ...current, [target.id]: open }));
+                            if (open) setPreviewGraphTargetId(target.id);
+                          }}
                         >
-                          <div className="rounded-lg border">
-                            <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 rounded-t-lg border-b bg-card/95 px-3 py-2 backdrop-blur-md">
-                              <CollapsibleTrigger className="flex min-w-0 flex-1 items-center gap-2 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                          <div
+                            className={cn(
+                              "rounded-md border",
+                              graphSelected && "border-primary/50 ring-1 ring-primary/30",
+                            )}
+                          >
+                            <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-1 rounded-t-md border-b bg-card/95 px-2 py-1 backdrop-blur-md">
+                              <CollapsibleTrigger
+                                className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                onClick={() => setPreviewGraphTargetId(target.id)}
+                              >
                                 <span
-                                  className="size-2.5 shrink-0 rounded-full"
+                                  className="size-2 shrink-0 rounded-full"
                                   style={{ backgroundColor: target.color }}
                                   aria-hidden="true"
                                 />
                                 <span className="truncate font-medium">{target.callsign}</span>
-                                <Badge variant="outline">{events.length} events</Badge>
-                                <ChevronDownIcon className="size-4 text-muted-foreground" />
+                                <Badge variant="outline" className="text-[10px]">
+                                  {events.length}
+                                </Badge>
+                                <ChevronDownIcon className="size-3.5 text-muted-foreground" />
                               </CollapsibleTrigger>
                               <Button
                                 size="sm"
                                 variant="outline"
+                                className="h-7 px-2 text-xs"
                                 onClick={() => setRouteTargetId(target.id)}
                               >
                                 <RouteIcon data-icon="inline-start" />
-                                Generate route
+                                Route
                               </Button>
                             </div>
                             <CollapsibleContent>
-                              <p className="px-3 py-2 text-xs text-muted-foreground">
+                              <p className="px-2 py-1 text-[11px] text-muted-foreground">
                                 {firstAt && lastAt
                                   ? `${new Date(firstAt).toLocaleString()} – ${new Date(lastAt).toLocaleString()}`
                                   : "No events scheduled"}
                               </p>
                               <ul
                                 className={cn(
-                                  "flex flex-col px-2 pb-2",
-                                  timelineMode === "edit" ? "gap-2" : "gap-1",
+                                  "flex flex-col px-1.5 pb-1.5",
+                                  timelineMode === "edit" ? "gap-1.5" : "gap-0.5",
                                 )}
                               >
                                 {events.map((event) => {
@@ -1395,56 +1744,102 @@ export function ScenarioBuilder() {
                 </ScrollArea>
               </>
             )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Builder preview</CardTitle>
-            <CardDescription>
-              Accelerated local playback only. Live operations remain real-time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap gap-1.5 border-t border-dashed border-border pt-2">
+              <Button variant="outline" size="sm" onClick={save}>
+                <SaveIcon data-icon="inline-start" />
+                Save
+              </Button>
               <Button
+                variant="outline"
                 size="sm"
-                variant="outline"
-                onClick={() => (preview.playing ? preview.pause() : preview.play())}
-              >
-                {preview.playing ? (
-                  <>
-                    <PauseIcon data-icon="inline-start" />
-                    Pause
-                  </>
-                ) : (
-                  <>
-                    <PlayIcon data-icon="inline-start" />
-                    Play
-                  </>
-                )}
-              </Button>
-              <Button size="sm" variant="outline" onClick={preview.reset}>
-                Reset
-              </Button>
-              <ToggleGroup
-                value={[String(preview.speed)]}
-                onValueChange={(values) => {
-                  const next = Number(values[0]);
-                  if (PREVIEW_SPEEDS.includes(next as (typeof PREVIEW_SPEEDS)[number])) {
-                    preview.setSpeed(next as (typeof PREVIEW_SPEEDS)[number]);
+                disabled={!validationSuccess}
+                onClick={() => {
+                  const issues = applyValidation(scenario);
+                  if (issues.length > 0) {
+                    toast.error("Resolve validation issues before exporting.");
+                    return;
                   }
+                  downloadScenario(scenario);
                 }}
-                variant="outline"
-                spacing={0}
-                aria-label="Preview playback speed"
               >
-                {PREVIEW_SPEEDS.map((value) => (
-                  <ToggleGroupItem key={value} value={String(value)} aria-label={`${value}x speed`}>
-                    {value}×
+                <DownloadIcon data-icon="inline-start" />
+                Export
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-border pb-2">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <strong className="text-sm">Build preview</strong>
+                <span className="text-xs text-muted-foreground">
+                  {previewViewMode === "graph" && previewGraphTarget
+                    ? `Event graph · ${previewGraphTarget.callsign}`
+                    : "Accelerated local playback only"}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <ToggleGroup
+                  value={[previewViewMode]}
+                  onValueChange={(values) => {
+                    const next = values[0];
+                    if (next === "map" || next === "graph") setPreviewViewMode(next);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  spacing={0}
+                  aria-label="Preview view mode"
+                >
+                  <ToggleGroupItem value="map" aria-label="Map preview">
+                    <MapIcon data-icon="inline-start" />
+                    Map
                   </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                  <ToggleGroupItem value="graph" aria-label="Graph preview">
+                    <WaypointsIcon data-icon="inline-start" />
+                    Graph
+                  </ToggleGroupItem>
+                </ToggleGroup>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7"
+                  onClick={() => (preview.playing ? preview.pause() : preview.play())}
+                >
+                  {preview.playing ? (
+                    <>
+                      <PauseIcon data-icon="inline-start" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <PlayIcon data-icon="inline-start" />
+                      Play
+                    </>
+                  )}
+                </Button>
+                <Button size="sm" variant="outline" className="h-7" onClick={preview.reset}>
+                  Reset
+                </Button>
+                <ToggleGroup
+                  value={[String(preview.speed)]}
+                  onValueChange={(values) => {
+                    const next = Number(values[0]);
+                    if (PREVIEW_SPEEDS.includes(next as (typeof PREVIEW_SPEEDS)[number])) {
+                      preview.setSpeed(next as (typeof PREVIEW_SPEEDS)[number]);
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  spacing={0}
+                  aria-label="Preview playback speed"
+                >
+                  {PREVIEW_SPEEDS.map((value) => (
+                    <ToggleGroupItem key={value} value={String(value)} aria-label={`${value}x speed`}>
+                      {value}×
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
             </div>
             {preview.previewRange ? (
               <Field>
@@ -1468,7 +1863,7 @@ export function ScenarioBuilder() {
                   onChange={(event) => preview.seek(Number(event.target.value))}
                   aria-valuetext={new Date(preview.previewTimeMs).toLocaleString()}
                 />
-                <div className="flex items-center justify-between gap-3 font-mono text-xs text-muted-foreground">
+                <div className="flex items-center justify-between gap-3 font-mono text-[11px] text-muted-foreground">
                   <span>{new Date(preview.previewRange.startMs).toLocaleString()}</span>
                   <span>{new Date(preview.previewTimeMs).toLocaleString()}</span>
                   <span>{new Date(preview.previewRange.endMs).toLocaleString()}</span>
@@ -1480,35 +1875,63 @@ export function ScenarioBuilder() {
               </p>
             )}
             {preview.currentEvent ? (
-              <p className={cn("rounded-lg border px-3 py-2 text-sm", "border-primary/40")}>
+              <p className={cn("rounded-md border px-2.5 py-1.5 text-sm", "border-primary/40")}>
                 Current: {describePreviewEvent(preview.currentEvent)}
               </p>
             ) : null}
-            <div className="h-[min(42vh,24rem)]">
-              <Suspense
-                fallback={
-                  <div className="grid h-full place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
-                    Initializing preview map…
+            <div className="h-[min(58vh,34rem)] min-h-80">
+              {previewViewMode === "graph" ? (
+                previewGraphTarget ? (
+                  <Suspense
+                    fallback={
+                      <div className="grid h-full place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                        Initializing event graph…
+                      </div>
+                    }
+                  >
+                    <PreviewEventGraph
+                      target={previewGraphTarget}
+                      events={eventsByTarget.get(previewGraphTarget.id) ?? []}
+                      currentEventId={graphCurrentEventId}
+                      priorityTerms={scenario.priorityTerms}
+                      fitKey={`${preview.previewRevision}:${previewGraphTarget.id}`}
+                      onEventSelect={(eventId, at) => {
+                        setHighlightEventId(eventId);
+                        preview.seek(Date.parse(at));
+                      }}
+                    />
+                  </Suspense>
+                ) : (
+                  <div className="grid h-full place-items-center rounded-lg border border-dashed border-border bg-muted/40 px-4 text-center text-sm text-muted-foreground">
+                    Add a target to view its event graph.
                   </div>
-                }
-              >
-                <TrackingMap
-                  targets={preview.mapTargets}
-                  highlightedEventId={preview.currentEvent?.id}
-                  mode="2d"
-                  cameraMode={cameraMode}
-                  continuousMotion
-                  onCameraModeChange={(mode) => {
-                    if (mode === "overview" || mode === "pan") setCameraMode(mode);
-                  }}
-                  availableCameraModes={["overview", "pan"]}
-                  fitTargetsKey={preview.previewRevision}
-                />
-              </Suspense>
+                )
+              ) : (
+                <Suspense
+                  fallback={
+                    <div className="grid h-full place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                      Initializing preview map…
+                    </div>
+                  }
+                >
+                  <TrackingMap
+                    targets={preview.mapTargets}
+                    highlightedEventId={preview.currentEvent?.id}
+                    mode="2d"
+                    cameraMode={cameraMode}
+                    continuousMotion
+                    onCameraModeChange={(mode) => {
+                      if (mode === "overview" || mode === "pan") setCameraMode(mode);
+                    }}
+                    availableCameraModes={["overview", "pan"]}
+                    fitTargetsKey={preview.previewRevision}
+                  />
+                </Suspense>
+              )}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
+      </section>
 
       {routeTarget ? (
         <GenerateRouteDialog

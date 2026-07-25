@@ -8,8 +8,9 @@ import {
 } from "@adversary/ui/components/dropdown-menu";
 import { Separator } from "@adversary/ui/components/separator";
 import { Link } from "@tanstack/react-router";
-import { FileUpIcon, RadarIcon, SettingsIcon, WrenchIcon } from "lucide-react";
+import { FileUpIcon, SettingsIcon, WrenchIcon } from "lucide-react";
 
+import { BrandMark } from "./brand-mark";
 import { useSimulation } from "./simulation-provider";
 import { ModeToggle } from "./mode-toggle";
 
@@ -26,7 +27,7 @@ export default function Header() {
             aria-label="Adversary home"
           >
             <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
-              <RadarIcon aria-hidden="true" />
+              <BrandMark className="size-5" />
             </span>
             <span className="hidden text-sm font-semibold tracking-[0.18em] sm:inline">
               ADVERSARY

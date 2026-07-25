@@ -18,7 +18,15 @@ import {
   CommandList,
   CommandShortcut,
 } from "@adversary/ui/components/command";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@adversary/ui/components/input-group";
+import { Label } from "@adversary/ui/components/label";
 import { ScrollArea } from "@adversary/ui/components/scroll-area";
+import { Switch } from "@adversary/ui/components/switch";
 import {
   Table,
   TableBody,
@@ -32,7 +40,6 @@ import { cn } from "@adversary/ui/lib/utils";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangleIcon,
-  CircleDotIcon,
   Clock3Icon,
   CommandIcon,
   FocusIcon,
@@ -42,10 +49,12 @@ import {
   MessageSquareIcon,
   RadioTowerIcon,
   RotateCcwIcon,
+  SearchIcon,
   SquareTerminalIcon,
   UsersIcon,
+  XIcon,
 } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { useSimulation } from "@/components/simulation-provider";
 import type { CameraMode } from "@/components/tracking-map";
@@ -56,6 +65,11 @@ import type { MapMode, RuntimeTargetState, SimulationEvent } from "@/types/targe
 const TrackingMap = lazy(() =>
   import("@/components/tracking-map").then((module) => ({ default: module.TrackingMap })),
 );
+
+/** Shared workspace height for roster / map / tracked detail (mobile + desktop). */
+const OPS_WORKSPACE_HEIGHT = "h-[min(58vh,42rem)] min-h-88";
+/** Desktop row height — must be literal for Tailwind detection. */
+const OPS_WORKSPACE_ROW = "xl:h-[min(58vh,42rem)] xl:min-h-88";
 
 function eventSummary(event: SimulationEvent) {
   const parts: string[] = [];
@@ -87,6 +101,23 @@ function eventPayloadBadges(event: SimulationEvent) {
   );
 }
 
+function targetSearchFields(target: RuntimeTargetState) {
+  const fields = [target.callsign];
+  if (target.revealed) {
+    if (target.profile.vehicleSubtype) fields.push(target.profile.vehicleSubtype);
+    if (target.profile.affiliation) fields.push(target.profile.affiliation);
+    if (target.profile.status) fields.push(target.profile.status);
+    if (target.profile.identifier) fields.push(target.profile.identifier);
+  } else {
+    fields.push("masked");
+  }
+  return fields;
+}
+
+function matchesTargetSearch(target: RuntimeTargetState, needle: string) {
+  return targetSearchFields(target).some((field) => field.toLowerCase().includes(needle));
+}
+
 function TargetRoster({
   targets,
   selectedId,
@@ -100,64 +131,134 @@ function TargetRoster({
   onSelect: (id: string) => void;
   onToggleTrack: (id: string, tracked: boolean) => void;
 }) {
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const trackedSet = new Set(trackedIds);
+  const itemRefs = useRef(new Map<string, HTMLElement>());
+  const targetsRef = useRef(targets);
+  targetsRef.current = targets;
+
+  const filteredTargets = useMemo(() => {
+    const needle = deferredQuery.trim().toLowerCase();
+    if (!needle) return targets;
+    return targets.filter((target) => matchesTargetSearch(target, needle));
+  }, [deferredQuery, targets]);
+
+  // Clear search only when a newly selected contact is hidden by it (e.g. map pick).
+  useEffect(() => {
+    if (!selectedId) return;
+    const selected = targetsRef.current.find((target) => target.targetId === selectedId);
+    if (!selected) return;
+    setQuery((current) => {
+      const needle = current.trim().toLowerCase();
+      if (!needle) return current;
+      return matchesTargetSearch(selected, needle) ? current : "";
+    });
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const node = itemRefs.current.get(selectedId);
+    if (!node) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    node.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+  }, [filteredTargets, selectedId]);
 
   return (
-    <ScrollArea className="h-[20rem]">
-      <div className="flex flex-col gap-1 p-1">
-        {targets.map((target) => {
-          const Icon = getVehicleCategoryIcon(target.profile.vehicleCategory);
-          const isTracked = trackedSet.has(target.targetId);
-          return (
-            <div
-              key={target.targetId}
-              className={cn(
-                "flex min-h-12 w-full items-center gap-2 rounded-lg px-2 py-2 transition-colors",
-                selectedId === target.targetId && "bg-accent text-accent-foreground",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => onSelect(target.targetId)}
-                aria-pressed={selectedId === target.targetId}
-                className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-1 text-left outline-none hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-2">
+      <div className="shrink-0 px-1">
+        <InputGroup>
+          <InputGroupAddon>
+            <SearchIcon aria-hidden="true" />
+          </InputGroupAddon>
+          <InputGroupInput
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Callsign, subtype, status…"
+            aria-label="Search target roster"
+          />
+          {query ? (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                size="icon-xs"
+                aria-label="Clear search"
+                onClick={() => setQuery("")}
               >
-                <span
-                  className="grid size-8 shrink-0 place-items-center rounded-md border bg-background"
-                  style={{ color: target.color }}
-                >
-                  <Icon aria-hidden="true" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium">{target.callsign}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {target.revealed
-                      ? (target.profile.vehicleSubtype ??
-                        target.profile.vehicleCategory ??
-                        "Unclassified contact")
-                      : "Masked contact"}
-                  </span>
-                </span>
-                <span className="flex items-center gap-1 text-[0.68rem] uppercase tracking-wider text-muted-foreground">
-                  <CircleDotIcon className="size-3" aria-hidden="true" />
-                  {target.revealed ? (target.profile.status ?? "unknown") : "unknown"}
-                </span>
-              </button>
-              <label className="flex shrink-0 cursor-pointer items-center gap-1.5 pr-1 text-xs text-muted-foreground">
-                <Checkbox
-                  checked={isTracked}
-                  onCheckedChange={(checked) => {
-                    onToggleTrack(target.targetId, checked === true);
-                  }}
-                  aria-label={`Track ${target.callsign}`}
-                />
-                Track
-              </label>
-            </div>
-          );
-        })}
+                <XIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          ) : null}
+        </InputGroup>
       </div>
-    </ScrollArea>
+      <ScrollArea className="h-0 min-h-0 flex-1">
+        {filteredTargets.length > 0 ? (
+          <div className="flex flex-col gap-1 p-1">
+            {filteredTargets.map((target) => {
+              const Icon = getVehicleCategoryIcon(target.profile.vehicleCategory);
+              const isTracked = trackedSet.has(target.targetId);
+              return (
+                <div
+                  key={target.targetId}
+                  ref={(node) => {
+                    if (node) itemRefs.current.set(target.targetId, node);
+                    else itemRefs.current.delete(target.targetId);
+                  }}
+                  className={cn(
+                    "flex min-h-12 w-full items-center gap-2 rounded-lg px-2 py-2 transition-colors",
+                    selectedId === target.targetId && "bg-accent text-accent-foreground",
+                  )}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onSelect(target.targetId)}
+                    aria-pressed={selectedId === target.targetId}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-1 text-left outline-none hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span
+                      className="grid size-8 shrink-0 place-items-center rounded-md border bg-background"
+                      style={{ color: target.color }}
+                    >
+                      <Icon aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{target.callsign}</span>
+                      <span className="block truncate text-xs capitalize text-muted-foreground">
+                        {target.revealed
+                          ? [
+                              target.profile.vehicleSubtype ??
+                                target.profile.vehicleCategory ??
+                                "Unclassified contact",
+                              target.profile.status ?? "unknown",
+                            ].join(" · ")
+                          : "Masked contact · unknown"}
+                      </span>
+                    </span>
+                  </button>
+                  <label className="flex shrink-0 cursor-pointer items-center gap-1.5 pr-1 text-xs text-muted-foreground">
+                    <Checkbox
+                      checked={isTracked}
+                      onCheckedChange={(checked) => {
+                        onToggleTrack(target.targetId, checked === true);
+                      }}
+                      aria-label={`Track ${target.callsign}`}
+                    />
+                    Track
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="px-2 py-8 text-center text-sm text-muted-foreground">
+            {targets.length === 0
+              ? "No contacts yet."
+              : query.trim()
+                ? `No contacts match “${query.trim()}”.`
+                : "No contacts match the current search."}
+          </p>
+        )}
+      </ScrollArea>
+    </div>
   );
 }
 
@@ -215,6 +316,7 @@ export function OperationsDashboard() {
   const [mapMode, setMapMode] = useState<MapMode>("2d");
   const [cameraMode, setCameraMode] = useState<CameraMode>("overview");
   const [trackedTargetIds, setTrackedTargetIds] = useState<string[]>([]);
+  const [showTrackedOnly, setShowTrackedOnly] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>();
 
@@ -248,6 +350,12 @@ export function OperationsDashboard() {
       setCameraMode("overview");
     }
   }, [cameraMode, trackedTargetIds.length]);
+
+  useEffect(() => {
+    if (trackedTargetIds.length === 0 && showTrackedOnly) {
+      setShowTrackedOnly(false);
+    }
+  }, [showTrackedOnly, trackedTargetIds.length]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -405,13 +513,19 @@ export function OperationsDashboard() {
         </section>
       ) : null}
 
-      <div className="grid gap-3 xl:grid-cols-[18rem_minmax(0,1fr)_minmax(18rem,22rem)]">
-        <Card>
-          <CardHeader>
+      <div
+        className={cn(
+          "grid gap-3",
+          "xl:grid-cols-[18rem_minmax(0,1fr)_minmax(18rem,22rem)]",
+          OPS_WORKSPACE_ROW,
+        )}
+      >
+        <Card className={cn("min-h-0", OPS_WORKSPACE_HEIGHT, "xl:h-full xl:min-h-0")}>
+          <CardHeader className="shrink-0">
             <CardTitle>Target roster</CardTitle>
             <CardDescription>Contacts derived from received events</CardDescription>
           </CardHeader>
-          <CardContent className="px-1">
+          <CardContent className="flex min-h-0 flex-1 flex-col px-1">
             <TargetRoster
               targets={targets}
               selectedId={selectedTarget?.targetId}
@@ -422,8 +536,8 @@ export function OperationsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className={cn("min-h-0", OPS_WORKSPACE_HEIGHT, "xl:h-full xl:min-h-0")}>
+          <CardHeader className="shrink-0">
             <CardTitle>
               {mapMode === "globe" ? "Global representation" : "Operational map"}
             </CardTitle>
@@ -431,33 +545,48 @@ export function OperationsDashboard() {
               {targets.filter((target) => target.position).length} positioned contacts
             </CardDescription>
             <CardAction>
-              <Badge variant="outline">{mapMode === "globe" ? "GLOBE" : "MERCATOR"}</Badge>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="ops-tracked-only"
+                  size="sm"
+                  checked={showTrackedOnly}
+                  disabled={trackedTargetIds.length === 0}
+                  onCheckedChange={setShowTrackedOnly}
+                  aria-label="Show tracked contacts only"
+                />
+                <Label htmlFor="ops-tracked-only" className="cursor-pointer text-xs font-medium">
+                  Tracked only
+                </Label>
+              </div>
             </CardAction>
           </CardHeader>
-          <CardContent className="min-h-[22rem] h-[min(58vh,42rem)]">
-            <Suspense
-              fallback={
-                <div className="grid h-full min-h-[22rem] place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
-                  Initializing geospatial display…
-                </div>
-              }
-            >
-              <TrackingMap
-                targets={targets}
-                trackedTargetIds={trackedTargetIds}
-                cameraMode={cameraMode}
-                onCameraModeChange={handleCameraModeChange}
-                availableCameraModes={["track", "overview", "pan"]}
-                selectedTargetId={selectedTarget?.targetId}
-                onSelectTarget={setSelectedTargetId}
-                mode={mapMode}
-              />
-            </Suspense>
+          <CardContent className="flex min-h-0 flex-1 flex-col">
+            <div className="h-0 min-h-0 flex-1">
+              <Suspense
+                fallback={
+                  <div className="grid h-full place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                    Initializing geospatial display…
+                  </div>
+                }
+              >
+                <TrackingMap
+                  targets={targets}
+                  trackedTargetIds={trackedTargetIds}
+                  showTrackedOnly={showTrackedOnly}
+                  cameraMode={cameraMode}
+                  onCameraModeChange={handleCameraModeChange}
+                  availableCameraModes={["track", "overview", "pan"]}
+                  selectedTargetId={selectedTarget?.targetId}
+                  onSelectTarget={setSelectedTargetId}
+                  mode={mapMode}
+                />
+              </Suspense>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className={cn("min-h-0", OPS_WORKSPACE_HEIGHT, "xl:h-full xl:min-h-0")}>
+          <CardHeader className="shrink-0">
             <CardTitle>Tracked detail</CardTitle>
             <CardDescription>
               {trackedTargets.length > 0
@@ -465,8 +594,8 @@ export function OperationsDashboard() {
                 : "Select Track on roster contacts"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="px-2">
-            <ScrollArea className="h-[min(58vh,42rem)]">
+          <CardContent className="flex min-h-0 flex-1 flex-col px-2">
+            <ScrollArea className="h-0 min-h-0 flex-1">
               {trackedTargets.length > 0 ? (
                 <div className="flex flex-col gap-2 p-1">
                   {trackedTargets.map((target) => (

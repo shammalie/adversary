@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <rect width="32" height="32" rx="6" fill="#0c1014"/>
+  <!-- Solid disc with one directional spike  ping / alert -->
+  <circle cx="14.5" cy="16" r="10"/>
+  <path d="M22 11 L30 16 L22 21 Z"/>
+</svg>

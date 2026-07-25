@@ -1,4 +1,5 @@
 import { Button } from "@adversary/ui/components/button";
+import { ButtonGroup } from "@adversary/ui/components/button-group";
 import { Calendar } from "@adversary/ui/components/calendar";
 import { Input } from "@adversary/ui/components/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@adversary/ui/components/popover";
@@ -12,9 +13,21 @@ interface DateTimePickerProps {
   "aria-invalid"?: boolean;
 }
 
+const PRESETS = [
+  { label: "+1m", minutes: 1 },
+  { label: "+5m", minutes: 5 },
+  { label: "+15m", minutes: 15 },
+] as const;
+
 function toLocalInputValue(date: Date) {
   const offset = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+}
+
+function parseValue(value: string): Date | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
 export function DateTimePicker({
@@ -23,7 +36,7 @@ export function DateTimePicker({
   onChange,
   "aria-invalid": ariaInvalid,
 }: DateTimePickerProps) {
-  const selected = value ? new Date(value) : undefined;
+  const selected = parseValue(value);
   const timeValue = selected ? toLocalInputValue(selected).slice(11) : "12:00";
 
   function setDate(date?: Date) {
@@ -34,46 +47,73 @@ export function DateTimePicker({
   }
 
   function setTime(time: string) {
-    const date = selected ?? new Date();
+    const date = selected ? new Date(selected) : new Date();
     const [hours, minutes] = time.split(":").map(Number);
     date.setHours(hours ?? 0, minutes ?? 0, 0, 0);
     onChange(date.toISOString());
   }
 
+  function bumpMinutes(minutes: number) {
+    const base = selected ?? new Date();
+    onChange(new Date(base.getTime() + minutes * 60_000).toISOString());
+  }
+
+  function setNow() {
+    onChange(new Date().toISOString());
+  }
+
   return (
-    <div className="grid grid-cols-[1fr_7.5rem] gap-2">
-      <Popover>
-        <PopoverTrigger
-          render={
-            <Button
-              id={id}
-              type="button"
-              variant="outline"
-              className="justify-start font-normal"
-              aria-invalid={ariaInvalid}
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-[1fr_7.5rem] gap-2">
+        <Popover>
+          <PopoverTrigger
+            render={
+              <Button
+                id={id}
+                type="button"
+                variant="outline"
+                className="justify-start font-normal"
+                aria-invalid={ariaInvalid}
+              />
+            }
+          >
+            <CalendarClockIcon data-icon="inline-start" />
+            {selected ? format(selected, "PP") : "Choose date"}
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={selected}
+              onSelect={setDate}
+              timeZone={Intl.DateTimeFormat().resolvedOptions().timeZone}
             />
-          }
-        >
-          <CalendarClockIcon data-icon="inline-start" />
-          {selected ? format(selected, "PP") : "Choose date"}
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={selected}
-            onSelect={setDate}
-            timeZone={Intl.DateTimeFormat().resolvedOptions().timeZone}
-          />
-        </PopoverContent>
-      </Popover>
-      <Input
-        aria-label="Event time"
-        type="time"
-        step="60"
-        value={timeValue}
-        aria-invalid={ariaInvalid}
-        onChange={(event) => setTime(event.target.value)}
-      />
+          </PopoverContent>
+        </Popover>
+        <Input
+          aria-label="Event time"
+          type="time"
+          step="60"
+          value={timeValue}
+          aria-invalid={ariaInvalid}
+          onChange={(event) => setTime(event.target.value)}
+        />
+      </div>
+      <ButtonGroup aria-label="Quick time adjustments">
+        <Button type="button" variant="outline" size="sm" onClick={setNow}>
+          Now
+        </Button>
+        {PRESETS.map((preset) => (
+          <Button
+            key={preset.label}
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => bumpMinutes(preset.minutes)}
+          >
+            {preset.label}
+          </Button>
+        ))}
+      </ButtonGroup>
     </div>
   );
 }

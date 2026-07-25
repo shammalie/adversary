@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Builder layout wireframes — 7 designs</title>
+  <style>
+    :root {
+      --bg: #f0f1f3;
+      --ink: #1a1d23;
+      --muted: #6b7280;
+      --line: #9ca3af;
+      --panel: #ffffff;
+      --dash: #94a3b8;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --dim: #e5e7eb;
+      --danger: #b91c1c;
+      --ok: #15803d;
+      --map: #c5d4e8;
+      --map-line: #64748b;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+      --radius: 6px;
+      --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.35;
+      font-size: 13px;
+    }
+
+    /* —— Sticky nav —— */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(255,255,255,.92);
+      border-bottom: 1px solid #d1d5db;
+      backdrop-filter: blur(8px);
+    }
+    .nav strong { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-right: 8px; }
+    .nav a {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12px;
+      background: #fff;
+    }
+    .nav a:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+    .intro {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 24px 8px;
+    }
+    .intro h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; }
+    .intro p { margin: 0; color: var(--muted); max-width: 70ch; }
+
+    /* —— Design sections —— */
+    .design {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 24px 48px;
+      scroll-margin-top: 64px;
+    }
+    .design-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: baseline;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .design-head h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 650;
+    }
+    .design-head .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .design-head .intent {
+      flex: 1 1 280px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Shared wireframe primitives */
+    .label {
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .box {
+      background: var(--panel);
+      border: 1px dashed var(--dash);
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+    .box.solid {
+      border-style: solid;
+      border-color: #d1d5db;
+      box-shadow: var(--shadow);
+    }
+    .row { display: flex; gap: 12px; }
+    .col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .grow { flex: 1; min-width: 0; }
+    .field {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      background: #fafafa;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .field.tall { height: 56px; align-items: flex-start; padding-top: 8px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 550;
+      white-space: nowrap;
+    }
+    .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .btn.ghost { background: transparent; }
+    .btn.danger { color: var(--danger); border-color: #fecaca; }
+    .btn.sm { height: 22px; padding: 0 8px; font-size: 11px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      font-size: 12px;
+      background: #fff;
+    }
+    .chip.on { background: var(--accent-soft); border-color: #93c5fd; color: #1d4ed8; }
+    .chip.off { opacity: .55; }
+    .switch {
+      width: 28px;
+      height: 16px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .switch.on { background: var(--accent); }
+    .switch.on::after { left: 14px; }
+    .map {
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(100,116,139,.25) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(100,116,139,.25) 50%, transparent 51%),
+        repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(148,163,184,.15) 19px),
+        repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(148,163,184,.15) 19px),
+        var(--map);
+      border: 1px solid var(--map-line);
+      border-radius: 4px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      min-height: 120px;
+    }
+    .map .pin {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px var(--accent);
+      top: 42%;
+      left: 58%;
+    }
+    .dimmed {
+      opacity: .42;
+      filter: grayscale(.35);
+      pointer-events: none;
+      position: relative;
+    }
+    .dimmed::after {
+      content: "disabled — still visible";
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 9px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,.9);
+      border: 1px solid #d1d5db;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: var(--muted);
+      z-index: 2;
+    }
+    .list {
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      overflow: auto;
+      background: #fff;
+    }
+    .list-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 12px;
+    }
+    .list-row:last-child { border-bottom: 0; }
+    .list-row.selected {
+      background: var(--accent-soft);
+      outline: 1px solid #93c5fd;
+      outline-offset: -1px;
+    }
+    .list-row:hover { background: #f8fafc; }
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .list-row .name { flex: 1; font-weight: 550; }
+    .meta { color: var(--muted); font-size: 11px; }
+    .page-chrome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius);
+    }
+    .page-chrome h3 { margin: 0; font-size: 14px; }
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .field-wrap .label { display: block; margin-bottom: 4px; }
+    .toggles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .section-title h4 { margin: 0; font-size: 13px; font-weight: 650; }
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    /* ========== D1 Classic asymmetry ========== */
+    .d1-author { display: grid; grid-template-columns: 30% 70%; gap: 12px; }
+    .d1-review { display: grid; grid-template-columns: 30% 70%; gap: 12px; margin-top: 12px; }
+    .d1 .event-map { height: 280px; }
+    .d1 .preview-map { height: 260px; }
+    .d1 .target-list { max-height: 220px; }
+    .d1 .timeline-list { max-height: 240px; }
+
+    /* ========== D2 Form-first rail ========== */
+    .d2-author { display: grid; grid-template-columns: 28% 72%; gap: 14px; align-items: start; }
+    .d2-targets {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius);
+      background: #fff;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      min-height: 520px;
+    }
+    .d2-form {
+      padding: 12px;
+      border-bottom: 2px solid var(--ink);
+      background: #f8fafc;
+      position: sticky;
+      top: 0;
+    }
+    .d2-list-wrap { flex: 1; overflow: auto; max-height: 340px; }
+    .d2 .event-map { height: 320px; }
+    .d2 .preview-map { height: 280px; }
+    .d2-review { display: grid; grid-template-columns: 28% 72%; gap: 14px; margin-top: 14px; }
+    .d2 .timeline-list { max-height: 260px; }
+
+    /* ========== D3 Viewport workbench ========== */
+    .d3-shell {
+      height: min(86vh, 820px);
+      display: grid;
+      grid-template-rows: auto 1fr 28%;
+      gap: 8px;
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      padding: 8px;
+      background: #e8eaee;
+    }
+    .d3-main {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 8px;
+      min-height: 0;
+    }
+    .d3-targets {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 8px;
+    }
+    .d3-targets .list { flex: 1; min-height: 0; }
+    .d3-event {
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      gap: 8px;
+      min-height: 0;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 8px;
+    }
+    .d3 .event-map { min-height: 0; height: 100%; }
+    .d3-dock {
+      display: grid;
+      grid-template-columns: 32% 68%;
+      gap: 8px;
+      min-height: 0;
+    }
+    .d3-dock > * {
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 8px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .d3 .timeline-list { flex: 1; min-height: 0; max-height: none; }
+    .d3 .preview-map { flex: 1; min-height: 0; height: auto; }
+    .d3 .fields-grid { grid-template-columns: repeat(4, 1fr); }
+    .d3 .field { height: 24px; font-size: 11px; }
+    .d3 .field.tall { height: 40px; }
+
+    /* ========== D4 Event-centric stage ========== */
+    .d4-author {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 12px;
+    }
+    .d4-targets {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 560px;
+    }
+    .d4-targets .list { flex: 1; max-height: 200px; }
+    .d4-stage {
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 560px;
+    }
+    .d4 .event-map { height: 310px; flex: 0 0 auto; }
+    .d4-below {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .d4-timeline-strip {
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+    .d4-timeline-strip .list-row { padding: 5px 8px; }
+    .d4 .preview-map { height: 320px; }
+    .d4 .timeline-list { max-height: 300px; }
+
+    /* ========== D5 Mirrored panels ========== */
+    .d5-compose,
+    .d5-review {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .d5-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--ink);
+      color: #fff;
+    }
+    .d5-banner h4 { margin: 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+    .d5-banner .meta { color: #94a3b8; }
+    .d5-body { padding: 12px; }
+    .d5-compose .d5-body {
+      display: grid;
+      grid-template-columns: 32% 68%;
+      gap: 12px;
+    }
+    .d5-review { margin-top: 14px; }
+    .d5-review .d5-body {
+      display: grid;
+      grid-template-columns: 32% 68%;
+      gap: 12px;
+    }
+    .d5 .event-map { height: 260px; }
+    .d5 .preview-map { height: 260px; }
+    .d5 .target-list { max-height: 200px; }
+    .d5 .timeline-list { max-height: 240px; }
+    .d5-panel-chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #cbd5e1;
+    }
+
+    /* ========== D6 Dense ops console ========== */
+    .d6 {
+      font-size: 11px;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      background: #f1f5f9;
+      padding: 6px;
+    }
+    .d6 .label { font-size: 9px; }
+    .d6 .field { height: 22px; font-size: 11px; padding: 0 6px; }
+    .d6 .field.tall { height: 44px; }
+    .d6 .btn { height: 22px; font-size: 11px; padding: 0 8px; }
+    .d6 .list-row { padding: 4px 6px; font-size: 11px; }
+    .d6-author {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 6px;
+    }
+    .d6-targets {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid #94a3b8;
+      padding: 6px;
+    }
+    .d6-targets .list { max-height: 160px; }
+    .d6-event {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      grid-template-rows: auto 1fr auto;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid #94a3b8;
+      padding: 6px;
+    }
+    .d6-event .toggles { grid-column: 1 / -1; }
+    .d6-event .map-wrap { grid-row: 2; }
+    .d6-event .side-fields {
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .d6-event .msg-wrap { grid-column: 1 / -1; }
+    .d6 .event-map { height: 300px; }
+    .d6-review {
+      display: grid;
+      grid-template-columns: 34% 66%;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .d6-review > * {
+      background: #fff;
+      border: 1px solid #94a3b8;
+      padding: 6px;
+    }
+    .d6 .preview-map { height: 280px; }
+    .d6 .timeline-list { max-height: 260px; }
+    .d6 .list-row.accordion::before {
+      content: "▸";
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .d6 .page-chrome {
+      padding: 4px 8px;
+      margin-bottom: 6px;
+      border-radius: 2px;
+    }
+    .d6 .fields-grid { grid-template-columns: 1fr 1fr; gap: 4px; }
+
+    @media (max-width: 1100px) {
+      .d1-author, .d1-review,
+      .d2-author, .d2-review,
+      .d4-author, .d4-below,
+      .d5-compose .d5-body,
+      .d5-review .d5-body,
+      .d6-author, .d6-review {
+        grid-template-columns: 1fr;
+      }
+      .d3-main, .d3-dock { grid-template-columns: 1fr; }
+      .d3-shell { height: auto; }
+      .note::after { content: " (desktop intended — stacked here)"; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Design jump links">
+    <strong>Wireframes</strong>
+    <a href="#d1">1 Classic</a>
+    <a href="#d2">2 Form-first</a>
+    <a href="#d3">3 Workbench</a>
+    <a href="#d4">4 Event stage</a>
+    <a href="#d5">5 Mirrored</a>
+    <a href="#d6">6 Ops console</a>
+    <a href="#d7">7 Graph preview</a>
+  </nav>
+
+  <header class="intro">
+    <h1>Scenario builder — layout wireframes</h1>
+    <p>
+      Throwaway gray-box layouts for selection only. Designs 1–6 keep: targets left (shared form + scroll list + row delete + Add target),
+      event right (Position/Message toggles, always-visible map + fields + message, dimmed when off),
+      timeline compressed + preview map prominent below. Design 7 documents Review Map | Graph preview (horizontal event timeline). Desktop ~1400px+.
+    </p>
+  </header>
+
+  <!-- ==================== DESIGN 1 ==================== -->
+  <section class="design d1" id="d1">
+    <div class="design-head">
+      <h2>1. Classic asymmetry</h2>
+      <span class="tag">30 / 70 · stacked rows</span>
+      <p class="intent">Closest to today’s scroll page: matching authoring and review splits; event &amp; preview maps dominate.</p>
+    </div>
+
+    <div class="page-chrome">
+      <div>
+        <div class="label">Page</div>
+        <h3>Simulation builder</h3>
+      </div>
+      <div class="row" style="gap:8px">
+        <span class="btn ghost">Load demo</span>
+        <span class="btn primary">Start simulation</span>
+      </div>
+    </div>
+
+    <div class="d1-author">
+      <!-- Targets -->
+      <div class="box solid col">
+        <div class="section-title">
+          <h4>Targets</h4>
+          <span class="btn sm primary">+ Add target</span>
+        </div>
+        <p class="hint">One form for add/edit · click row to populate</p>
+        <div class="col" style="gap:6px">
+          <div class="field-wrap"><span class="label">Callsign</span><div class="field">CONTACT 02</div></div>
+          <div class="fields-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field-wrap"><span class="label">Affiliation</span><div class="field">Hostile</div></div>
+            <div class="field-wrap"><span class="label">Color</span><div class="field">■ #e11</div></div>
+          </div>
+          <div class="row" style="gap:8px">
+            <span class="btn sm">Save target</span>
+            <span class="btn sm ghost">Clear</span>
+          </div>
+        </div>
+        <div class="list target-list">
+          <div class="list-row"><span class="swatch" style="background:#2563eb"></span><span class="name">CONTACT 01</span><span class="meta">friend</span><span class="btn sm danger">Del</span></div>
+          <div class="list-row selected"><span class="swatch" style="background:#e11d48"></span><span class="name">CONTACT 02</span><span class="meta">hostile · editing</span><span class="btn sm danger">Del</span></div>
+          <div class="list-row"><span class="swatch" style="background:#ca8a04"></span><span class="name">CONTACT 03</span><span class="meta">unknown</span><span class="btn sm danger">Del</span></div>
+          <div class="list-row"><span class="swatch" style="background:#16a34a"></span><span class="name">CONTACT 04</span><span class="meta">neutral</span><span class="btn sm danger">Del</span></div>
+        </div>
+      </div>
+
+      <!-- Event -->
+      <div class="box solid col">
+        <div class="section-title">
+          <h4>Schedule event</h4>
+          <span class="btn primary">Add to timeline</span>
+        </div>
+        <div class="row" style="gap:8px; flex-wrap:wrap">
+          <div class="field" style="min-width:160px">Target: CONTACT 02</div>
+          <div class="field" style="min-width:180px">When: +5 min</div>
+        </div>
+        <div class="toggles">
+          <span class="label">Payload</span>
+          <span class="chip on"><span class="switch on"></span> Position</span>
+          <span class="chip off"><span class="switch"></span> Message</span>
+        </div>
+        <div>
+          <span class="label">Position map</span>
+          <div class="map event-map"><span class="pin"></span>Position map (largest)</div>
+        </div>
+        <div class="fields-grid">
+          <div class="field-wrap"><span class="label">Lat</span><div class="field">51.507</div></div>
+          <div class="field-wrap"><span class="label">Lon</span><div class="field">-0.128</div></div>
+          <div class="field-wrap"><span class="label">Alt</span><div class="field">120</div></div>
+          <div class="field-wrap"><span class="label">Speed</span><div class="field">18 kt</div></div>
+        </div>
+        <div class="dimmed">
+          <span class="label">Message</span>
+          <div class="field tall">Message body…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d1-review">
+      <div class="box solid col">
+        <div class="section-title">
+          <h4>Grouped timeline</h4>
+          <span class="chip">View</span>
+        </div>
+        <div class="list timeline-list">
+          <div class="list-row"><span class="name">CONTACT 02</span><span class="meta">3 events</span></div>
+          <div class="list-row"><span class="meta">12:01</span><span class="name">Pos</span><span class="meta">51.50, -0.12</span></div>
+          <div class="list-row"><span class="meta">12:04</span><span class="name">Pos + Msg</span></div>
+          <div class="list-row"><span class="name">CONTACT 01</span><span class="meta">2 events</span></div>
+          <div class="list-row"><span class="meta">12:00</span><span class="name">Pos</span></div>
+        </div>
+        <div class="row" style="gap:6px"><span class="btn sm">Save</span><span class="btn sm">Export</span></div>
+      </div>
+      <div class="box solid col">
+        <div class="section-title">
+          <h4>Build preview</h4>
+          <span class="meta">▶ Play · 10×</span>
+        </div>
+        <div class="map preview-map"><span class="pin"></span>Preview map (prominent)</div>
+      </div>
+    </div>
+    <p class="note">D1 — document flow · equal row language 30/70</p>
+  </section>
+
+  <!-- ==================== DESIGN 2 ==================== -->
+  <section class="design d2" id="d2">
+    <div class="design-head">
+      <h2>2. Form-first target rail</h2>
+      <span class="tag">pinned form · dense list</span>
+      <p class="intent">Shortest path: fill form → Add target → click row to edit. Event canvas is tall; map is the hero.</p>
+    </div>
+
+    <div class="page-chrome">
+      <div><div class="label">Page</div><h3>Simulation builder</h3></div>
+      <div class="row" style="gap:8px"><span class="btn ghost">Load demo</span><span class="btn primary">Start simulation</span></div>
+    </div>
+
+    <div class="d2-author">
+      <div class="d2-targets">
+        <div class="d2-form col" style="gap:8px">
+          <div class="section-title">
+            <h4>Target form</h4>
+            <span class="btn sm primary">+ Add target</span>
+          </div>
+          <p class="hint" style="margin:0">Always on top — type then add</p>
+          <div class="field">Callsign</div>
+          <div class="fields-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field">Vehicle</div>
+            <div class="field">Affiliation</div>
+          </div>
+          <div class="field">Identifier / description</div>
+          <div class="row" style="gap:6px">
+            <span class="btn sm primary">Save</span>
+            <span class="btn sm ghost">New blank</span>
+          </div>
+        </div>
+        <div class="d2-list-wrap">
+          <div class="list" style="border:0; border-radius:0">
+            <div class="list-row selected"><span class="swatch" style="background:#e11d48"></span><span class="name">CONTACT 02</span><span class="meta">selected</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#2563eb"></span><span class="name">CONTACT 01</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#ca8a04"></span><span class="name">CONTACT 03</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#16a34a"></span><span class="name">CONTACT 04</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#7c3aed"></span><span class="name">CONTACT 05</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#0891b2"></span><span class="name">CONTACT 06</span><span class="btn sm danger">Del</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="box solid col">
+        <div class="section-title">
+          <h4>Event</h4>
+          <span class="btn primary">Add to timeline</span>
+        </div>
+        <div class="toggles">
+          <span class="chip on"><span class="switch on"></span> Position</span>
+          <span class="chip off"><span class="switch"></span> Message</span>
+          <div class="field" style="margin-left:auto; min-width:140px">CONTACT 02</div>
+          <div class="field" style="min-width:140px">Datetime</div>
+        </div>
+        <div class="map event-map"><span class="pin"></span>Large position map</div>
+        <div class="fields-grid">
+          <div class="field-wrap"><span class="label">Lat</span><div class="field">51.507</div></div>
+          <div class="field-wrap"><span class="label">Lon</span><div class="field">-0.128</div></div>
+          <div class="field-wrap"><span class="label">Alt</span><div class="field">120</div></div>
+          <div class="field-wrap"><span class="label">Speed</span><div class="field">18 kt</div></div>
+        </div>
+        <div class="dimmed">
+          <span class="label">Message</span>
+          <div class="field tall">…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d2-review">
+      <div class="box solid col">
+        <div class="section-title"><h4>Timeline</h4><span class="meta">compressed</span></div>
+        <div class="list timeline-list">
+          <div class="list-row"><span class="name">C02 · 12:01 Pos</span><span class="btn sm danger">×</span></div>
+          <div class="list-row"><span class="name">C02 · 12:04 Pos+Msg</span><span class="btn sm danger">×</span></div>
+          <div class="list-row"><span class="name">C01 · 12:00 Pos</span><span class="btn sm danger">×</span></div>
+        </div>
+      </div>
+      <div class="box solid col">
+        <div class="section-title"><h4>Preview</h4><span class="meta">▶ · scrub</span></div>
+        <div class="map preview-map"><span class="pin"></span>Preview map</div>
+      </div>
+    </div>
+    <p class="note">D2 — form pinned above list · 28/72 mirror on review</p>
+  </section>
+
+  <!-- ==================== DESIGN 3 ==================== -->
+  <section class="design d3" id="d3">
+    <div class="design-head">
+      <h2>3. Viewport workbench</h2>
+      <span class="tag">tool · fixed viewport</span>
+      <p class="intent">Feels like a single-screen tool: targets rail + event map fill height; timeline/preview docked at ~28% bottom.</p>
+    </div>
+
+    <div class="d3-shell">
+      <div class="page-chrome" style="margin:0">
+        <div><h3 style="margin:0;font-size:13px">Builder workbench</h3></div>
+        <div class="row" style="gap:6px"><span class="btn sm">Demo</span><span class="btn sm primary">Start</span></div>
+      </div>
+
+      <div class="d3-main">
+        <div class="d3-targets">
+          <div class="section-title">
+            <h4>Targets</h4>
+            <span class="btn sm primary">+</span>
+          </div>
+          <div class="field">Callsign</div>
+          <div class="field">Affiliation</div>
+          <div class="field">Color / profile</div>
+          <div class="row" style="gap:4px"><span class="btn sm">Save</span><span class="btn sm ghost">Clear</span></div>
+          <div class="list">
+            <div class="list-row selected"><span class="swatch" style="background:#e11d48"></span><span class="name">C02</span><span class="btn sm danger">×</span></div>
+            <div class="list-row"><span class="swatch" style="background:#2563eb"></span><span class="name">C01</span><span class="btn sm danger">×</span></div>
+            <div class="list-row"><span class="swatch" style="background:#ca8a04"></span><span class="name">C03</span><span class="btn sm danger">×</span></div>
+            <div class="list-row"><span class="swatch" style="background:#16a34a"></span><span class="name">C04</span><span class="btn sm danger">×</span></div>
+          </div>
+        </div>
+
+        <div class="d3-event">
+          <div class="row" style="justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
+            <div class="toggles">
+              <span class="chip on"><span class="switch on"></span> Position</span>
+              <span class="chip off"><span class="switch"></span> Message</span>
+            </div>
+            <div class="row" style="gap:6px">
+              <div class="field" style="width:120px">CONTACT 02</div>
+              <div class="field" style="width:120px">Datetime</div>
+              <span class="btn sm primary">Add event</span>
+            </div>
+          </div>
+          <div class="map event-map"><span class="pin"></span>Map fills remaining height</div>
+          <div class="fields-grid">
+            <div class="field">Lat</div>
+            <div class="field">Lon</div>
+            <div class="field">Alt</div>
+            <div class="field">Speed</div>
+          </div>
+          <div class="dimmed"><div class="field tall">Message (always reserved)</div></div>
+        </div>
+      </div>
+
+      <div class="d3-dock">
+        <div>
+          <div class="section-title"><h4>Timeline</h4><span class="meta">dock</span></div>
+          <div class="list timeline-list">
+            <div class="list-row"><span class="name">C02 12:01 Pos</span></div>
+            <div class="list-row"><span class="name">C02 12:04 Pos</span></div>
+            <div class="list-row"><span class="name">C01 12:00 Pos</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title"><h4>Preview</h4><span class="meta">▶ 10×</span></div>
+          <div class="map preview-map"><span class="pin"></span>Dock preview map</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">D3 — ~86vh shell · no long page scroll inside frame</p>
+  </section>
+
+  <!-- ==================== DESIGN 4 ==================== -->
+  <section class="design d4" id="d4">
+    <div class="design-head">
+      <h2>4. Event-centric stage</h2>
+      <span class="tag">map stage · compact targets</span>
+      <p class="intent">Event is a framed stage (~55% map). Targets shrink to a compact card. Timeline strip + large preview below.</p>
+    </div>
+
+    <div class="page-chrome">
+      <div><div class="label">Page</div><h3>Simulation builder</h3></div>
+      <div class="row" style="gap:8px"><span class="btn ghost">Load demo</span><span class="btn primary">Start simulation</span></div>
+    </div>
+
+    <div class="d4-author">
+      <div class="box solid d4-targets">
+        <div class="section-title">
+          <h4>Targets</h4>
+          <span class="btn sm primary">+ Add</span>
+        </div>
+        <div class="field">Callsign</div>
+        <div class="field">Affiliation</div>
+        <div class="field">Profile…</div>
+        <span class="btn sm">Save target</span>
+        <div class="list">
+          <div class="list-row selected"><span class="swatch" style="background:#e11d48"></span><span class="name">C02</span><span class="btn sm danger">Del</span></div>
+          <div class="list-row"><span class="swatch" style="background:#2563eb"></span><span class="name">C01</span><span class="btn sm danger">Del</span></div>
+          <div class="list-row"><span class="swatch" style="background:#ca8a04"></span><span class="name">C03</span><span class="btn sm danger">Del</span></div>
+        </div>
+      </div>
+
+      <div class="d4-stage">
+        <div class="section-title">
+          <h4>Event stage</h4>
+          <span class="btn primary">Add to timeline</span>
+        </div>
+        <div class="toggles">
+          <span class="chip on"><span class="switch on"></span> Position</span>
+          <span class="chip off"><span class="switch"></span> Message</span>
+          <div class="field" style="margin-left:auto; width:140px">CONTACT 02</div>
+          <div class="field" style="width:140px">Datetime</div>
+        </div>
+        <div class="map event-map"><span class="pin"></span>Stage map · ~55% of stage</div>
+        <div class="fields-grid">
+          <div class="field-wrap"><span class="label">Lat</span><div class="field">51.507</div></div>
+          <div class="field-wrap"><span class="label">Lon</span><div class="field">-0.128</div></div>
+          <div class="field-wrap"><span class="label">Alt</span><div class="field">120</div></div>
+          <div class="field-wrap"><span class="label">Speed</span><div class="field">18 kt</div></div>
+        </div>
+        <div class="dimmed">
+          <span class="label">Message</span>
+          <div class="field tall">Reserved space when off</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d4-below">
+      <div class="d4-timeline-strip">
+        <div class="section-title"><h4>Timeline strip</h4><span class="meta">compressed rows</span></div>
+        <div class="list timeline-list">
+          <div class="list-row"><span class="meta">12:01</span><span class="name">C02 Pos</span></div>
+          <div class="list-row"><span class="meta">12:04</span><span class="name">C02 Pos+Msg</span></div>
+          <div class="list-row"><span class="meta">12:00</span><span class="name">C01 Pos</span></div>
+          <div class="list-row"><span class="meta">12:08</span><span class="name">C03 Msg</span></div>
+        </div>
+        <div class="row" style="gap:6px;margin-top:8px"><span class="btn sm">Save</span><span class="btn sm">Export</span></div>
+      </div>
+      <div class="box solid col">
+        <div class="section-title"><h4>Build preview</h4><span class="meta">largest map on page</span></div>
+        <div class="map preview-map"><span class="pin"></span>Preview map (most prominent)</div>
+      </div>
+    </div>
+    <p class="note">D4 — bold stage frame · preview wins bottom hierarchy</p>
+  </section>
+
+  <!-- ==================== DESIGN 5 ==================== -->
+  <section class="design d5" id="d5">
+    <div class="design-head">
+      <h2>5. Mirrored panels</h2>
+      <span class="tag">Compose · Review twins</span>
+      <p class="intent">Identical chrome for authoring and review: same header language, same 32/68 split — visual consistency.</p>
+    </div>
+
+    <div class="page-chrome">
+      <div><div class="label">Page</div><h3>Simulation builder</h3></div>
+      <div class="row" style="gap:8px"><span class="btn ghost">Load demo</span><span class="btn primary">Start simulation</span></div>
+    </div>
+
+    <div class="d5-compose">
+      <div class="d5-banner">
+        <h4>Compose</h4>
+        <span class="meta">targets + event</span>
+      </div>
+      <div class="d5-body">
+        <div class="col">
+          <div class="d5-panel-chrome">
+            <strong>Targets</strong>
+            <span class="btn sm primary">+ Add target</span>
+          </div>
+          <div class="field">Callsign — CONTACT 02</div>
+          <div class="fields-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field">Affiliation</div>
+            <div class="field">Color</div>
+          </div>
+          <div class="field">Description</div>
+          <span class="btn sm">Save target</span>
+          <div class="list target-list">
+            <div class="list-row selected"><span class="swatch" style="background:#e11d48"></span><span class="name">CONTACT 02</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#2563eb"></span><span class="name">CONTACT 01</span><span class="btn sm danger">Del</span></div>
+            <div class="list-row"><span class="swatch" style="background:#ca8a04"></span><span class="name">CONTACT 03</span><span class="btn sm danger">Del</span></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="d5-panel-chrome">
+            <strong>Event</strong>
+            <span class="btn sm primary">Add to timeline</span>
+          </div>
+          <div class="toggles">
+            <span class="chip on"><span class="switch on"></span> Position</span>
+            <span class="chip off"><span class="switch"></span> Message</span>
+          </div>
+          <div class="row" style="gap:8px">
+            <div class="field grow">Target: CONTACT 02</div>
+            <div class="field grow">Datetime</div>
+          </div>
+          <div class="map event-map"><span class="pin"></span>Position map</div>
+          <div class="fields-grid">
+            <div class="field">Lat</div><div class="field">Lon</div><div class="field">Alt</div><div class="field">Speed</div>
+          </div>
+          <div class="dimmed"><div class="field tall">Message</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d5-review">
+      <div class="d5-banner">
+        <h4>Review</h4>
+        <span class="meta">timeline + preview</span>
+      </div>
+      <div class="d5-body">
+        <div class="col">
+          <div class="d5-panel-chrome">
+            <strong>Grouped timeline</strong>
+            <span class="chip">View | Edit</span>
+          </div>
+          <div class="list timeline-list">
+            <div class="list-row"><span class="name">CONTACT 02</span><span class="meta">3</span></div>
+            <div class="list-row"><span class="meta">·</span><span class="name">12:01 Pos</span></div>
+            <div class="list-row"><span class="meta">·</span><span class="name">12:04 Pos+Msg</span></div>
+            <div class="list-row"><span class="name">CONTACT 01</span><span class="meta">2</span></div>
+          </div>
+          <div class="row" style="gap:6px"><span class="btn sm">Save draft</span><span class="btn sm">Export</span></div>
+        </div>
+        <div class="col">
+          <div class="d5-panel-chrome">
+            <strong>Build preview</strong>
+            <span class="meta">▶ Play · speed</span>
+          </div>
+          <div class="map preview-map"><span class="pin"></span>Preview map</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">D5 — twin dark banners · matched 32/68 columns</p>
+  </section>
+
+  <!-- ==================== DESIGN 6 ==================== -->
+  <section class="design d6" id="d6">
+    <div class="design-head">
+      <h2>6. Dense ops console</h2>
+      <span class="tag">high density · tight chrome</span>
+      <p class="intent">Maximum information on screen: narrow target rail, near-square event map, accordion timeline, full-bleed preview.</p>
+    </div>
+
+    <div class="d6">
+      <div class="page-chrome">
+        <div><h3 style="margin:0;font-size:12px">OPS BUILDER</h3></div>
+        <div class="row" style="gap:4px"><span class="btn">DEMO</span><span class="btn primary">START</span></div>
+      </div>
+
+      <div class="d6-author">
+        <div class="d6-targets">
+          <div class="section-title">
+            <h4 style="font-size:11px">TARGETS</h4>
+            <span class="btn primary">+ ADD</span>
+          </div>
+          <div class="field">CSN</div>
+          <div class="fields-grid">
+            <div class="field">AFF</div>
+            <div class="field">CLR</div>
+          </div>
+          <div class="field">ID / DESC</div>
+          <span class="btn">SAVE</span>
+          <div class="list">
+            <div class="list-row selected"><span class="swatch" style="background:#e11d48"></span><span class="name">C02</span><span class="btn sm danger">×</span></div>
+            <div class="list-row"><span class="swatch" style="background:#2563eb"></span><span class="name">C01</span><span class="btn sm danger">×</span></div>
+            <div class="list-row"><span class="swatch" style="background:#ca8a04"></span><span class="name">C03</span><span class="btn sm danger">×</span></div>
+            <div class="list-row"><span class="swatch" style="background:#16a34a"></span><span class="name">C04</span><span class="btn sm danger">×</span></div>
+          </div>
+        </div>
+
+        <div class="d6-event">
+          <div class="toggles">
+            <span class="chip on"><span class="switch on"></span> POS</span>
+            <span class="chip off"><span class="switch"></span> MSG</span>
+            <div class="field" style="width:100px">C02</div>
+            <div class="field" style="width:110px">DTG</div>
+            <span class="btn primary" style="margin-left:auto">ADD EVT</span>
+          </div>
+          <div class="map-wrap">
+            <div class="map event-map"><span class="pin"></span>MAP</div>
+          </div>
+          <div class="side-fields">
+            <span class="label">POSITION FIELDS</span>
+            <div class="field">LAT 51.507</div>
+            <div class="field">LON -0.128</div>
+            <div class="field">ALT 120</div>
+            <div class="field">SPD 18 KT</div>
+          </div>
+          <div class="msg-wrap dimmed">
+            <span class="label">MESSAGE</span>
+            <div class="field tall">MSG BODY (VISIBLE WHEN OFF)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d6-review">
+        <div>
+          <div class="section-title"><h4 style="font-size:11px">TIMELINE</h4><span class="meta">accordion</span></div>
+          <div class="list timeline-list">
+            <div class="list-row accordion"><span class="name">C02</span><span class="meta">3</span></div>
+            <div class="list-row"><span class="meta">12:01</span><span class="name">POS</span></div>
+            <div class="list-row"><span class="meta">12:04</span><span class="name">POS+MSG</span></div>
+            <div class="list-row accordion"><span class="name">C01</span><span class="meta">2</span></div>
+            <div class="list-row"><span class="meta">12:00</span><span class="name">POS</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title"><h4 style="font-size:11px">PREVIEW</h4><span class="meta">▶ 10× SCRUB</span></div>
+          <div class="map preview-map" style="border-radius:0"><span class="pin"></span>FULL-BLEED PREVIEW</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">D6 — ops density · map + side fields · accordion timeline</p>
+  </section>
+
+  <!-- ==================== DESIGN 7 — GRAPH PREVIEW ==================== -->
+  <section class="design" id="d7">
+    <div class="design-head">
+      <h2>Design 7 — Review graph preview</h2>
+      <span class="tag">SHIPPED · MAP | GRAPH</span>
+      <p class="intent">
+        Review keeps the 32/68 split. Build preview toggles Map vs Graph. Graph shows one target’s events as a left-to-right temporal chain;
+        select the target from the grouped timeline on the left. Playback scrubber highlights the current node.
+      </p>
+    </div>
+
+    <div class="box solid col" style="gap:14px">
+      <div class="row" style="align-items:center;justify-content:space-between;background:var(--ink);color:#fff;padding:8px 12px;border-radius:4px">
+        <strong style="font-size:11px;letter-spacing:.08em;text-transform:uppercase">Review</strong>
+        <span style="opacity:.6;font-size:11px">timeline + map / graph preview</span>
+      </div>
+
+      <div class="row" style="gap:12px;align-items:stretch">
+        <div class="col" style="flex:0 0 32%;min-width:220px">
+          <div class="section-title"><h4>Grouped timeline</h4><span class="meta">target list</span></div>
+          <div class="row" style="gap:6px"><span class="btn sm">View</span><span class="btn sm">Edit</span></div>
+          <div class="list timeline-list">
+            <div class="list-row" style="border-color:var(--accent);background:var(--accent-soft)">
+              <span class="swatch" style="background:#0e7490"></span>
+              <span class="name">ALPHA</span>
+              <span class="meta">4</span>
+            </div>
+            <div class="list-row"><span class="meta">12:00</span><span class="name">POS</span></div>
+            <div class="list-row"><span class="meta">12:04</span><span class="name">POS+MSG</span></div>
+            <div class="list-row"><span class="meta">12:10</span><span class="name">POS</span></div>
+            <div class="list-row accordion"><span class="swatch" style="background:#1d4ed8"></span><span class="name">BRAVO</span><span class="meta">2</span></div>
+            <div class="list-row accordion"><span class="swatch" style="background:#047857"></span><span class="name">CHARLIE</span><span class="meta">3</span></div>
+          </div>
+          <div class="row" style="gap:6px"><span class="btn sm">Save</span><span class="btn sm">Export</span></div>
+        </div>
+
+        <div class="col grow">
+          <div class="section-title">
+            <h4>Build preview</h4>
+            <span class="meta">Event graph · ALPHA</span>
+          </div>
+          <div class="row" style="gap:6px;flex-wrap:wrap;align-items:center">
+            <span class="btn sm">Map</span>
+            <span class="btn sm primary">Graph</span>
+            <span class="btn sm">▶ Play</span>
+            <span class="btn sm">Reset</span>
+            <span class="btn sm">1×</span><span class="btn sm">2×</span><span class="btn sm">5×</span><span class="btn sm">10×</span>
+          </div>
+          <div class="field" style="height:18px;margin:4px 0">scrubber · 12:00 ———●——— 12:15</div>
+          <div class="field" style="height:auto;padding:6px 8px;border-color:#99c">Current: 51.5074, -0.1278 · checkpoint</div>
+          <div class="box" style="min-height:280px;background:
+            linear-gradient(color-mix(in srgb, #0e7490 12%, transparent) 1px, transparent 1px),
+            linear-gradient(90deg, color-mix(in srgb, #0e7490 12%, transparent) 1px, transparent 1px),
+            #f5f8f9; background-size:32px 32px, 32px 32px, auto; position:relative; overflow:hidden">
+            <div class="row" style="gap:0;align-items:center;justify-content:flex-start;padding:48px 24px;overflow-x:auto">
+              <div class="box solid" style="width:140px;flex:0 0 auto;border-top:3px solid #0e7490;opacity:.55">
+                <span class="label">POS</span>
+                <div style="font-family:var(--mono);font-size:10px;margin-top:4px">12:00:00</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">51.5000, -0.1200</div>
+              </div>
+              <div style="flex:0 0 48px;text-align:center;font-family:var(--mono);font-size:10px;color:#0e7490">Δ4m →</div>
+              <div class="box solid" style="width:140px;flex:0 0 auto;border:2px solid #0e7490;border-top:3px solid #0e7490;box-shadow:0 0 0 3px rgba(14,116,144,.25)">
+                <div class="row" style="justify-content:space-between"><span class="label">POS+MSG</span><span style="font-size:10px;color:#0e7490;font-weight:650">NOW</span></div>
+                <div style="font-family:var(--mono);font-size:10px;margin-top:4px">12:04:00</div>
+                <div style="font-size:11px;color:var(--muted)">checkpoint</div>
+              </div>
+              <div style="flex:0 0 48px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)">Δ6m →</div>
+              <div class="box" style="width:140px;flex:0 0 auto;border-style:dashed;border-top:3px solid #0e7490;opacity:.8">
+                <span class="label">POS</span>
+                <div style="font-family:var(--mono);font-size:10px;margin-top:4px">12:10:00</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">51.5200, -0.0800</div>
+              </div>
+              <div style="flex:0 0 48px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)">Δ5m →</div>
+              <div class="box" style="width:140px;flex:0 0 auto;border-style:dashed;border-top:3px solid #0e7490;opacity:.8">
+                <span class="label">MSG</span>
+                <div style="font-family:var(--mono);font-size:10px;margin-top:4px">12:15:00</div>
+                <div style="font-size:11px;color:var(--muted)">on station</div>
+              </div>
+            </div>
+            <div style="position:absolute;left:10px;bottom:10px;display:flex;flex-direction:column;border:1px solid #d1d5db;border-radius:4px;overflow:hidden;background:#fff">
+              <span class="btn sm" style="border:0;border-bottom:1px solid #d1d5db;border-radius:0">+</span>
+              <span class="btn sm" style="border:0;border-bottom:1px solid #d1d5db;border-radius:0">−</span>
+              <span class="btn sm" style="border:0;border-radius:0">⊡</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">D7 — Map | Graph toggle · one target · horizontal temporal chain · playback focus</p>
+  </section>
+
+  <footer class="intro" style="padding-bottom:48px">
+    <p>Open at <code>/builder-wireframes.html</code> when the Vite app is running, or open this file directly. Pick a design number and we will implement it in the real builder.</p>
+  </footer>
+</body>
+</html>

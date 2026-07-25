@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createDemoScenario } from "@/lib/demo-scenario";
+import { createDemoScenario, parseDemoTargetCount } from "@/lib/demo-scenario";
 import { CATEGORY_SPEED_RANGES, CATEGORY_TOP_SPEED_KNOTS } from "@/lib/vehicle-speed";
 import { simulationScenarioSchema } from "@/lib/simulation-schema";
 import { VEHICLE_CATEGORIES } from "@/types/target";
@@ -30,15 +30,46 @@ describe("demo scenario", () => {
     expect(scenario.targets.length).toBeLessThanOrEqual(100);
   });
 
-  it("uses a single vehicle category when a specific type is selected", () => {
+  it("uses an explicit target count when provided", () => {
+    const scenario = createDemoScenario(1_735_000_000_000, seededRandom(), {
+      targetCount: 7,
+    });
+    expect(scenario.targets).toHaveLength(7);
+  });
+
+  it("clamps out-of-range target counts into 2–100", () => {
+    expect(
+      createDemoScenario(1_735_000_000_000, seededRandom(), { targetCount: 1 }).targets,
+    ).toHaveLength(2);
+    expect(
+      createDemoScenario(1_735_000_000_000, seededRandom(), { targetCount: 250 }).targets,
+    ).toHaveLength(100);
+  });
+
+  it("uses a single vehicle category when one type is selected", () => {
     const scenario = createDemoScenario(Date.now(), () => 0.55, {
-      vehicleSelection: "aircraft",
+      vehicleSelection: ["aircraft"],
       targetCount: 5,
     });
     expect(scenario.targets).toHaveLength(5);
     expect(
       scenario.targets.every((target) => target.profile.vehicleCategory === "aircraft"),
     ).toBe(true);
+  });
+
+  it("picks only from a multi-selected vehicle pool", () => {
+    const pool = ["aircraft", "boat"] as const;
+    const scenario = createDemoScenario(1_735_000_000_000, seededRandom(3), {
+      vehicleSelection: pool,
+      targetCount: 20,
+    });
+    for (const target of scenario.targets) {
+      expect(pool).toContain(target.profile.vehicleCategory);
+    }
+    const categories = new Set(
+      scenario.targets.map((target) => target.profile.vehicleCategory),
+    );
+    expect(categories.size).toBeGreaterThan(1);
   });
 
   it("can mix vehicle categories in random mode", () => {
@@ -84,5 +115,23 @@ describe("demo scenario", () => {
       firstLast?.latitude !== secondLast?.latitude ||
         firstLast?.longitude !== secondLast?.longitude,
     ).toBe(true);
+  });
+});
+
+describe("parseDemoTargetCount", () => {
+  it("accepts integers from 2 to 100", () => {
+    expect(parseDemoTargetCount("2")).toBe(2);
+    expect(parseDemoTargetCount("100")).toBe(100);
+    expect(parseDemoTargetCount(" 42 ")).toBe(42);
+  });
+
+  it("rejects empty, non-integers, and out-of-range values", () => {
+    expect(parseDemoTargetCount("")).toBeNull();
+    expect(parseDemoTargetCount("   ")).toBeNull();
+    expect(parseDemoTargetCount("1")).toBeNull();
+    expect(parseDemoTargetCount("0")).toBeNull();
+    expect(parseDemoTargetCount("101")).toBeNull();
+    expect(parseDemoTargetCount("2.5")).toBeNull();
+    expect(parseDemoTargetCount("abc")).toBeNull();
   });
 });

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adversary — Brand marks v2</title>
+  <style>
+    :root {
+      --bg: #0c1014;
+      --bg-elev: #12171d;
+      --ink: #e8eef2;
+      --muted: #8b9aab;
+      --line: #243040;
+      --cyan: #22d3ee;
+      --cyan-deep: #0e7490;
+      --primary-badge: #14808f;
+      --light: #f5f8f9;
+      --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(34, 211, 238, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.035) 1px, transparent 1px),
+        var(--bg);
+      background-size: 32px 32px, 32px 32px, auto;
+      line-height: 1.4;
+      font-size: 14px;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; }
+    header.page { margin-bottom: 28px; max-width: 64ch; }
+    header.page .eyebrow {
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--cyan); margin: 0 0 10px; font-weight: 600;
+    }
+    header.page h1 { margin: 0 0 10px; font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+    header.page p { margin: 0; color: var(--muted); }
+    .principles {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0;
+    }
+    .principles span {
+      font-size: 11px; padding: 5px 10px; border-radius: 999px;
+      border: 1px solid var(--line); color: var(--muted);
+    }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin: 28px 0 18px; padding: 10px 12px;
+      background: rgba(18, 23, 29, 0.92); border: 1px solid var(--line);
+      border-radius: 10px; position: sticky; top: 12px; z-index: 20;
+      backdrop-filter: blur(10px);
+    }
+    .toolbar > span {
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-right: 4px;
+    }
+    .toolbar button {
+      appearance: none; border: 1px solid var(--line); background: transparent;
+      color: var(--ink); padding: 6px 12px; border-radius: 999px;
+      font: inherit; font-size: 12px; cursor: pointer;
+    }
+    .toolbar button[aria-pressed="true"] {
+      border-color: var(--cyan); color: var(--cyan);
+      background: rgba(34, 211, 238, 0.08);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--bg-elev); border: 1px solid var(--line);
+      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .card.selected { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan); }
+    .hero {
+      display: grid; place-items: center; min-height: 140px;
+      background: #080b0e; color: var(--cyan); position: relative;
+    }
+    .hero .big { width: 72px; height: 72px; }
+    .stage {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line);
+    }
+    .swatch {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      padding: 14px; min-height: 72px;
+    }
+    .swatch.dark { background: #0c1014; color: var(--cyan); }
+    .swatch.light { background: var(--light); color: var(--cyan-deep); }
+    .sizes { display: flex; align-items: center; gap: 8px; }
+    .mark { display: block; flex-shrink: 0; }
+    .mark .svg-host, .mark .svg-host svg { width: 100%; height: 100%; display: block; }
+    .s16 { width: 16px; height: 16px; }
+    .s20 { width: 20px; height: 20px; }
+    .s24 { width: 24px; height: 24px; }
+    .s32 { width: 32px; height: 32px; }
+    .badge {
+      display: grid; place-items: center; width: 40px; height: 40px;
+      border-radius: 9px; background: var(--primary-badge); color: #ecfeff;
+    }
+    .badge .mark { width: 22px; height: 22px; color: inherit; }
+    .swatch.light .badge { background: oklch(0.42 0.1 211); }
+    .meta { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .meta .row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .meta h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    .meta .id { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .meta p { margin: 0; color: var(--muted); font-size: 13px; }
+    .meta .file { font-family: var(--mono); font-size: 11px; color: #6b7c8f; }
+    .pick {
+      margin-top: 4px; align-self: flex-start; appearance: none;
+      border: 1px solid var(--line); background: transparent; color: var(--ink);
+      padding: 6px 10px; border-radius: 6px; font: inherit; font-size: 12px; cursor: pointer;
+    }
+    .pick:hover, .card.selected .pick {
+      border-color: var(--cyan); color: var(--cyan);
+      background: rgba(34, 211, 238, 0.08);
+    }
+    .wordmark {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-top: 1px solid var(--line); background: rgba(0,0,0,0.18);
+    }
+    .wordmark .badge { width: 28px; height: 28px; border-radius: 6px; }
+    .wordmark .badge .mark { width: 16px; height: 16px; }
+    .wordmark .name { font-size: 11px; font-weight: 650; letter-spacing: 0.18em; }
+    footer.note {
+      margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line);
+      color: var(--muted); font-size: 13px; max-width: 70ch;
+    }
+    footer.note code { font-family: var(--mono); font-size: 12px; color: var(--cyan); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page">
+      <p class="eyebrow">Brand identity · v2 — bold marks</p>
+      <h1>Solid. Dynamic. Sharp at 16px.</h1>
+      <p>
+        Scrapped the thin HUD line-icons. These are filled brand silhouettes —
+        few shapes, high mass, readable as a blur. Built for favicon + in-app badge.
+      </p>
+      <div class="principles">
+        <span>Filled mass, not strokes</span>
+        <span>≤ 3 shapes</span>
+        <span>Unique silhouette</span>
+        <span>currentColor SVG</span>
+      </div>
+    </header>
+
+    <div class="toolbar" role="toolbar" aria-label="Sort">
+      <span>Focus</span>
+      <button type="button" data-focus="all" aria-pressed="true">All</button>
+      <button type="button" data-focus="tiny" aria-pressed="false">16px stress test</button>
+      <button type="button" data-focus="badge" aria-pressed="false">App badge</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <footer class="note">
+      Source: <code>apps/web/public/brand-icons/</code> ·
+      Solid plates: <code>brand-icons/solid/</code> ·
+      Shortlist saves in this tab. Tell me the winners and I’ll wire favicon + header.
+    </footer>
+  </div>
+
+  <script>
+    const ICONS = [
+      { id: "01", slug: "intercept", name: "Intercept", blurb: "Two vectors slam into a contact. Pursuit energy — the product story in three shapes." },
+      { id: "02", slug: "eclipse", name: "Eclipse", blurb: "Disc with an offset bite. One silhouette, high recognition, zero detail loss." },
+      { id: "03", slug: "apex-cut", name: "Apex Cut", blurb: "Solid chevron with a hard notch. Forward, decisive, logo-grade." },
+      { id: "04", slug: "slash-ring", name: "Slash Ring", blurb: "Open heavy ring — scan / incomplete lock. Asymmetry keeps it dynamic." },
+      { id: "05", slug: "signal-rise", name: "Signal Rise", blurb: "Three leaning bars. Signal rising. Instant read even when tiny." },
+      { id: "06", slug: "mark-a", name: "Mark A", blurb: "Custom solid A. Lettermark route — ownable if you want the word in the icon." },
+      { id: "07", slug: "pursuit", name: "Pursuit", blurb: "Arrowhead hunting a lead blip. Narrative, still only two elements." },
+      { id: "08", slug: "shard", name: "Shard", blurb: "Single asymmetric crystal. Map-pin DNA without looking like Google Maps." },
+      { id: "09", slug: "crescent-scan", name: "Crescent Scan", blurb: "One crescent. Maximum simplicity. Sweep implied by the void." },
+      { id: "10", slug: "twin-node", name: "Twin Node", blurb: "Two nodes, one angled link. Multi-target tracking, abstracted." },
+      { id: "11", slug: "bolt-frame", name: "Bolt Frame", blurb: "App-shaped plate with a punched diagonal. Built for PWA / favicon plates." },
+      { id: "12", slug: "oppose", name: "Oppose", blurb: "Mirrored wedges. Literal adversary — confrontation as geometry." },
+      { id: "13", slug: "spike-disc", name: "Spike Disc", blurb: "Massive disc + one directional spike. Alert / ping without ornament." },
+      { id: "14", slug: "fold-wing", name: "Fold Wing", blurb: "Overlapping planes. Motion and aircraft, still geometric." },
+      { id: "15", slug: "core-lock", name: "Core Lock", blurb: "Heavy ring + solid core. Classic lock-on, designed for mass not lines." },
+    ];
+
+    const grid = document.getElementById("grid");
+    const shortlist = new Set(JSON.parse(sessionStorage.getItem("adv-icon-v2") || "[]"));
+
+    function mark(icon, sizeClass) {
+      return `<span class="mark ${sizeClass || ""}" data-src="./brand-icons/${icon.id}-${icon.slug}.svg"></span>`;
+    }
+
+    ICONS.forEach((icon) => {
+      const selected = shortlist.has(icon.slug);
+      const el = document.createElement("article");
+      el.className = "card" + (selected ? " selected" : "");
+      el.dataset.slug = icon.slug;
+      el.innerHTML = `
+        <div class="hero" data-panel="hero">${mark(icon, "big")}</div>
+        <div class="stage" data-panel="stage">
+          <div class="swatch dark">
+            <div class="sizes">${mark(icon, "s16")}${mark(icon, "s20")}${mark(icon, "s24")}${mark(icon, "s32")}</div>
+          </div>
+          <div class="swatch light">
+            <div class="badge">${mark(icon)}</div>
+            <div class="sizes">${mark(icon, "s16")}${mark(icon, "s24")}</div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="row"><h2>${icon.name}</h2><span class="id">${icon.id}</span></div>
+          <p>${icon.blurb}</p>
+          <span class="file">${icon.id}-${icon.slug}.svg</span>
+          <button type="button" class="pick">${selected ? "Shortlisted" : "Shortlist"}</button>
+        </div>
+        <div class="wordmark" data-panel="wordmark">
+          <div class="badge">${mark(icon)}</div>
+          <span class="name">ADVERSARY</span>
+        </div>`;
+      el.querySelector(".pick").addEventListener("click", () => {
+        if (shortlist.has(icon.slug)) shortlist.delete(icon.slug);
+        else shortlist.add(icon.slug);
+        sessionStorage.setItem("adv-icon-v2", JSON.stringify([...shortlist]));
+        el.classList.toggle("selected", shortlist.has(icon.slug));
+        el.querySelector(".pick").textContent = shortlist.has(icon.slug) ? "Shortlisted" : "Shortlist";
+      });
+      grid.appendChild(el);
+    });
+
+    async function inlineAll() {
+      const nodes = [...document.querySelectorAll(".mark[data-src]")];
+      const cache = new Map();
+      await Promise.all(nodes.map(async (node) => {
+        const src = node.dataset.src;
+        if (!cache.has(src)) {
+          cache.set(src, fetch(src).then((r) => r.text()).then((t) =>
+            t.replace(/<title>[\s\S]*?<\/title>/, "").replace(/\sfill="currentColor"/, "")
+          ));
+        }
+        const svg = await cache.get(src);
+        node.innerHTML = `<span class="svg-host">${svg}</span>`;
+        const root = node.querySelector("svg");
+        if (root && !root.getAttribute("fill")) root.setAttribute("fill", "currentColor");
+      }));
+    }
+    inlineAll();
+
+    document.querySelector(".toolbar").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-focus]");
+      if (!btn) return;
+      document.querySelectorAll(".toolbar button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      btn.setAttribute("aria-pressed", "true");
+      const focus = btn.dataset.focus;
+      document.querySelectorAll(".card").forEach((card) => {
+        const hero = card.querySelector("[data-panel=hero]");
+        const stage = card.querySelector("[data-panel=stage]");
+        const word = card.querySelector("[data-panel=wordmark]");
+        if (focus === "tiny") {
+          hero.style.display = "none";
+          stage.style.display = "grid";
+          word.style.display = "none";
+        } else if (focus === "badge") {
+          hero.style.display = "none";
+          stage.style.display = "none";
+          word.style.display = "flex";
+        } else {
+          hero.style.display = "";
+          stage.style.display = "";
+          word.style.display = "";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

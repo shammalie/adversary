@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@adversary/ui/components/select";
 import { Field, FieldDescription, FieldLabel } from "@adversary/ui/components/field";
+import { cn } from "@adversary/ui/lib/utils";
 
 import { useMapData } from "@/components/map-data-provider";
 import { isWithinBounds } from "@/lib/offline-regions/manifest";
@@ -59,6 +60,9 @@ interface MapLocationPickerProps {
   /** Draft event time used to connect the picker marker to nearest existing points. */
   previewAt?: string;
   trailColor?: string;
+  /** Override map container height/size classes (default `h-56`). */
+  mapClassName?: string;
+  disabled?: boolean;
 }
 
 type TrailFeatureCollection = {
@@ -105,6 +109,28 @@ function buildTrailCollection(
       },
     ],
   };
+}
+
+/** True when every previous point id is still present (trail grew or stayed — e.g. after Add event). */
+function isExistingPointsAppend(previousKey: string, nextKey: string): boolean {
+  if (!previousKey || previousKey === nextKey) return false;
+  const previousIds = new Set(
+    previousKey
+      .split("|")
+      .filter(Boolean)
+      .map((entry) => entry.slice(0, entry.indexOf(":"))),
+  );
+  if (previousIds.size === 0) return false;
+  const nextIds = new Set(
+    nextKey
+      .split("|")
+      .filter(Boolean)
+      .map((entry) => entry.slice(0, entry.indexOf(":"))),
+  );
+  for (const id of previousIds) {
+    if (!nextIds.has(id)) return false;
+  }
+  return true;
 }
 
 /** Previous/next existing points relative to `at` (sorted points required). */
@@ -218,6 +244,8 @@ export function MapLocationPicker({
   existingPoints = [],
   previewAt,
   trailColor = DEFAULT_TRAIL_COLOR,
+  mapClassName,
+  disabled = false,
 }: MapLocationPickerProps) {
   const { mapStyle, activeRegion } = useMapData();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -229,6 +257,8 @@ export function MapLocationPicker({
   const onChangeRef = useRef(onChange);
   const valueRef = useRef(value);
   const fittedPointsKeyRef = useRef<string | null>(null);
+  const userAdjustedCameraRef = useRef(false);
+  const programmaticCameraRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
   const [speedUnit, setSpeedUnit] = useState<SpeedUnit>("kt");
   const [speedDraft, setSpeedDraft] = useState("");
@@ -311,6 +341,12 @@ export function MapLocationPicker({
         longitude: Number(event.lngLat.lng.toFixed(6)),
       });
     });
+    const markUserCamera = () => {
+      if (programmaticCameraRef.current) return;
+      userAdjustedCameraRef.current = true;
+    };
+    map.on("zoomend", markUserCamera);
+    map.on("dragend", markUserCamera);
     map.on("load", () => {
       ensureOverlayLayers(map, trailCollectionRef.current, neighborCollectionRef.current);
       setMapReady(true);
@@ -324,9 +360,14 @@ export function MapLocationPicker({
       }
       eventMarkersRef.current.clear();
       marker.remove();
+      map.off("zoomend", markUserCamera);
+      map.off("dragend", markUserCamera);
       map.remove();
       markerRef.current = null;
       mapRef.current = null;
+      fittedPointsKeyRef.current = null;
+      userAdjustedCameraRef.current = false;
+      programmaticCameraRef.current = false;
       setMapReady(false);
     };
   }, []);
@@ -403,15 +444,35 @@ export function MapLocationPicker({
       return;
     }
 
-    if (fittedPointsKeyRef.current === existingPointsKey) return;
+    const previousKey = fittedPointsKeyRef.current;
+    if (previousKey === existingPointsKey) return;
+
+    // Adding another event only appends points — keep the user's zoom/pan.
+    if (previousKey && isExistingPointsAppend(previousKey, existingPointsKey)) {
+      fittedPointsKeyRef.current = existingPointsKey;
+      return;
+    }
+
+    // Target / set change (not an append): allow a fresh fit unless the user already framed.
     fittedPointsKeyRef.current = existingPointsKey;
+    if (previousKey) {
+      // Switching trails — reset so the new set can fit once.
+      userAdjustedCameraRef.current = false;
+    } else if (userAdjustedCameraRef.current) {
+      // First points, but user already zoomed/panned the empty map.
+      return;
+    }
 
     const bounds = new LngLatBounds();
     for (const point of sortedExistingPoints) {
       bounds.extend([point.longitude, point.latitude]);
     }
     bounds.extend([value.longitude, value.latitude]);
+    programmaticCameraRef.current = true;
     map.fitBounds(bounds, { padding: 40, maxZoom: 12, duration: 0 });
+    map.once("moveend", () => {
+      programmaticCameraRef.current = false;
+    });
   }, [
     existingPointsKey,
     mapReady,
@@ -454,13 +515,20 @@ export function MapLocationPicker({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="relative">
+    <div
+      className={cn("flex flex-col gap-3", disabled && "opacity-50")}
+      aria-disabled={disabled || undefined}
+    >
+      <div className={cn("relative", disabled && "pointer-events-none")}>
         <div
           ref={containerRef}
-          className="h-56 w-full overflow-hidden rounded-lg border bg-muted"
+          className={cn(
+            "h-56 w-full overflow-hidden rounded-lg border bg-muted",
+            mapClassName,
+          )}
           role="application"
           aria-label="Map location picker. Click or tap to place a marker."
+          aria-disabled={disabled || undefined}
         />
         <div className="pointer-events-none absolute top-3 right-3 z-10">
           <ButtonGroup orientation="vertical" className="pointer-events-auto bg-card/75 shadow-sm backdrop-blur-md">
@@ -469,6 +537,7 @@ export function MapLocationPicker({
               size="icon"
               variant="outline"
               aria-label="Zoom in"
+              disabled={disabled}
               onClick={() => zoomBy(1)}
             >
               <PlusIcon />
@@ -478,6 +547,7 @@ export function MapLocationPicker({
               size="icon"
               variant="outline"
               aria-label="Zoom out"
+              disabled={disabled}
               onClick={() => zoomBy(-1)}
             >
               <MinusIcon />
@@ -506,38 +576,41 @@ export function MapLocationPicker({
         </p>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field>
+        <Field data-disabled={disabled || undefined}>
           <FieldLabel htmlFor={`${idPrefix}-latitude`}>Latitude</FieldLabel>
           <Input
             id={`${idPrefix}-latitude`}
             type="number"
             step="0.000001"
             value={value.latitude}
+            disabled={disabled}
             onChange={(event) => updateCoordinate("latitude", event.target.value)}
           />
         </Field>
-        <Field>
+        <Field data-disabled={disabled || undefined}>
           <FieldLabel htmlFor={`${idPrefix}-longitude`}>Longitude</FieldLabel>
           <Input
             id={`${idPrefix}-longitude`}
             type="number"
             step="0.000001"
             value={value.longitude}
+            disabled={disabled}
             onChange={(event) => updateCoordinate("longitude", event.target.value)}
           />
         </Field>
-        <Field>
+        <Field data-disabled={disabled || undefined}>
           <FieldLabel htmlFor={`${idPrefix}-altitude`}>Altitude (ft)</FieldLabel>
           <Input
             id={`${idPrefix}-altitude`}
             type="number"
             step="100"
             value={value.altitude ?? 0}
+            disabled={disabled}
             onChange={(event) => updateCoordinate("altitude", event.target.value)}
           />
           <FieldDescription>Optional.</FieldDescription>
         </Field>
-        <Field>
+        <Field data-disabled={disabled || undefined}>
           <FieldLabel htmlFor={`${idPrefix}-speed`}>Speed</FieldLabel>
           <InputGroup>
             <InputGroupInput
@@ -545,6 +618,7 @@ export function MapLocationPicker({
               inputMode="decimal"
               placeholder="Auto or 450 mph"
               value={speedDraft}
+              disabled={disabled}
               onChange={(event) => setSpeedDraft(event.target.value)}
               onBlur={() => commitSpeedDraft(speedDraft)}
               onKeyDown={(event) => {
@@ -557,6 +631,7 @@ export function MapLocationPicker({
             <InputGroupAddon align="inline-end">
               <Select
                 value={speedUnit}
+                disabled={disabled}
                 onValueChange={(next) => {
                   if (!next) return;
                   setSpeedUnit(next as SpeedUnit);
@@ -566,6 +641,7 @@ export function MapLocationPicker({
                   size="sm"
                   className="w-19 border-0 bg-transparent shadow-none"
                   aria-label="Speed unit"
+                  disabled={disabled}
                 >
                   <SelectValue />
                 </SelectTrigger>
