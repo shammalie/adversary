@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AttributionControl,
   type GeoJSONSource,
   type LngLatBoundsLike,
   Map as MapLibreMap,
@@ -272,7 +271,6 @@ export function TrackingMap({
       attributionControl: false,
       interactive: true,
     });
-    map.addControl(new AttributionControl({ compact: true }), "bottom-right");
     map.on("load", () => {
       map.addSource("target-trails", {
         type: "geojson",

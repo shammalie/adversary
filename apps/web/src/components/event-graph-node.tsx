@@ -24,13 +24,18 @@ const KIND_COLOR: Record<EventGraphKind, string> = {
 };
 
 const KIND_BADGE: Record<EventGraphKind, string> = {
-  position: "border-[color:var(--event-kind-position)] text-[color:var(--event-kind-position)]",
-  message: "border-[color:var(--event-kind-message)] text-[color:var(--event-kind-message)]",
+  position:
+    "border-[color:var(--event-kind-position)] text-[color:var(--event-kind-position)]",
+  message:
+    "border-[color:var(--event-kind-message)] text-[color:var(--event-kind-message)]",
   both: "border-[color:var(--event-kind-both)] text-[color:var(--event-kind-both)]",
   empty: "border-muted-foreground text-muted-foreground",
 };
 
-export function EventGraphNodeView({ data, selected }: NodeProps<EventGraphNode>) {
+export function EventGraphNodeView({
+  data,
+  selected,
+}: NodeProps<EventGraphNode>) {
   const vertical = data.layout === "vertical";
   const zoom = useFlowZoom();
   const detail = useEventGraphDetailLevel();
@@ -38,14 +43,15 @@ export function EventGraphNodeView({ data, selected }: NodeProps<EventGraphNode>
   const ringWidth = useZoomCompensatedWidth(2, 8);
   const kindColor = KIND_COLOR[data.kind];
   // Dashed borders fall apart under heavy downscale — solid below ~0.6 keeps the frame continuous.
-  const borderStyle = data.playback === "current" || zoom < 0.6 ? "solid" : "dashed";
+  const borderStyle =
+    data.playback === "current" || zoom < 0.6 ? "solid" : "dashed";
   const showSummary = detail !== "type";
   const showFull = detail === "full";
 
   return (
     <div
       className={cn(
-        "box-border flex h-full w-full flex-col overflow-hidden rounded-md bg-card text-card-foreground transition-[opacity]",
+        "box-border flex h-full w-full flex-col overflow-hidden rounded-md bg-card text-card-foreground transition-opacity",
         data.playback === "past" && "opacity-50",
         data.playback === "future" && "opacity-85",
         data.priority && "critical-rail",
@@ -104,10 +110,14 @@ export function EventGraphNodeView({ data, selected }: NodeProps<EventGraphNode>
           </time>
         ) : null}
         {showFull && data.positionSummary ? (
-          <p className="truncate font-mono text-[11px] text-foreground">{data.positionSummary}</p>
+          <p className="truncate font-mono text-[11px] text-foreground">
+            {data.positionSummary}
+          </p>
         ) : null}
         {showFull && data.messageSummary ? (
-          <p className="line-clamp-2 text-xs text-muted-foreground">{data.messageSummary}</p>
+          <p className="line-clamp-2 text-xs text-muted-foreground">
+            {data.messageSummary}
+          </p>
         ) : null}
       </div>
       <Handle

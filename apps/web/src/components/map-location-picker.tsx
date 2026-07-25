@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AttributionControl,
   LngLatBounds,
   Map as MapLibreMap,
   Marker,
@@ -317,7 +316,6 @@ export function MapLocationPicker({
       zoom: 8,
       attributionControl: false,
     });
-    map.addControl(new AttributionControl({ compact: true }), "bottom-right");
 
     const marker = new Marker({ draggable: true })
       .setLngLat([value.longitude, value.latitude])
