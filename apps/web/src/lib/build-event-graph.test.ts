@@ -12,6 +12,7 @@ const target: TargetDefinition = {
   id: "target-1",
   callsign: "ALPHA",
   revealOnFirstEvent: false,
+  appearOnFirstEvent: false,
   color: "#0e7490",
   profile: {
     vehicleCategory: "car",

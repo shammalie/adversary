@@ -20,8 +20,18 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { useMapData } from "@/components/map-data-provider";
+import { useTheme } from "@/components/theme-provider";
+import {
+  resolveAffiliationColor,
+  resolveAffiliationColorTheme,
+} from "@/lib/affiliation-colors";
 import { vehicleCategoryIconSvg } from "@/lib/vehicle-icon";
-import type { MapMode, RuntimeTargetState, VehicleCategory } from "@/types/target";
+import type {
+  Affiliation,
+  MapMode,
+  RuntimeTargetState,
+  VehicleCategory,
+} from "@/types/target";
 
 export type CameraMode = "track" | "overview" | "pan";
 
@@ -29,6 +39,7 @@ export interface MapTargetDisplay {
   targetId: string;
   callsign: string;
   color: string;
+  affiliation?: Affiliation;
   vehicleCategory?: VehicleCategory;
   heading?: number;
   position?: { latitude: number; longitude: number };
@@ -81,6 +92,7 @@ function toDisplayTarget(target: MapTargetDisplay | RuntimeTargetState): MapTarg
       targetId: target.targetId,
       callsign: target.callsign,
       color: target.color,
+      affiliation: target.profile.affiliation,
       vehicleCategory: target.profile.vehicleCategory,
       heading: target.position?.heading,
       position: target.position
@@ -221,6 +233,8 @@ export function TrackingMap({
   continuousMotion = false,
 }: TrackingMapProps) {
   const { mapStyle } = useMapData();
+  const { resolvedTheme } = useTheme();
+  const affiliationTheme = resolveAffiliationColorTheme(resolvedTheme);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef(new Map<string, Marker>());
@@ -420,30 +434,44 @@ export function TrackingMap({
           marker.setLngLat(destination);
         } else {
           const origin = marker.getLngLat();
-          const startedAt = performance.now();
-          const animate = (frameTime: number) => {
-            const progress = Math.min((frameTime - startedAt) / 650, 1);
-            const eased = 1 - (1 - progress) ** 3;
-            marker?.setLngLat({
-              lng: origin.lng + (destination.lng - origin.lng) * eased,
-              lat: origin.lat + (destination.lat - origin.lat) * eased,
-            });
-            if (progress < 1) {
-              markerAnimationsRef.current.set(
-                target.targetId,
-                window.requestAnimationFrame(animate),
-              );
-            } else {
-              markerAnimationsRef.current.delete(target.targetId);
-            }
-          };
-          markerAnimationsRef.current.set(target.targetId, window.requestAnimationFrame(animate));
+          if (
+            !origin ||
+            !Number.isFinite(origin.lng) ||
+            !Number.isFinite(origin.lat) ||
+            !Number.isFinite(destination.lng) ||
+            !Number.isFinite(destination.lat)
+          ) {
+            marker.setLngLat(destination);
+          } else {
+            const startedAt = performance.now();
+            const animate = (frameTime: number) => {
+              const progress = Math.min((frameTime - startedAt) / 650, 1);
+              const eased = 1 - (1 - progress) ** 3;
+              marker?.setLngLat({
+                lng: origin.lng + (destination.lng - origin.lng) * eased,
+                lat: origin.lat + (destination.lat - origin.lat) * eased,
+              });
+              if (progress < 1) {
+                markerAnimationsRef.current.set(
+                  target.targetId,
+                  window.requestAnimationFrame(animate),
+                );
+              } else {
+                markerAnimationsRef.current.delete(target.targetId);
+              }
+            };
+            markerAnimationsRef.current.set(target.targetId, window.requestAnimationFrame(animate));
+          }
         }
         const iconHost = marker.getElement();
         iconHost.innerHTML = vehicleCategoryIconSvg(target.vehicleCategory);
       }
       const element = marker.getElement();
       element.style.setProperty("--target-color", target.color);
+      element.style.setProperty(
+        "--affiliation-color",
+        resolveAffiliationColor(target.affiliation, affiliationTheme),
+      );
       const hasHeading =
         typeof target.heading === "number" &&
         Number.isFinite(target.heading) &&
@@ -477,6 +505,7 @@ export function TrackingMap({
     const source = map.getSource("target-trails") as GeoJSONSource | undefined;
     source?.setData(trailCollection);
   }, [
+    affiliationTheme,
     continuousMotion,
     highlightedEventId,
     mapReady,

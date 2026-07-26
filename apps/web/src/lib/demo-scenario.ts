@@ -178,6 +178,7 @@ export function createDemoScenario(
       id: targetId,
       callsign: demoCallsign(index, random),
       revealOnFirstEvent: true,
+      appearOnFirstEvent: false,
       color: demoColor(index),
       profile: {
         vehicleCategory,

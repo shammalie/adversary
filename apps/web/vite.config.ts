@@ -1,10 +1,20 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite-plus";
 import { VitePWA } from "vite-plugin-pwa";
 
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
 export default defineConfig({
+  envDir: repoRoot,
+  optimizeDeps: {
+    // Keep maplibre out of the dep optimizer so `*.mjs?url` worker imports
+    // resolve to the real package file instead of a missing `.vite/deps` path.
+    exclude: ["maplibre-gl"],
+  },
   server: {
     port: 3001,
     warmup: {
@@ -75,6 +85,17 @@ export default defineConfig({
               cacheName: "carto-basemap",
               expiration: {
                 maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+            },
+          },
+          {
+            urlPattern: /^http:\/\/tiles\.adversary\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "local-tileserver",
+              expiration: {
+                maxEntries: 64,
                 maxAgeSeconds: 60 * 60 * 24 * 7,
               },
             },

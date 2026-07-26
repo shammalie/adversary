@@ -74,7 +74,10 @@ export function useBuilderPreview(scenario: SimulationScenario) {
     [previewTimeMs, scenario],
   );
   const currentEvent = dueEvents.at(-1);
-  const mapTargets = useMemo(() => Object.values(targetStates), [targetStates]);
+  const mapTargets = useMemo(
+    () => Object.values(targetStates).filter((target) => target.appeared),
+    [targetStates],
+  );
   const firstEventMs = useMemo(() => {
     const first = sortEvents(scenario.events)[0];
     return first ? Date.parse(first.at) : null;

@@ -109,7 +109,34 @@ export function loadRuntime(): SimulationRuntime | null {
   if (runtime.schemaVersion !== 2 || !runtime.scenario || !runtime.startedAt) return null;
   const scenario = normalizeScenario(runtime.scenario);
   if (!scenario) return null;
-  return { ...runtime, scenario } as SimulationRuntime;
+
+  const targetStates = runtime.targetStates ?? {};
+  const normalizedStates = Object.fromEntries(
+    scenario.targets.map((definition) => {
+      const current = targetStates[definition.id];
+      if (!current) {
+        return [
+          definition.id,
+          {
+            targetId: definition.id,
+            callsign: definition.callsign,
+            color: definition.color,
+            profile: definition.revealOnFirstEvent ? {} : { ...definition.profile },
+            revealed: !definition.revealOnFirstEvent,
+            appeared: !definition.appearOnFirstEvent,
+            trail: [],
+          },
+        ];
+      }
+      const appeared =
+        typeof current.appeared === "boolean"
+          ? current.appeared
+          : !definition.appearOnFirstEvent || Boolean(current.lastEventAt);
+      return [definition.id, { ...current, appeared }];
+    }),
+  );
+
+  return { ...runtime, scenario, targetStates: normalizedStates } as SimulationRuntime;
 }
 
 export function saveRuntime(runtime: SimulationRuntime | null) {

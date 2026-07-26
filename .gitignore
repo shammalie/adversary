@@ -57,3 +57,7 @@ apps/web/playwright/.cache/
 .cache
 tmp
 temp
+
+# Local OpenMapTiles / tileserver-gl data (planet MBTiles are ~100GB)
+data/tiles/**
+!data/tiles/.gitkeep

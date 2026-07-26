@@ -17,6 +17,7 @@ function baseScenario(overrides?: Partial<SimulationScenario>): SimulationScenar
         id: "target-1",
         callsign: "TEST",
         revealOnFirstEvent: false,
+        appearOnFirstEvent: false,
         color: "#fff",
         profile: {
           vehicleCategory: "car",
@@ -90,6 +91,7 @@ describe("builder preview helpers", () => {
           id: "target-2",
           callsign: "NEW",
           revealOnFirstEvent: false,
+          appearOnFirstEvent: false,
           color: "#000",
           profile: {
             vehicleCategory: "other",
@@ -109,6 +111,7 @@ describe("builder preview helpers", () => {
           id: "target-1",
           callsign: "A",
           revealOnFirstEvent: false,
+          appearOnFirstEvent: false,
           color: "#fff",
           profile: { vehicleCategory: "car", affiliation: "unknown", status: "active" },
         },
@@ -116,6 +119,7 @@ describe("builder preview helpers", () => {
           id: "target-2",
           callsign: "B",
           revealOnFirstEvent: false,
+          appearOnFirstEvent: false,
           color: "#000",
           profile: { vehicleCategory: "truck", affiliation: "unknown", status: "active" },
         },
@@ -147,13 +151,14 @@ describe("builder preview helpers", () => {
     expect(states["target-2"]?.trail).toHaveLength(1);
   });
 
-  it("includes newly added targets after revision reset", () => {
+  it("keeps appearOnFirstEvent targets unappeared until their first due event", () => {
     const scenario = baseScenario({
       targets: [
         {
           id: "target-1",
           callsign: "A",
           revealOnFirstEvent: false,
+          appearOnFirstEvent: false,
           color: "#fff",
           profile: { vehicleCategory: "car", affiliation: "unknown", status: "active" },
         },
@@ -161,6 +166,57 @@ describe("builder preview helpers", () => {
           id: "target-2",
           callsign: "B",
           revealOnFirstEvent: false,
+          appearOnFirstEvent: true,
+          color: "#000",
+          profile: { vehicleCategory: "truck", affiliation: "unknown", status: "active" },
+        },
+      ],
+      events: [
+        {
+          id: "e1",
+          targetId: "target-1",
+          at: "2026-07-24T12:00:00.000Z",
+          position: { latitude: 51.5, longitude: -0.12 },
+        },
+        {
+          id: "e2",
+          targetId: "target-2",
+          at: "2026-07-24T12:05:00.000Z",
+          message: "First contact",
+        },
+      ],
+    });
+
+    const before = buildInterpolatedPreviewTargetStates(
+      scenario,
+      Date.parse("2026-07-24T12:02:00.000Z"),
+    );
+    expect(before["target-1"]?.appeared).toBe(true);
+    expect(before["target-2"]?.appeared).toBe(false);
+
+    const after = buildInterpolatedPreviewTargetStates(
+      scenario,
+      Date.parse("2026-07-24T12:06:00.000Z"),
+    );
+    expect(after["target-2"]?.appeared).toBe(true);
+  });
+
+  it("includes newly added targets after revision reset", () => {
+    const scenario = baseScenario({
+      targets: [
+        {
+          id: "target-1",
+          callsign: "A",
+          revealOnFirstEvent: false,
+          appearOnFirstEvent: false,
+          color: "#fff",
+          profile: { vehicleCategory: "car", affiliation: "unknown", status: "active" },
+        },
+        {
+          id: "target-2",
+          callsign: "B",
+          revealOnFirstEvent: false,
+          appearOnFirstEvent: false,
           color: "#000",
           profile: { vehicleCategory: "car", affiliation: "unknown", status: "active" },
         },

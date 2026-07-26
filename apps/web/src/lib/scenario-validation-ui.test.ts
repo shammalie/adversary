@@ -41,6 +41,7 @@ describe("scenario validation ui", () => {
           id: "target-1",
           callsign: "",
           revealOnFirstEvent: true,
+          appearOnFirstEvent: false,
           color: "bad",
           profile: {
             vehicleCategory: "aircraft" as const,
@@ -85,6 +86,7 @@ describe("scenario validation ui", () => {
           id: "target-1",
           callsign: "ALPHA",
           revealOnFirstEvent: true,
+          appearOnFirstEvent: false,
           color: "#22d3ee",
           profile: {
             vehicleCategory: "aircraft" as const,

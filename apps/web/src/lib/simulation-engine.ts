@@ -30,6 +30,7 @@ function createInitialTargetStates(scenario: SimulationScenario) {
         color: target.color,
         profile: maskedProfile(target),
         revealed: !target.revealOnFirstEvent,
+        appeared: !target.appearOnFirstEvent,
         trail: [],
       } satisfies RuntimeTargetState,
     ]),
@@ -51,12 +52,10 @@ export function createRuntime(scenario: SimulationScenario, now = new Date()): S
 }
 
 function revealTarget(
-  runtime: SimulationRuntime,
-  targetId: string,
-): RuntimeTargetState | undefined {
-  const current = runtime.targetStates[targetId];
-  const definition = runtime.scenario.targets.find((target) => target.id === targetId);
-  if (!current || !definition || current.revealed) return current;
+  current: RuntimeTargetState,
+  definition: TargetDefinition | undefined,
+): RuntimeTargetState {
+  if (!definition || current.revealed) return current;
   return {
     ...current,
     revealed: true,
@@ -64,19 +63,27 @@ function revealTarget(
   };
 }
 
+function appearTarget(current: RuntimeTargetState): RuntimeTargetState {
+  if (current.appeared) return current;
+  return {
+    ...current,
+    appeared: true,
+  };
+}
+
 function applyEvent(runtime: SimulationRuntime, event: SimulationEvent) {
   let target = runtime.targetStates[event.targetId];
   if (!target) return runtime;
 
-  target = revealTarget(runtime, event.targetId) ?? target;
+  const definition = runtime.scenario.targets.find((candidate) => candidate.id === event.targetId);
+  target = appearTarget(target);
+  target = revealTarget(target, definition);
   const nextTarget: RuntimeTargetState = { ...target, lastEventAt: event.at };
 
   if (event.position) {
     const previous = target.position ?? target.trail.at(-1);
     const vehicleCategory =
-      nextTarget.profile.vehicleCategory ??
-      runtime.scenario.targets.find((candidate) => candidate.id === event.targetId)?.profile
-        .vehicleCategory;
+      nextTarget.profile.vehicleCategory ?? definition?.profile.vehicleCategory;
     const position = derivePositionSnapshot(
       event.position,
       event.at,

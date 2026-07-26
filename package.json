@@ -20,7 +20,8 @@
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "tiles:collect": "bash scripts/collect-map-tiles.sh"
   },
   "dependencies": {
     "@adversary/env": "workspace:*",

@@ -20,17 +20,28 @@ export const targetProfileSchema = z.object({
   description: z.string().trim().max(500).optional(),
 });
 
-const targetDefinitionSchema = z.object({
-  id: idSchema,
-  callsign: z
-    .string()
-    .trim()
-    .min(1, "Enter a callsign for this target.")
-    .max(40, "Callsigns must be 40 characters or fewer."),
-  revealOnFirstEvent: z.boolean(),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Choose a valid hex color (#RRGGBB)."),
-  profile: targetProfileSchema,
-});
+const targetDefinitionSchema = z
+  .object({
+    id: idSchema,
+    callsign: z
+      .string()
+      .trim()
+      .min(1, "Enter a callsign for this target.")
+      .max(40, "Callsigns must be 40 characters or fewer."),
+    revealOnFirstEvent: z.boolean(),
+    appearOnFirstEvent: z.boolean().default(false),
+    color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Choose a valid hex color (#RRGGBB)."),
+    profile: targetProfileSchema,
+  })
+  .superRefine((target, context) => {
+    if (target.revealOnFirstEvent && target.appearOnFirstEvent) {
+      context.addIssue({
+        code: "custom",
+        message: "Choose reveal on first event or appear on first event, not both.",
+        path: ["appearOnFirstEvent"],
+      });
+    }
+  });
 
 const positionPayloadSchema = z.object({
   latitude: z.number().min(-90, "Latitude must be between -90 and 90.").max(90, "Latitude must be between -90 and 90."),

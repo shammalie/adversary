@@ -82,6 +82,14 @@
     pointer-events: none;
   }
 
+  .schedule-companion-point {
+    width: 0.75rem;
+    height: 0.75rem;
+    background: transparent;
+    border: 2px solid var(--event-point-color, #38bdf8);
+    box-shadow: none;
+  }
+
   .tracking-marker {
     position: relative;
     display: grid;
@@ -91,7 +99,7 @@
     border: none;
     border-radius: 9999px;
     background: transparent;
-    color: var(--foreground);
+    color: var(--affiliation-color, var(--foreground));
     transition:
       width 180ms ease,
       height 180ms ease;

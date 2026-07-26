@@ -20,6 +20,8 @@ export interface TargetDefinition {
   id: string;
   callsign: string;
   revealOnFirstEvent: boolean;
+  /** When true, contact stays off roster/map until any event is ingested. Mutually exclusive with revealOnFirstEvent. */
+  appearOnFirstEvent: boolean;
   color: string;
   profile: TargetProfile;
 }
@@ -68,6 +70,8 @@ export interface RuntimeTargetState {
   color: string;
   profile: Partial<TargetProfile>;
   revealed: boolean;
+  /** False while appearOnFirstEvent is pending the first ingested event. */
+  appeared: boolean;
   position?: PositionSnapshot;
   trail: PositionSnapshot[];
   lastEventAt?: string;

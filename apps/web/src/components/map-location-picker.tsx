@@ -24,11 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@adversary/ui/components/select";
-import { Field, FieldDescription, FieldLabel } from "@adversary/ui/components/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@adversary/ui/components/field";
 import { cn } from "@adversary/ui/lib/utils";
 
 import { useMapData } from "@/components/map-data-provider";
-import { isWithinBounds } from "@/lib/offline-regions/manifest";
 import {
   SPEED_UNITS,
   formatSpeedInUnit,
@@ -42,6 +41,26 @@ const EVENT_TRAIL_LAYER = "schedule-event-trail";
 const EVENT_NEIGHBOR_SOURCE = "schedule-event-neighbors";
 const EVENT_NEIGHBOR_LAYER = "schedule-event-neighbors";
 const DEFAULT_TRAIL_COLOR = "#38bdf8";
+const FALLBACK_CENTER: [number, number] = [-0.1278, 51.5074];
+
+function isFiniteLngLat(longitude: number, latitude: number): boolean {
+  return (
+    Number.isFinite(longitude) &&
+    Number.isFinite(latitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  );
+}
+
+function lngLatPair(
+  longitude: number,
+  latitude: number,
+): [number, number] | null {
+  if (!isFiniteLngLat(longitude, latitude)) return null;
+  return [longitude, latitude];
+}
 
 export interface ExistingMapPoint {
   id: string;
@@ -50,18 +69,34 @@ export interface ExistingMapPoint {
   at: string;
 }
 
+export interface CompanionMapPoint {
+  latitude: number;
+  longitude: number;
+  /** Short label for the companion marker tooltip (e.g. "Start", "End"). */
+  label?: string;
+}
+
 interface MapLocationPickerProps {
   value: PositionPayload;
   onChange: (value: PositionPayload) => void;
   idPrefix?: string;
   /** Existing position events for the selected target, any order (sorted by `at` for display). */
   existingPoints?: ExistingMapPoint[];
+  /**
+   * Optional second geography (e.g. the other end of an A→B route) shown as a
+   * reference marker and included when fitting the camera.
+   */
+  companionPoint?: CompanionMapPoint | null;
   /** Draft event time used to connect the picker marker to nearest existing points. */
   previewAt?: string;
   trailColor?: string;
   /** Override map container height/size classes (default `h-56`). */
   mapClassName?: string;
   disabled?: boolean;
+  /** When false, hides the speed field (route generation authors speed). Default true. */
+  showSpeedField?: boolean;
+  /** Accessible name for the map surface. */
+  mapAriaLabel?: string;
 }
 
 type TrailFeatureCollection = {
@@ -86,6 +121,15 @@ function createEventPointElement(point: ExistingMapPoint, color: string) {
   element.className = "schedule-event-point";
   element.style.setProperty("--event-point-color", color);
   element.title = new Date(point.at).toLocaleString();
+  element.setAttribute("aria-hidden", "true");
+  return element;
+}
+
+function createCompanionPointElement(label: string, color: string) {
+  const element = document.createElement("div");
+  element.className = "schedule-event-point schedule-companion-point";
+  element.style.setProperty("--event-point-color", color);
+  element.title = label;
   element.setAttribute("aria-hidden", "true");
   return element;
 }
@@ -241,15 +285,19 @@ export function MapLocationPicker({
   onChange,
   idPrefix = "map-point",
   existingPoints = [],
+  companionPoint = null,
   previewAt,
   trailColor = DEFAULT_TRAIL_COLOR,
   mapClassName,
   disabled = false,
+  showSpeedField = true,
+  mapAriaLabel = "Map location picker. Click or tap to place a marker.",
 }: MapLocationPickerProps) {
-  const { mapStyle, activeRegion } = useMapData();
+  const { mapStyle } = useMapData();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  const companionMarkerRef = useRef<Marker | null>(null);
   const eventMarkersRef = useRef(new Map<string, Marker>());
   const trailCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL);
   const neighborCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL);
@@ -258,6 +306,7 @@ export function MapLocationPicker({
   const fittedPointsKeyRef = useRef<string | null>(null);
   const userAdjustedCameraRef = useRef(false);
   const programmaticCameraRef = useRef(false);
+  const appliedStyleRef = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [speedUnit, setSpeedUnit] = useState<SpeedUnit>("kt");
   const [speedDraft, setSpeedDraft] = useState("");
@@ -292,9 +341,6 @@ export function MapLocationPicker({
     [previewAt, sortedExistingPoints],
   );
 
-  const outsideRegion =
-    activeRegion && !isWithinBounds(value.latitude, value.longitude, activeRegion.bounds);
-
   useEffect(() => {
     if (skipSpeedSyncRef.current) {
       skipSpeedSyncRef.current = false;
@@ -308,21 +354,32 @@ export function MapLocationPicker({
   }, [value.speed, speedUnit]);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const map = new MapLibreMap({
-      container: containerRef.current,
-      style: mapStyle,
-      center: [value.longitude, value.latitude],
-      zoom: 8,
-      attributionControl: false,
-    });
+    const container = containerRef.current;
+    if (!container || mapRef.current) return;
 
-    const marker = new Marker({ draggable: true })
-      .setLngLat([value.longitude, value.latitude])
-      .addTo(map);
+    let cancelled = false;
+    let map: MapLibreMap | null = null;
+    let marker: Marker | null = null;
+
+    const markUserCamera = () => {
+      if (programmaticCameraRef.current) return;
+      userAdjustedCameraRef.current = true;
+    };
+
+    const handleMapClick = (event: { lngLat?: { lat: number; lng: number } }) => {
+      if (!marker || !event.lngLat) return;
+      marker.setLngLat(event.lngLat);
+      onChangeRef.current({
+        ...valueRef.current,
+        latitude: Number(event.lngLat.lat.toFixed(6)),
+        longitude: Number(event.lngLat.lng.toFixed(6)),
+      });
+    };
 
     const syncFromMarker = () => {
+      if (!marker) return;
       const lngLat = marker.getLngLat();
+      if (!lngLat || !Number.isFinite(lngLat.lng) || !Number.isFinite(lngLat.lat)) return;
       onChangeRef.current({
         ...valueRef.current,
         latitude: Number(lngLat.lat.toFixed(6)),
@@ -330,55 +387,96 @@ export function MapLocationPicker({
       });
     };
 
-    marker.on("dragend", syncFromMarker);
-    map.on("click", (event) => {
-      marker.setLngLat(event.lngLat);
-      onChangeRef.current({
-        ...valueRef.current,
-        latitude: Number(event.lngLat.lat.toFixed(6)),
-        longitude: Number(event.lngLat.lng.toFixed(6)),
-      });
-    });
-    const markUserCamera = () => {
-      if (programmaticCameraRef.current) return;
-      userAdjustedCameraRef.current = true;
-    };
-    map.on("zoomend", markUserCamera);
-    map.on("dragend", markUserCamera);
-    map.on("load", () => {
-      ensureOverlayLayers(map, trailCollectionRef.current, neighborCollectionRef.current);
-      setMapReady(true);
-    });
+    const initMap = () => {
+      if (cancelled || mapRef.current || !containerRef.current) return;
+      // KeepMounted / hidden tabs mount with zero size — MapLibre breaks click coords.
+      if (container.clientWidth === 0 || container.clientHeight === 0) return;
 
-    markerRef.current = marker;
-    mapRef.current = map;
+      const center =
+        lngLatPair(valueRef.current.longitude, valueRef.current.latitude) ??
+        FALLBACK_CENTER;
+
+      map = new MapLibreMap({
+        container: containerRef.current,
+        style: mapStyle,
+        center,
+        zoom: 8,
+        attributionControl: false,
+      });
+
+      // MapLibre Marker._update reads lngLat on addTo — set coords first.
+      marker = new Marker({ draggable: true }).setLngLat(center).addTo(map);
+
+      marker.on("dragend", syncFromMarker);
+      map.on("click", handleMapClick);
+      map.on("zoomend", markUserCamera);
+      map.on("dragend", markUserCamera);
+      map.on("load", () => {
+        if (!map) return;
+        ensureOverlayLayers(map, trailCollectionRef.current, neighborCollectionRef.current);
+        map.resize();
+        setMapReady(true);
+      });
+
+      markerRef.current = marker;
+      mapRef.current = map;
+      appliedStyleRef.current = mapStyle;
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (!mapRef.current) {
+        initMap();
+        return;
+      }
+      mapRef.current.resize();
+    });
+    resizeObserver.observe(container);
+    initMap();
+
     return () => {
+      cancelled = true;
+      resizeObserver.disconnect();
       for (const eventMarker of eventMarkersRef.current.values()) {
         eventMarker.remove();
       }
       eventMarkersRef.current.clear();
-      marker.remove();
-      map.off("zoomend", markUserCamera);
-      map.off("dragend", markUserCamera);
-      map.remove();
+      companionMarkerRef.current?.remove();
+      companionMarkerRef.current = null;
+      if (marker) {
+        marker.off("dragend", syncFromMarker);
+        marker.remove();
+      }
+      if (map) {
+        map.off("click", handleMapClick);
+        map.off("zoomend", markUserCamera);
+        map.off("dragend", markUserCamera);
+        map.remove();
+      }
       markerRef.current = null;
       mapRef.current = null;
+      appliedStyleRef.current = null;
       fittedPointsKeyRef.current = null;
       userAdjustedCameraRef.current = false;
       programmaticCameraRef.current = false;
       setMapReady(false);
     };
+    // Intentionally mount once; style swaps happen in the effect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mapStyle used only for first paint
   }, []);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
+    // Avoid reloading the style we already initialized with — mid-reload
+    // Marker._update can run with undefined lngLat (smartWrap crash).
+    if (appliedStyleRef.current === mapStyle) return;
 
     const restoreOverlay = () => {
       if (!map.isStyleLoaded()) return;
       ensureOverlayLayers(map, trailCollectionRef.current, neighborCollectionRef.current);
     };
 
+    appliedStyleRef.current = mapStyle;
     map.on("style.load", restoreOverlay);
     void map.setStyle(mapStyle);
     return () => {
@@ -388,11 +486,74 @@ export function MapLocationPicker({
 
   useEffect(() => {
     if (!mapReady || !markerRef.current) return;
-    markerRef.current.setLngLat([value.longitude, value.latitude]);
-    if (sortedExistingPoints.length === 0) {
-      mapRef.current?.setCenter([value.longitude, value.latitude]);
+    const next = lngLatPair(value.longitude, value.latitude);
+    if (!next) return;
+    markerRef.current.setLngLat(next);
+    if (sortedExistingPoints.length === 0 && !companionPoint) {
+      mapRef.current?.setCenter(next);
     }
-  }, [mapReady, sortedExistingPoints.length, value.latitude, value.longitude]);
+  }, [
+    companionPoint,
+    mapReady,
+    sortedExistingPoints.length,
+    value.latitude,
+    value.longitude,
+  ]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const companionLngLat = companionPoint
+      ? lngLatPair(companionPoint.longitude, companionPoint.latitude)
+      : null;
+
+    if (!companionLngLat) {
+      companionMarkerRef.current?.remove();
+      companionMarkerRef.current = null;
+      return;
+    }
+
+    const label = companionPoint?.label ?? "Related point";
+
+    const attachCompanion = () => {
+      if (!map.isStyleLoaded()) return false;
+
+      let marker = companionMarkerRef.current;
+      if (!marker) {
+        try {
+          // setLngLat before addTo — Marker._update → smartWrap requires defined lngLat.
+          marker = new Marker({
+            element: createCompanionPointElement(label, trailColor),
+            anchor: "center",
+          })
+            .setLngLat(companionLngLat)
+            .addTo(map);
+          companionMarkerRef.current = marker;
+        } catch {
+          companionMarkerRef.current = null;
+          return false;
+        }
+        return true;
+      }
+
+      const element = marker.getElement();
+      element.title = label;
+      element.style.setProperty("--event-point-color", trailColor);
+      marker.setLngLat(companionLngLat);
+      return true;
+    };
+
+    if (attachCompanion()) return;
+
+    const onStyleLoad = () => {
+      attachCompanion();
+    };
+    map.on("style.load", onStyleLoad);
+    return () => {
+      map.off("style.load", onStyleLoad);
+    };
+  }, [companionPoint, mapReady, trailColor]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -420,58 +581,83 @@ export function MapLocationPicker({
     }
 
     for (const point of sortedExistingPoints) {
+      const pointLngLat = lngLatPair(point.longitude, point.latitude);
+      if (!pointLngLat) continue;
       let marker = eventMarkersRef.current.get(point.id);
       if (!marker) {
         marker = new Marker({
           element: createEventPointElement(point, trailColor),
           anchor: "center",
         })
-          .setLngLat([point.longitude, point.latitude])
+          .setLngLat(pointLngLat)
           .addTo(map);
         eventMarkersRef.current.set(point.id, marker);
       } else {
-        marker.setLngLat([point.longitude, point.latitude]);
+        marker.setLngLat(pointLngLat);
         const element = marker.getElement();
         element.style.setProperty("--event-point-color", trailColor);
         element.title = new Date(point.at).toLocaleString();
       }
     }
 
-    if (sortedExistingPoints.length === 0) {
+    const companionLngLat = companionPoint
+      ? lngLatPair(companionPoint.longitude, companionPoint.latitude)
+      : null;
+    const companionKey = companionLngLat
+      ? `companion:${companionLngLat[1]}:${companionLngLat[0]}`
+      : "";
+    const fitKey = `${existingPointsKey}|${companionKey}`;
+
+    if (sortedExistingPoints.length === 0 && !companionKey) {
       fittedPointsKeyRef.current = null;
       return;
     }
 
     const previousKey = fittedPointsKeyRef.current;
-    if (previousKey === existingPointsKey) return;
+    if (previousKey === fitKey) return;
 
     // Adding another event only appends points — keep the user's zoom/pan.
-    if (previousKey && isExistingPointsAppend(previousKey, existingPointsKey)) {
-      fittedPointsKeyRef.current = existingPointsKey;
+    if (
+      previousKey &&
+      !companionKey &&
+      isExistingPointsAppend(previousKey.split("|")[0] ?? "", existingPointsKey)
+    ) {
+      fittedPointsKeyRef.current = fitKey;
       return;
     }
 
-    // Target / set change (not an append): allow a fresh fit unless the user already framed.
-    fittedPointsKeyRef.current = existingPointsKey;
+    const valueLngLat = lngLatPair(value.longitude, value.latitude);
+    if (!valueLngLat) return;
+
+    fittedPointsKeyRef.current = fitKey;
     if (previousKey) {
-      // Switching trails — reset so the new set can fit once.
       userAdjustedCameraRef.current = false;
     } else if (userAdjustedCameraRef.current) {
-      // First points, but user already zoomed/panned the empty map.
       return;
     }
 
     const bounds = new LngLatBounds();
     for (const point of sortedExistingPoints) {
-      bounds.extend([point.longitude, point.latitude]);
+      const pointLngLat = lngLatPair(point.longitude, point.latitude);
+      if (pointLngLat) bounds.extend(pointLngLat);
     }
-    bounds.extend([value.longitude, value.latitude]);
+    bounds.extend(valueLngLat);
+    if (companionLngLat) bounds.extend(companionLngLat);
+    if (!bounds.getSouthWest() || !bounds.getNorthEast()) return;
+
     programmaticCameraRef.current = true;
-    map.fitBounds(bounds, { padding: 40, maxZoom: 12, duration: 0 });
+    try {
+      map.resize();
+      map.fitBounds(bounds, { padding: 40, maxZoom: 12, duration: 0 });
+    } catch {
+      programmaticCameraRef.current = false;
+      return;
+    }
     map.once("moveend", () => {
       programmaticCameraRef.current = false;
     });
   }, [
+    companionPoint,
     existingPointsKey,
     mapReady,
     previewAt,
@@ -525,7 +711,7 @@ export function MapLocationPicker({
             mapClassName,
           )}
           role="application"
-          aria-label="Map location picker. Click or tap to place a marker."
+          aria-label={mapAriaLabel}
           aria-disabled={disabled || undefined}
         />
         <div className="pointer-events-none absolute top-3 right-3 z-10">
@@ -553,6 +739,12 @@ export function MapLocationPicker({
           </ButtonGroup>
         </div>
       </div>
+      {companionPoint ? (
+        <p className="text-sm text-muted-foreground" role="status">
+          Showing companion point
+          {companionPoint.label ? ` (${companionPoint.label})` : ""} on the map for reference.
+        </p>
+      ) : null}
       {sortedExistingPoints.length > 0 ? (
         <p className="text-sm text-muted-foreground" role="status">
           Showing {sortedExistingPoints.length} existing position
@@ -564,16 +756,13 @@ export function MapLocationPicker({
           .
         </p>
       ) : null}
-      {outsideRegion ? (
-        <p
-          className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100"
-          role="alert"
-        >
-          Selected coordinates fall outside the active offline region ({activeRegion.name}). Offline
-          maps may not render this location.
-        </p>
-      ) : null}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <FieldGroup
+        className={cn(
+          "gap-3",
+          "grid sm:grid-cols-2",
+          showSpeedField ? "lg:grid-cols-4" : "lg:grid-cols-3",
+        )}
+      >
         <Field data-disabled={disabled || undefined}>
           <FieldLabel htmlFor={`${idPrefix}-latitude`}>Latitude</FieldLabel>
           <Input
@@ -606,62 +795,63 @@ export function MapLocationPicker({
             disabled={disabled}
             onChange={(event) => updateCoordinate("altitude", event.target.value)}
           />
-          <FieldDescription>Optional.</FieldDescription>
         </Field>
-        <Field data-disabled={disabled || undefined}>
-          <FieldLabel htmlFor={`${idPrefix}-speed`}>Speed</FieldLabel>
-          <InputGroup>
-            <InputGroupInput
-              id={`${idPrefix}-speed`}
-              inputMode="decimal"
-              placeholder="Auto or 450 mph"
-              value={speedDraft}
-              disabled={disabled}
-              onChange={(event) => setSpeedDraft(event.target.value)}
-              onBlur={() => commitSpeedDraft(speedDraft)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  commitSpeedDraft(speedDraft);
-                }
-              }}
-            />
-            <InputGroupAddon align="inline-end">
-              <Select
-                value={speedUnit}
+        {showSpeedField ? (
+          <Field data-disabled={disabled || undefined}>
+            <FieldLabel htmlFor={`${idPrefix}-speed`}>Speed</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                id={`${idPrefix}-speed`}
+                inputMode="decimal"
+                placeholder="Auto or 450 mph"
+                value={speedDraft}
                 disabled={disabled}
-                onValueChange={(next) => {
-                  if (!next) return;
-                  setSpeedUnit(next as SpeedUnit);
+                onChange={(event) => setSpeedDraft(event.target.value)}
+                onBlur={() => commitSpeedDraft(speedDraft)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    commitSpeedDraft(speedDraft);
+                  }
                 }}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="w-19 border-0 bg-transparent shadow-none"
-                  aria-label="Speed unit"
+              />
+              <InputGroupAddon align="inline-end">
+                <Select
+                  value={speedUnit}
                   disabled={disabled}
+                  onValueChange={(next) => {
+                    if (!next) return;
+                    setSpeedUnit(next as SpeedUnit);
+                  }}
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="end">
-                  <SelectGroup>
-                    {SPEED_UNITS.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {unit}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </InputGroupAddon>
-          </InputGroup>
-          <FieldDescription>
-            {value.speed == null
-              ? "Optional. Enter a value with unit (e.g. 450 mph); stored as knots."
-              : `Stored as ${value.speed} kt. Leave blank to derive from track.`}
-          </FieldDescription>
-        </Field>
-      </div>
+                  <SelectTrigger
+                    size="sm"
+                    className="w-19 border-0 bg-transparent shadow-none"
+                    aria-label="Speed unit"
+                    disabled={disabled}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    <SelectGroup>
+                      {SPEED_UNITS.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </InputGroupAddon>
+            </InputGroup>
+            <FieldDescription>
+              {value.speed == null
+                ? "Optional. Enter a value with unit (e.g. 450 mph); stored as knots."
+                : `Stored as ${value.speed} kt. Leave blank to derive from track.`}
+            </FieldDescription>
+          </Field>
+        ) : null}
+      </FieldGroup>
     </div>
   );
 }

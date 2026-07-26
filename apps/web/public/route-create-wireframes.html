@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Route create wireframes — R1–R5</title>
+  <style>
+    :root {
+      --bg: #f0f1f3;
+      --ink: #1a1d23;
+      --muted: #6b7280;
+      --line: #9ca3af;
+      --panel: #ffffff;
+      --dash: #94a3b8;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --dim: #e5e7eb;
+      --danger: #b91c1c;
+      --ok: #15803d;
+      --map: #c5d4e8;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+      --radius: 6px;
+      --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.35;
+      font-size: 13px;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(255,255,255,.92);
+      border-bottom: 1px solid #d1d5db;
+      backdrop-filter: blur(8px);
+    }
+    .nav strong {
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 8px;
+    }
+    .nav a {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12px;
+      background: #fff;
+    }
+    .nav a:hover,
+    .nav a.pick {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .intro {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 24px 8px;
+    }
+    .intro h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; }
+    .intro p { margin: 0 0 8px; color: var(--muted); max-width: 78ch; }
+    .intro .locked {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border: 1px solid #bbf7d0;
+      background: #f0fdf4;
+      border-radius: var(--radius);
+      color: #166534;
+      font-size: 12px;
+      max-width: 90ch;
+    }
+
+    .design {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 24px 48px;
+      scroll-margin-top: 64px;
+    }
+    .design-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: baseline;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .design-head h2 { margin: 0; font-size: 18px; font-weight: 650; }
+    .design-head .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .design-head .intent {
+      flex: 1 1 280px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .label {
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .box {
+      background: var(--panel);
+      border: 1px dashed var(--dash);
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+    .box.solid {
+      border-style: solid;
+      border-color: #d1d5db;
+      box-shadow: var(--shadow);
+    }
+    .row { display: flex; gap: 12px; }
+    .col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .grow { flex: 1; min-width: 0; }
+    .field {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      background: #fafafa;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .field.optional { border-style: dashed; background: #fff; }
+    .field.preview {
+      background: var(--accent-soft);
+      border-color: #93c5fd;
+      color: #1d4ed8;
+      height: auto;
+      min-height: 28px;
+      padding: 6px 8px;
+      align-items: flex-start;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 550;
+      white-space: nowrap;
+    }
+    .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .btn.ghost { background: transparent; }
+    .btn.sm { height: 22px; padding: 0 8px; font-size: 11px; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      font-size: 12px;
+      background: #fff;
+    }
+    .chip.on { background: var(--accent-soft); border-color: #93c5fd; color: #1d4ed8; }
+    .chip.aircraft { background: #ecfdf5; border-color: #86efac; color: #166534; }
+
+    .map {
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(100,116,139,.25) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(100,116,139,.25) 50%, transparent 51%),
+        repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(148,163,184,.15) 19px),
+        repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(148,163,184,.15) 19px),
+        var(--map);
+      border: 1px solid #94a3b8;
+      border-radius: 4px;
+      min-height: 140px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 550;
+      overflow: hidden;
+    }
+    .map .pin {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e11d48;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #e11d48;
+    }
+    .map .pin.start { top: 28%; left: 32%; background: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
+    .map .pin.end { top: 62%; left: 68%; background: #e11d48; }
+    .map .route-line {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          125deg,
+          transparent 0 28%,
+          rgba(37,99,235,.55) 28% 30%,
+          transparent 30% 58%,
+          rgba(225,29,72,.55) 58% 60%,
+          transparent 60%
+        );
+      pointer-events: none;
+    }
+    .map.h-sm { min-height: 120px; }
+    .map.h-md { min-height: 160px; }
+    .map.h-lg { min-height: 220px; }
+    .map.h-xl { min-height: 280px; }
+
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .field-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .section-title h4 { margin: 0; font-size: 13px; }
+    .meta { color: var(--muted); font-size: 11px; }
+    .note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: italic;
+    }
+    .page-chrome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--panel);
+      border: 1px solid #d1d5db;
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .page-chrome h3 { margin: 0; font-size: 14px; }
+
+    .d5-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #1a1d23;
+      color: #fff;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .d5-banner h4 { margin: 0; font-size: 13px; }
+    .d5-banner .meta { color: #94a3b8; }
+    .d5-body {
+      display: grid;
+      grid-template-columns: 32% 68%;
+      gap: 12px;
+      padding: 12px;
+      background: var(--panel);
+      border: 1px solid #d1d5db;
+      border-top: 0;
+      border-radius: 0 0 var(--radius) var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .d5-panel-chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .d5-panel-chrome strong { font-size: 12px; }
+
+    .modal-scrim {
+      background: rgba(15,23,42,.35);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: grid;
+      place-items: center;
+      min-height: 520px;
+    }
+    .modal {
+      width: min(640px, 100%);
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.18);
+      border: 1px solid #d1d5db;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 560px;
+    }
+    .modal.wide { width: min(860px, 100%); }
+    .modal-head { padding: 14px 16px 8px; }
+    .modal-head h3 { margin: 0 0 4px; font-size: 15px; }
+    .modal-body {
+      padding: 0 16px 12px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+    }
+
+    .builder-shell {
+      display: grid;
+      gap: 12px;
+    }
+    .builder-shell .twins {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .sheet-scrim {
+      position: relative;
+      min-height: 520px;
+      background: #e8eaee;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid #d1d5db;
+    }
+    .sheet-scrim .dim-builder {
+      padding: 12px;
+      opacity: .45;
+      filter: grayscale(.2);
+    }
+    .sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 58%;
+      background: #fff;
+      border-top: 1px solid #d1d5db;
+      box-shadow: 0 -8px 24px rgba(0,0,0,.12);
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 12px;
+      padding: 12px;
+    }
+    .pick-mode {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .list { display: flex; flex-direction: column; gap: 4px; }
+    .list-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      background: #fafafa;
+      font-size: 12px;
+    }
+    .list-row.selected { border-color: #93c5fd; background: var(--accent-soft); }
+    .swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .name { font-weight: 550; }
+
+    @media (max-width: 960px) {
+      .d5-body, .builder-shell .twins, .sheet { grid-template-columns: 1fr; }
+      .fields-grid { grid-template-columns: 1fr 1fr; }
+      .sheet { height: 72%; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <strong>Route create</strong>
+    <a href="#r1">R1 Dialog</a>
+    <a href="#r2">R2 Dual-map</a>
+    <a href="#r3">R3 Compose</a>
+    <a href="#r4">R4 Map stage</a>
+    <a href="#r5">R5 Sheet</a>
+    <a class="pick" href="#implemented">Implemented: R2</a>
+  </nav>
+
+  <div class="intro">
+    <h1>Aircraft A→B route — layout wireframes</h1>
+    <p>
+      Optional end point (aircraft only) on the existing Generate Route flow.
+      End time optional only when end point is set; otherwise duration =
+      distance ÷ aircraft cruise midpoint. Intermediates stay physics-plausible;
+      final event snaps to end; bearing = true azimuth of each flown leg.
+    </p>
+    <p class="locked" id="implemented">
+      <strong>Implemented:</strong> R2 — Dialog dual-map with an <em>End location</em> switch.
+      When off, the End (B) column stays visible but disabled; when on, the end column is editable
+      and end time becomes optional (computed from distance ÷ cruise midpoint).
+    </p>
+  </div>
+
+  <!-- ==================== R1 ==================== -->
+  <section class="design" id="r1">
+    <div class="design-head">
+      <h2>R1. Dialog evolved</h2>
+      <span class="tag">modal · stacked maps</span>
+      <p class="intent">Keep today’s Generate Route dialog. Stack optional end-point map under start; end time becomes optional with computed preview when end is set.</p>
+    </div>
+
+    <div class="modal-scrim">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Generate route for CONTACT 02</h3>
+          <p class="meta" style="margin:0">Category-plausible movement · aircraft end point optional</p>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="field-wrap grow"><span class="label">Event count</span><div class="field">60</div></div>
+            <div class="field-wrap grow"><span class="label">Vehicle category</span><div class="field">aircraft</div></div>
+          </div>
+          <div class="field-wrap"><span class="label">Start time</span><div class="field">2026-07-26 12:00</div></div>
+          <div class="field-wrap">
+            <span class="label">End time (optional with end point)</span>
+            <div class="field optional">— leave empty to auto</div>
+          </div>
+          <div class="field preview">Computed end · 12:47 · 312 nm @ 745 kt cruise midpoint</div>
+          <div class="col">
+            <div class="section-title"><h4>Start point</h4><span class="chip">A</span></div>
+            <div class="map h-md"><span class="pin start"></span>Start picker</div>
+            <div class="fields-grid">
+              <div class="field">Lat 51.507</div><div class="field">Lon -0.128</div>
+              <div class="field">Alt 8000</div><div class="field">—</div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="section-title">
+              <h4>End point</h4>
+              <span class="chip aircraft">Aircraft only · optional</span>
+            </div>
+            <div class="map h-md"><span class="pin end"></span>End picker</div>
+            <div class="fields-grid">
+              <div class="field">Lat 52.205</div><div class="field">Lon 0.122</div>
+              <div class="field">Alt 8000</div><div class="field"><span class="btn sm">Clear</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <span class="btn ghost">Cancel</span>
+          <span class="btn primary">Preview generation</span>
+        </div>
+      </div>
+    </div>
+    <p class="note">R1 — single scrollable modal · start then end · computed duration banner</p>
+  </section>
+
+  <!-- ==================== R2 ==================== -->
+  <section class="design" id="r2">
+    <div class="design-head">
+      <h2>R2. Dialog dual-map</h2>
+      <span class="tag">modal · side-by-side · switch</span>
+      <p class="intent">Start and end maps side-by-side. An End location switch enables the End (B) column; when off, the column stays visible but disabled.</p>
+    </div>
+
+    <div class="modal-scrim">
+      <div class="modal wide">
+        <div class="modal-head">
+          <h3>Generate route for CONTACT 02</h3>
+          <p class="meta" style="margin:0">Dual map · end location switch</p>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="field-wrap grow"><span class="label">Event count</span><div class="field">60</div></div>
+            <div class="field-wrap grow"><span class="label">Category</span><div class="field">aircraft</div></div>
+            <div class="field-wrap grow"><span class="label">Start time</span><div class="field">12:00</div></div>
+            <div class="field-wrap grow"><span class="label">End time</span><div class="field optional">auto</div></div>
+          </div>
+          <div class="row" style="align-items:center;gap:10px">
+            <span class="switch on"></span>
+            <div>
+              <strong style="font-size:12px">End location</strong>
+              <div class="meta">Enables the End (B) column</div>
+            </div>
+            <span class="chip aircraft" style="margin-left:auto">aircraft only</span>
+          </div>
+          <div class="field preview">Computed end 12:47 · 312 nm · 745 kt mid</div>
+          <div class="row">
+            <div class="col grow">
+              <div class="section-title"><h4>Start (A)</h4></div>
+              <div class="map h-lg"><span class="pin start"></span>Start</div>
+              <div class="fields-grid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="field">Lat</div><div class="field">Lon</div><div class="field">Alt</div>
+              </div>
+            </div>
+            <div class="col grow">
+              <div class="section-title"><h4>End (B)</h4><span class="chip on">enabled</span></div>
+              <div class="map h-lg"><span class="pin end"></span>End</div>
+              <div class="fields-grid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="field">Lat</div><div class="field">Lon</div><div class="field">Alt</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <span class="btn ghost">Cancel</span>
+          <span class="btn primary">Preview generation</span>
+        </div>
+      </div>
+    </div>
+    <p class="note">R2 — wider modal · parallel pickers · End location switch gates the B column</p>
+  </section>
+
+  <!-- ==================== R3 ==================== -->
+  <section class="design" id="r3">
+    <div class="design-head">
+      <h2>R3. Compose inline</h2>
+      <span class="tag">no modal · compose column</span>
+      <p class="intent">Route form lives in the Compose event column after Route is clicked — no overlay. Review panel unchanged.</p>
+    </div>
+
+    <div class="builder-shell">
+      <div class="page-chrome">
+        <div><div class="label">Page</div><h3>Simulation builder</h3></div>
+        <div class="row" style="gap:8px"><span class="btn ghost">Load demo</span><span class="btn primary">Start simulation</span></div>
+      </div>
+      <div class="twins">
+        <div>
+          <div class="d5-banner"><h4>Compose</h4><span class="meta">route mode</span></div>
+          <div class="d5-body" style="grid-template-columns:1fr">
+            <div class="col">
+              <div class="d5-panel-chrome">
+                <strong>Generate route · CONTACT 02</strong>
+                <span class="chip aircraft">aircraft</span>
+              </div>
+              <div class="row">
+                <div class="field grow">Count 60</div>
+                <div class="field grow">Start 12:00</div>
+                <div class="field grow optional">End (auto)</div>
+              </div>
+              <div class="field preview">Computed end 12:47 · 312 nm @ 745 kt</div>
+              <div class="map h-md"><span class="route-line"></span><span class="pin start"></span><span class="pin end"></span>Inline start/end map</div>
+              <div class="row">
+                <div class="col grow">
+                  <span class="label">Start</span>
+                  <div class="fields-grid" style="grid-template-columns:1fr 1fr 1fr">
+                    <div class="field">Lat</div><div class="field">Lon</div><div class="field">Alt</div>
+                  </div>
+                </div>
+                <div class="col grow">
+                  <span class="label">End (optional)</span>
+                  <div class="fields-grid" style="grid-template-columns:1fr 1fr 1fr">
+                    <div class="field">Lat</div><div class="field">Lon</div><div class="field">Alt</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row" style="justify-content:flex-end">
+                <span class="btn ghost">Cancel</span>
+                <span class="btn primary">Preview · Insert</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="d5-banner"><h4>Review</h4><span class="meta">unchanged</span></div>
+          <div class="d5-body" style="grid-template-columns:1fr">
+            <div class="col">
+              <div class="map h-xl"><span class="pin"></span>Preview map</div>
+              <div class="list">
+                <div class="list-row"><span class="name">CONTACT 02</span><span class="meta">3 events</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">R3 — route authoring replaces event form temporarily</p>
+  </section>
+
+  <!-- ==================== R4 ==================== -->
+  <section class="design" id="r4">
+    <div class="design-head">
+      <h2>R4. Compose + map stage</h2>
+      <span class="tag">form left · pick on review map</span>
+      <p class="intent">Fields stay in Compose; clicking Start/End arms pick mode on the Review preview map (one shared map).</p>
+    </div>
+
+    <div class="builder-shell">
+      <div class="page-chrome">
+        <div><h3>Simulation builder</h3></div>
+        <div class="pick-mode">
+          <span class="chip on">Picking: End (B)</span>
+          <span class="btn sm">Cancel pick</span>
+        </div>
+      </div>
+      <div class="twins">
+        <div>
+          <div class="d5-banner"><h4>Compose</h4><span class="meta">route fields</span></div>
+          <div class="box solid col" style="border-radius:0 0 6px 6px;border-top:0">
+            <div class="d5-panel-chrome"><strong>CONTACT 02 · Route</strong><span class="chip aircraft">aircraft</span></div>
+            <div class="field">Count 60</div>
+            <div class="field">Start time 12:00</div>
+            <div class="field optional">End time — auto</div>
+            <div class="field preview">Computed 12:47 · 312 nm</div>
+            <div class="row">
+              <span class="btn">Set start (A)</span>
+              <span class="btn primary">Set end (B)</span>
+            </div>
+            <div class="fields-grid" style="grid-template-columns:1fr 1fr">
+              <div class="field">A 51.507, -0.128 · 8000</div>
+              <div class="field">B 52.205, 0.122 · 8000</div>
+            </div>
+            <div class="row" style="justify-content:flex-end">
+              <span class="btn ghost">Cancel</span>
+              <span class="btn primary">Preview</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="d5-banner"><h4>Review</h4><span class="meta">pick stage</span></div>
+          <div class="box solid col" style="border-radius:0 0 6px 6px;border-top:0">
+            <div class="map h-xl">
+              <span class="route-line"></span>
+              <span class="pin start"></span>
+              <span class="pin end"></span>
+              Click map to place End (B)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">R4 — Review map doubles as location stage while Compose holds the form</p>
+  </section>
+
+  <!-- ==================== R5 ==================== -->
+  <section class="design" id="r5">
+    <div class="design-head">
+      <h2>R5. Split sheet</h2>
+      <span class="tag">bottom sheet · shared map</span>
+      <p class="intent">Route opens as a bottom sheet over the builder. One shared map; Start then End pick modes; form beside the map.</p>
+    </div>
+
+    <div class="sheet-scrim">
+      <div class="dim-builder">
+        <div class="page-chrome"><h3>Simulation builder (dimmed)</h3></div>
+        <div class="row">
+          <div class="box grow" style="height:120px">Compose</div>
+          <div class="box grow" style="height:120px">Review</div>
+        </div>
+      </div>
+      <div class="sheet">
+        <div class="col">
+          <div class="section-title">
+            <h4>Generate route · CONTACT 02</h4>
+            <span class="chip aircraft">aircraft</span>
+          </div>
+          <div class="field">Event count 60</div>
+          <div class="field">Start 12:00</div>
+          <div class="field optional">End time (optional)</div>
+          <div class="field preview">Computed end 12:47 · 312 nm @ 745 kt</div>
+          <div class="pick-mode">
+            <span class="chip on">1 · Start</span>
+            <span class="chip">2 · End</span>
+          </div>
+          <div class="fields-grid" style="grid-template-columns:1fr 1fr">
+            <div class="field">A lat/lon/alt</div>
+            <div class="field">B lat/lon/alt</div>
+          </div>
+          <div class="row" style="margin-top:auto;justify-content:flex-end">
+            <span class="btn ghost">Cancel</span>
+            <span class="btn primary">Preview · Insert</span>
+          </div>
+        </div>
+        <div class="col">
+          <div class="map h-xl">
+            <span class="route-line"></span>
+            <span class="pin start"></span>
+            <span class="pin end"></span>
+            Shared map · place Start then End
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">R5 — sheet overlays builder · sequential pick on one map</p>
+  </section>
+</body>
+</html>

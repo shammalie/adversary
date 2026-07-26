@@ -120,6 +120,8 @@ export function getValidationIssueFocusId(
     const target = scenario.targets[issue.index];
     if (!target) return "targets-section";
     if (issue.field === "callsign") return `${target.id}-callsign`;
+    if (issue.field === "appearOnFirstEvent") return `${target.id}-appear`;
+    if (issue.field === "revealOnFirstEvent") return `${target.id}-reveal`;
     if (issue.field === "profile.vehicleSubtype") return `${target.id}-subtype`;
     if (issue.field === "profile.identifier") return `${target.id}-identifier`;
     if (issue.field === "profile.description") return `${target.id}-description`;

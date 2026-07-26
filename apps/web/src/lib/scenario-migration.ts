@@ -76,6 +76,7 @@ export function migrateScenarioV1ToV2(scenario: LegacySimulationScenario): Simul
     id: target.id,
     callsign: target.callsign,
     revealOnFirstEvent: target.startsUnknown,
+    appearOnFirstEvent: false,
     color: target.color,
     profile: mergeProfile(target.initialProfile ?? {}, identityProfiles.get(target.id) ?? {}),
   }));

@@ -1,8 +1,10 @@
+import { Button } from "@adversary/ui/components/button";
 import { Toaster } from "@adversary/ui/components/sonner";
 import {
   HeadContent,
   Outlet,
   createRootRouteWithContext,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 
 import { RouterDevtoolsGate } from "@/components/router-devtools-gate";
@@ -17,6 +19,7 @@ export interface RouterAppContext {}
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
+  errorComponent: RootErrorComponent,
   head: () => ({
     meta: [
       {
@@ -46,6 +49,42 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     ],
   }),
 });
+
+function RootErrorComponent({ error, reset }: ErrorComponentProps) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      disableTransitionOnChange
+      storageKey="vite-ui-theme"
+    >
+      <ThemeColorSync />
+      <div className="grid min-h-svh grid-rows-[auto_1fr]">
+        <Header />
+        <main className="mx-auto flex w-full max-w-lg flex-col justify-center gap-4 p-6">
+          <h1 className="text-2xl font-semibold tracking-tight">Something went wrong</h1>
+          <p className="text-sm text-muted-foreground">
+            The page hit an unexpected error. You can try again or reload.
+          </p>
+          <pre className="overflow-auto rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+            {message}
+          </pre>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={reset}>
+              Try again
+            </Button>
+            <Button type="button" variant="outline" onClick={() => window.location.assign("/")}>
+              Go home
+            </Button>
+          </div>
+        </main>
+      </div>
+      <Toaster richColors />
+    </ThemeProvider>
+  );
+}
 
 function RootComponent() {
   return (

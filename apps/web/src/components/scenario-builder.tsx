@@ -41,6 +41,12 @@ import {
   SelectValue,
 } from "@adversary/ui/components/select";
 import { Switch } from "@adversary/ui/components/switch";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@adversary/ui/components/tabs";
 import { Textarea } from "@adversary/ui/components/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@adversary/ui/components/toggle-group";
 import { ScrollArea } from "@adversary/ui/components/scroll-area";
@@ -58,7 +64,6 @@ import {
   PlayIcon,
   PlusIcon,
   RadioIcon,
-  RouteIcon,
   SaveIcon,
   ShuffleIcon,
   SparklesIcon,
@@ -76,7 +81,7 @@ import {
   EditTimelineEvent,
   ViewTimelineEvent,
 } from "@/components/grouped-timeline-event";
-import { GenerateRouteDialog } from "@/components/generate-route-dialog";
+import { GenerateRouteForm } from "@/components/generate-route-form";
 import { useSimulation } from "@/components/simulation-provider";
 import { useTheme } from "@/components/theme-provider";
 import {
@@ -321,7 +326,7 @@ export function ScenarioBuilder() {
   const [scenario, setScenario] = useState<SimulationScenario>(() => blankScenario());
   const [draft, setDraft] = useState(() => createEventDraft());
   const [priorityInput, setPriorityInput] = useState("");
-  const [routeTargetId, setRouteTargetId] = useState<string | null>(null);
+  const [eventMode, setEventMode] = useState<"manual" | "automatic">("manual");
   const [timelineMode, setTimelineMode] = useState<"view" | "edit">("view");
   const [previewViewMode, setPreviewViewMode] = useState<"map" | "graph">("map");
   const [cameraMode, setCameraMode] = useState<"overview" | "pan">("overview");
@@ -519,6 +524,7 @@ export function ScenarioBuilder() {
           id: targetId,
           callsign: `CONTACT ${String(index + 1).padStart(2, "0")}`,
           revealOnFirstEvent: true,
+          appearOnFirstEvent: false,
           color: nextTargetColor(
             scenario.targets.map((target) => target.color),
             colorTheme,
@@ -820,7 +826,6 @@ export function ScenarioBuilder() {
     return () => window.clearTimeout(timer);
   }, [highlightEventId]);
 
-  const routeTarget = scenario.targets.find((target) => target.id === routeTargetId);
   const selectedTargetIssues = selectedTarget
     ? getIssuesForTarget(validationIssues, selectedTarget.id, scenario)
     : [];
@@ -1267,12 +1272,43 @@ export function ScenarioBuilder() {
                     onCheckedChange={(checked) =>
                       updateTarget(selectedTarget.id, {
                         revealOnFirstEvent: checked === true,
+                        ...(checked === true ? { appearOnFirstEvent: false } : {}),
                       })
                     }
                   />
                   <FieldLabel htmlFor={`${selectedTarget.id}-reveal`}>
                     Reveal on first event
                   </FieldLabel>
+                </Field>
+                <Field
+                  orientation="horizontal"
+                  data-invalid={
+                    selectedTargetIssues.some((issue) => issue.field === "appearOnFirstEvent") ||
+                    undefined
+                  }
+                >
+                  <Checkbox
+                    id={`${selectedTarget.id}-appear`}
+                    checked={selectedTarget.appearOnFirstEvent}
+                    onCheckedChange={(checked) =>
+                      updateTarget(selectedTarget.id, {
+                        appearOnFirstEvent: checked === true,
+                        ...(checked === true ? { revealOnFirstEvent: false } : {}),
+                      })
+                    }
+                    aria-invalid={
+                      selectedTargetIssues.some((issue) => issue.field === "appearOnFirstEvent") ||
+                      undefined
+                    }
+                  />
+                  <FieldLabel htmlFor={`${selectedTarget.id}-appear`}>
+                    Appear on first event
+                  </FieldLabel>
+                  {selectedTargetIssues
+                    .filter((issue) => issue.field === "appearOnFirstEvent")
+                    .map((issue) => (
+                      <FieldError key={issue.message}>{issue.message}</FieldError>
+                    ))}
                 </Field>
                 <Field
                   data-invalid={
@@ -1451,122 +1487,164 @@ export function ScenarioBuilder() {
           <div className="flex min-w-0 flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-border pb-2">
               <strong className="text-sm">Event</strong>
-              <Button
-                size="sm"
-                onClick={addEvent}
-                disabled={scenario.targets.length === 0}
-              >
-                <PlusIcon data-icon="inline-start" />
-                Add to timeline
-              </Button>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <Field orientation="horizontal" className="w-auto gap-2">
-                <Switch
-                  id="include-position"
-                  checked={draft.includePosition}
-                  onCheckedChange={(checked) =>
-                    setDraft((current) => ({ ...current, includePosition: checked }))
-                  }
-                />
-                <FieldLabel htmlFor="include-position">Position</FieldLabel>
-              </Field>
-              <Field orientation="horizontal" className="w-auto gap-2">
-                <Switch
-                  id="include-message"
-                  checked={draft.includeMessage}
-                  onCheckedChange={(checked) =>
-                    setDraft((current) => ({ ...current, includeMessage: checked }))
-                  }
-                />
-                <FieldLabel htmlFor="include-message">Message</FieldLabel>
-              </Field>
-            </div>
-            <FieldGroup className="grid gap-3 sm:grid-cols-2">
-              <Field data-disabled={scenario.targets.length === 0 ? true : undefined}>
-                <FieldLabel>Target</FieldLabel>
-                <Select
-                  value={draft.targetId}
-                  onValueChange={(value) => {
-                    if (!value || value === draft.targetId) return;
-                    selectEventTarget(String(value));
-                  }}
+              {eventMode === "manual" ? (
+                <Button
+                  size="sm"
+                  onClick={addEvent}
                   disabled={scenario.targets.length === 0}
                 >
-                  <SelectTrigger className="w-full" aria-label="Event target">
-                    <SelectValue placeholder="Choose target">
-                      {selectedDraftTarget?.callsign ?? "Choose target"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {scenario.targets.map((target) => (
-                        <SelectItem key={target.id} value={target.id}>
-                          {target.callsign}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="event-at">Event date and time</FieldLabel>
-                <DateTimePicker
-                  id="event-at"
-                  value={draft.at}
-                  onChange={(at) => setDraft((current) => ({ ...current, at }))}
-                />
-              </Field>
-            </FieldGroup>
-            <div
-              className={cn(
-                "flex flex-col gap-3 rounded-lg border p-3",
-                !draft.includePosition && "opacity-50",
-              )}
-              aria-disabled={!draft.includePosition || undefined}
-            >
-              <Suspense
-                fallback={
-                  <div className="grid h-[min(40vh,22rem)] place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
-                    Loading map picker…
-                  </div>
-                }
-              >
-                <MapLocationPicker
-                  idPrefix="event-position"
-                  value={draft.position}
-                  onChange={(position) => setDraft((current) => ({ ...current, position }))}
-                  existingPoints={draftTargetPositionPoints}
-                  previewAt={draft.at}
-                  trailColor={selectedDraftTarget?.color}
-                  mapClassName="h-[min(40vh,22rem)]"
-                  disabled={!draft.includePosition}
-                />
-              </Suspense>
-            </div>
-            <div
-              className={cn(
-                "flex flex-col gap-2 rounded-lg border p-3",
-                !draft.includeMessage && "opacity-50",
-              )}
-              aria-disabled={!draft.includeMessage || undefined}
-            >
-              <FieldLabel htmlFor="event-message">Message</FieldLabel>
-              <Textarea
-                id="event-message"
-                value={draft.message}
-                disabled={!draft.includeMessage}
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, message: event.target.value }))
-                }
-                placeholder="Operator note or intelligence message"
-              />
-              {draft.includeMessage && priorityMatches.length > 0 ? (
-                <p className="text-sm text-destructive" role="status">
-                  Priority match: {priorityMatches.join(", ")}
-                </p>
+                  <PlusIcon data-icon="inline-start" />
+                  Add to timeline
+                </Button>
               ) : null}
             </div>
+
+            <Field data-disabled={scenario.targets.length === 0 ? true : undefined}>
+              <FieldLabel>Target</FieldLabel>
+              <Select
+                value={draft.targetId}
+                onValueChange={(value) => {
+                  if (!value || value === draft.targetId) return;
+                  selectEventTarget(String(value));
+                }}
+                disabled={scenario.targets.length === 0}
+              >
+                <SelectTrigger className="w-full" aria-label="Event target">
+                  <SelectValue placeholder="Choose target">
+                    {selectedDraftTarget?.callsign ?? "Choose target"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {scenario.targets.map((target) => (
+                      <SelectItem key={target.id} value={target.id}>
+                        {target.callsign}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Tabs
+              value={eventMode}
+              onValueChange={(value) => {
+                if (value === "manual" || value === "automatic") setEventMode(value);
+              }}
+              className="gap-3"
+            >
+              <TabsList className="w-full">
+                <TabsTrigger value="manual" className="flex-1">
+                  Manual
+                </TabsTrigger>
+                <TabsTrigger value="automatic" className="flex-1">
+                  Automatic
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent
+                value="manual"
+                keepMounted
+                className="flex flex-col gap-3 outline-none"
+              >
+                <div className="flex flex-wrap items-center gap-4">
+                  <Field orientation="horizontal" className="w-auto gap-2">
+                    <Switch
+                      id="include-position"
+                      checked={draft.includePosition}
+                      onCheckedChange={(checked) =>
+                        setDraft((current) => ({ ...current, includePosition: checked }))
+                      }
+                    />
+                    <FieldLabel htmlFor="include-position">Position</FieldLabel>
+                  </Field>
+                  <Field orientation="horizontal" className="w-auto gap-2">
+                    <Switch
+                      id="include-message"
+                      checked={draft.includeMessage}
+                      onCheckedChange={(checked) =>
+                        setDraft((current) => ({ ...current, includeMessage: checked }))
+                      }
+                    />
+                    <FieldLabel htmlFor="include-message">Message</FieldLabel>
+                  </Field>
+                </div>
+                <Field>
+                  <FieldLabel htmlFor="event-at">Event date and time</FieldLabel>
+                  <DateTimePicker
+                    id="event-at"
+                    value={draft.at}
+                    onChange={(at) => setDraft((current) => ({ ...current, at }))}
+                  />
+                </Field>
+                <div
+                  className={cn(
+                    "flex flex-col gap-3 rounded-lg border p-3",
+                    !draft.includePosition && "opacity-50",
+                  )}
+                  aria-disabled={!draft.includePosition || undefined}
+                >
+                  <Suspense
+                    fallback={
+                      <div className="grid h-[min(40vh,22rem)] place-items-center rounded-lg bg-muted text-sm text-muted-foreground">
+                        Loading map picker…
+                      </div>
+                    }
+                  >
+                    <MapLocationPicker
+                      idPrefix="event-position"
+                      value={draft.position}
+                      onChange={(position) => setDraft((current) => ({ ...current, position }))}
+                      existingPoints={draftTargetPositionPoints}
+                      previewAt={draft.at}
+                      trailColor={selectedDraftTarget?.color}
+                      mapClassName="h-[min(40vh,22rem)]"
+                      disabled={!draft.includePosition}
+                    />
+                  </Suspense>
+                </div>
+                <div
+                  className={cn(
+                    "flex flex-col gap-2 rounded-lg border p-3",
+                    !draft.includeMessage && "opacity-50",
+                  )}
+                  aria-disabled={!draft.includeMessage || undefined}
+                >
+                  <FieldLabel htmlFor="event-message">Message</FieldLabel>
+                  <Textarea
+                    id="event-message"
+                    value={draft.message}
+                    disabled={!draft.includeMessage}
+                    onChange={(event) =>
+                      setDraft((current) => ({ ...current, message: event.target.value }))
+                    }
+                    placeholder="Operator note or intelligence message"
+                  />
+                  {draft.includeMessage && priorityMatches.length > 0 ? (
+                    <p className="text-sm text-destructive" role="status">
+                      Priority match: {priorityMatches.join(", ")}
+                    </p>
+                  ) : null}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="automatic" keepMounted className="outline-none">
+                {selectedDraftTarget ? (
+                  <GenerateRouteForm
+                    key={selectedDraftTarget.id}
+                    target={selectedDraftTarget}
+                    onGenerate={(events, summary) => {
+                      updateScenario({ events: [...scenario.events, ...events] });
+                      toast.success(summary);
+                    }}
+                  />
+                ) : (
+                  <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+                    Choose a target to generate a route automatically.
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </section>
@@ -1674,15 +1752,6 @@ export function ScenarioBuilder() {
                                 </Badge>
                                 <ChevronDownIcon className="size-3.5 text-muted-foreground" />
                               </CollapsibleTrigger>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 px-2 text-xs"
-                                onClick={() => setRouteTargetId(target.id)}
-                              >
-                                <RouteIcon data-icon="inline-start" />
-                                Route
-                              </Button>
                             </div>
                             <CollapsibleContent>
                               <p className="px-2 py-1 text-[11px] text-muted-foreground">
@@ -1932,21 +2001,6 @@ export function ScenarioBuilder() {
           </div>
         </div>
       </section>
-
-      {routeTarget ? (
-        <GenerateRouteDialog
-          target={routeTarget}
-          open={Boolean(routeTargetId)}
-          onOpenChange={(open) => {
-            if (!open) setRouteTargetId(null);
-          }}
-          onGenerate={(events, summary) => {
-            updateScenario({ events: [...scenario.events, ...events] });
-            toast.success(summary);
-            setRouteTargetId(null);
-          }}
-        />
-      ) : null}
     </main>
   );
 }

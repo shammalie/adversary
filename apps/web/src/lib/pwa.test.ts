@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-describe("offline PWA build artifacts", () => {
+describe("PWA build artifacts", () => {
   it("includes a generated service worker when dist exists", () => {
     const distDir = resolve(process.cwd(), "dist");
     if (!existsSync(distDir)) {

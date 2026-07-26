@@ -6,7 +6,7 @@ export function computePreviewRevision(scenario: SimulationScenario): string {
   const targetPart = scenario.targets
     .map(
       (target) =>
-        `${target.id}:${target.callsign}:${target.color}:${target.revealOnFirstEvent}:${JSON.stringify(target.profile)}`,
+        `${target.id}:${target.callsign}:${target.color}:${target.revealOnFirstEvent}:${target.appearOnFirstEvent}:${JSON.stringify(target.profile)}`,
     )
     .toSorted()
     .join("|");

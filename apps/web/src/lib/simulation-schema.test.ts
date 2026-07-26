@@ -64,6 +64,83 @@ describe("simulation schema", () => {
     expect(messages).toContain("Each target must have at least one event.");
   });
 
+  it("defaults omitted appearOnFirstEvent to false", () => {
+    const result = validateScenario({
+      schemaVersion: 2,
+      id: "s1",
+      name: "Test",
+      createdAt: "2026-07-24T12:00:00.000Z",
+      updatedAt: "2026-07-24T12:00:00.000Z",
+      priorityTerms: [],
+      targets: [
+        {
+          id: "target-1",
+          callsign: "ALPHA",
+          revealOnFirstEvent: true,
+          color: "#22d3ee",
+          profile: {
+            vehicleCategory: "aircraft",
+            affiliation: "unknown",
+            status: "active",
+          },
+        },
+      ],
+      events: [
+        {
+          id: "event-1",
+          targetId: "target-1",
+          at: "2026-07-24T12:00:00.000Z",
+          message: "Ping",
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.targets[0]?.appearOnFirstEvent).toBe(false);
+  });
+
+  it("rejects revealOnFirstEvent and appearOnFirstEvent both true", () => {
+    const result = validateScenario({
+      schemaVersion: 2,
+      id: "s1",
+      name: "Test",
+      createdAt: "2026-07-24T12:00:00.000Z",
+      updatedAt: "2026-07-24T12:00:00.000Z",
+      priorityTerms: [],
+      targets: [
+        {
+          id: "target-1",
+          callsign: "ALPHA",
+          revealOnFirstEvent: true,
+          appearOnFirstEvent: true,
+          color: "#22d3ee",
+          profile: {
+            vehicleCategory: "aircraft",
+            affiliation: "unknown",
+            status: "active",
+          },
+        },
+      ],
+      events: [
+        {
+          id: "event-1",
+          targetId: "target-1",
+          at: "2026-07-24T12:00:00.000Z",
+          message: "Ping",
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(
+      result.error.issues.some(
+        (issue) =>
+          issue.message === "Choose reveal on first event or appear on first event, not both." &&
+          issue.path.join(".") === "targets.0.appearOnFirstEvent",
+      ),
+    ).toBe(true);
+  });
+
   it("requires every target to have at least one event", () => {
     const result = validateScenario({
       schemaVersion: 2,

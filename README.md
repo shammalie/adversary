@@ -4,7 +4,7 @@
   <img src="docs/images/hero-banner.png" alt="Adversary — multi-target tracking simulation" width="100%" />
 </p>
 
-**Adversary** is a browser-based multi-target tracking simulator. Author scenarios, replay timed position and message events, and run an operations console with live roster, map tracks, and priority intelligence — including offline map regions for disconnected use.
+**Adversary** is a browser-based multi-target tracking simulator. Author scenarios, replay timed position and message events, and run an operations console with live roster, map tracks, and priority intelligence — including a local-first OpenMapTiles stack for disconnected LAN deployments.
 
 <p align="center">
   <a href="#quick-start"><strong>Quick start</strong></a> ·
@@ -19,17 +19,17 @@
 
 Train operators, demo tracking workflows, or prototype geospatial intelligence pipelines without a live data feed. Scenarios are plain JSON: define targets, schedule events, hit **Start simulation**, and watch contacts appear on the map as time advances.
 
-| Operations console | Scenario builder | Offline regions |
+| Operations console | Scenario builder | Local-first maps |
 | :---: | :---: | :---: |
-| <img src="docs/images/feature-operations.png" alt="Operations map with tracked contacts" width="280" /> | <img src="docs/images/feature-builder.png" alt="Scenario builder with routes and timeline" width="280" /> | <img src="docs/images/feature-offline.png" alt="Offline map region packages" width="280" /> |
-| Live roster, track camera, event ingest, and priority alerts | Targets, routes, messages, demos, and schema-validated export | Import PMTiles packages and run disconnected |
+| <img src="docs/images/feature-operations.png" alt="Operations map with tracked contacts" width="280" /> | <img src="docs/images/feature-builder.png" alt="Scenario builder with routes and timeline" width="280" /> | <img src="docs/images/feature-offline.png" alt="Local OpenMapTiles stack" width="280" /> |
+| Live roster, track camera, event ingest, and priority alerts | Targets, routes, messages, demos, and schema-validated export | Traefik + tileserver-gl on `*.adversary` |
 
 ### Capabilities
 
 - **Operations dashboard** — target roster, 2D / globe map, track / overview / pan camera, event ingest table, and priority message highlighting
 - **Scenario builder** — author targets and timed events, generate routes, load random demos, preview, and start a run
 - **JSON import** — upload or paste scenarios with inline schema docs and validation
-- **Offline maps** — import region packages (PMTiles + style) for field or air-gapped use
+- **Local-first maps** — planet OpenMapTiles via Docker tileserver-gl (Liberty / Dark), fronted by Traefik
 - **Client-first** — scenarios and runtime state persist in IndexedDB; installable as a PWA
 
 ---
@@ -40,10 +40,11 @@ Train operators, demo tracking workflows, or prototype geospatial intelligence p
 
 ```bash
 pnpm install
+cp .env.example .env   # if you do not already have a root `.env`
 pnpm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001). The app redirects to **Operations**.
+Open [http://localhost:3001](http://localhost:3001). The app redirects to **Operations**. Map styles come from `VITE_MAP_STYLE_*` in the root `.env` (public basemaps by default in development).
 
 To run only the web app:
 
@@ -99,15 +100,32 @@ While a simulation is active:
 - Browse schema documentation and cross-field rules
 - Valid scenarios can be saved and started
 
-### 4. Offline map regions
+### 4. Map styles & environment
 
-Import a ZIP package containing:
+Client configuration lives in the **repo root** `.env` and is validated by [`packages/env/src/web.ts`](packages/env/src/web.ts) (`@t3-oss/env-core` + Zod). Copy [`.env.example`](.env.example) to `.env` for local development. Vite loads env from the monorepo root (`envDir` in `apps/web/vite.config.ts`).
 
-- `manifest.json` (schema version `2`)
-- `style.json`
-- A `.pmtiles` file referenced by the manifest
+| Variable | Purpose |
+| --- | --- |
+| `VITE_MAP_STYLE_LIGHT` | MapLibre style URL for light theme |
+| `VITE_MAP_STYLE_DARK` | MapLibre style URL for dark theme |
 
-Activate a region to use its tiles when operating without online basemaps.
+**Development (Vite):** public basemap URLs are fine (defaults in `.env.example`).
+
+**Local-first Docker:** set (or uncomment) tileserver URLs in the root `.env` before building:
+
+```bash
+VITE_MAP_STYLE_LIGHT=http://tiles.adversary/styles/liberty/style.json
+VITE_MAP_STYLE_DARK=http://tiles.adversary/styles/dark/style.json
+```
+
+Compose also falls back to those tileserver URLs for build args if the variables are unset. `VITE_*` values are **baked in at build time**. Changing them for a Docker image requires `pnpm run docker:build` (or `docker:up --build`).
+
+**Adding a future env var**
+
+1. Add a Zod field under `client` in `packages/env/src/web.ts` (name must start with `VITE_`)
+2. Set it in root `.env` / `.env.example`
+3. Import `env` from `@adversary/env/web` and use `env.VITE_…`
+4. Rebuild Docker images after changing production values
 
 ---
 
@@ -128,6 +146,7 @@ Scenarios use **schema version 2**. Minimal shape:
       "id": "tgt-1",
       "callsign": "VIPER-01",
       "revealOnFirstEvent": true,
+      "appearOnFirstEvent": false,
       "color": "#4ec9e0",
       "profile": {
         "vehicleCategory": "aircraft",
@@ -175,13 +194,16 @@ adversary/
 │   └── web/              # React app (TanStack Router, MapLibre, PWA)
 ├── packages/
 │   ├── ui/               # Shared shadcn/ui primitives & styles
-│   ├── env/              # Shared environment helpers
+│   ├── env/              # @t3-oss/env-core + Zod client env schema
 │   └── config/           # Shared TypeScript / tooling config
+├── data/tiles/           # OpenMapTiles MBTiles + styles (gitignored bulk)
+├── scripts/
+│   └── collect-map-tiles.sh
 ├── docs/images/          # README artwork
-└── docker-compose.yml    # Production-style web container
+└── docker-compose.yml    # Traefik + nginx web + tileserver-gl
 ```
 
-**Stack:** TypeScript · React 19 · TanStack Router · Tailwind CSS · MapLibre GL · PMTiles · IndexedDB · Vite+ · pnpm workspaces
+**Stack:** TypeScript · React 19 · TanStack Router · Tailwind CSS · MapLibre GL · OpenMapTiles · IndexedDB · Vite+ · pnpm workspaces · Traefik
 
 ---
 
@@ -196,6 +218,7 @@ adversary/
 | `pnpm run check-types` | TypeScript only |
 | `pnpm run lint` / `pnpm run format` | Lint or format |
 | `pnpm run test:a11y` | Playwright accessibility tests (web) |
+| `pnpm run tiles:collect` | Download planet MBTiles + Liberty/Dark styles into `data/tiles` |
 | `pnpm run docker:build` | Build Compose images |
 | `pnpm run docker:up` | Build and start Compose stack |
 | `pnpm run docker:logs` | Tail Compose logs |
@@ -213,20 +236,45 @@ pnpm --filter web test:e2e
 
 ## Deployment
 
+### Hosts (local-first domains)
+
+Add to `/etc/hosts` (or equivalent DNS):
+
+```text
+127.0.0.1 app.adversary
+127.0.0.1 tiles.adversary
+```
+
+### Collect map tiles
+
+Planet OpenMapTiles MBTiles are large (~100GB). Ensure ample free disk, then:
+
+```bash
+pnpm run tiles:collect
+```
+
+This writes `data/tiles/openmaptiles.mbtiles`, Liberty/Dark styles, fonts/sprites, and `data/tiles/config.json` for tileserver-gl.
+
 ### Docker Compose
 
 ```bash
+# optional: edit root `.env` for map style build args
 pnpm run docker:up
 ```
 
-Serves the web app at [http://localhost:3001](http://localhost:3001) (nginx in-container on port 80).
+Services:
+
+| Host | Service |
+| --- | --- |
+| [http://app.adversary](http://app.adversary) | Traefik → nginx SPA |
+| [http://tiles.adversary](http://tiles.adversary) | Traefik → tileserver-gl |
+
+HTTP only for v1. Production map style URLs are baked from Compose build args (defaults: Liberty/Dark on `tiles.adversary`). There is **no** public CDN fallback in the Docker deploy — if tileserver is down, maps fail closed.
 
 ```bash
 pnpm run docker:logs   # follow logs
 pnpm run docker:down   # stop
 ```
-
-Environment variables are read from `apps/web/.env` when present, and can be overridden in `docker-compose.yml`.
 
 ### UI customization
 

@@ -1,16 +1,35 @@
 name: adversary
 
 services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=false
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        VITE_MAP_STYLE_LIGHT: ${VITE_MAP_STYLE_LIGHT:-http://tiles.adversary/styles/liberty/style.json}
+        VITE_MAP_STYLE_DARK: ${VITE_MAP_STYLE_DARK:-http://tiles.adversary/styles/dark/style.json}
     init: true
-    ports:
-      - "3001:80"
     env_file:
-      - path: apps/web/.env
+      - path: .env
         required: false
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.adversary-web.rule=Host(`app.adversary`)
+      - traefik.http.routers.adversary-web.entrypoints=web
+      - traefik.http.services.adversary-web.loadbalancer.server.port=80
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
       interval: 10s
@@ -18,3 +37,25 @@ services:
       retries: 5
       start_period: 10s
     restart: unless-stopped
+    depends_on:
+      - traefik
+
+  tiles:
+    image: maptiler/tileserver-gl:latest
+    volumes:
+      - ./data/tiles:/data
+    command: ["--config", "/data/config.json"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.adversary-tiles.rule=Host(`tiles.adversary`)
+      - traefik.http.routers.adversary-tiles.entrypoints=web
+      - traefik.http.services.adversary-tiles.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    depends_on:
+      - traefik

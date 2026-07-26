@@ -63,8 +63,8 @@ export function DateTimePicker({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-[1fr_7.5rem] gap-2">
+    <div className="flex min-w-0 flex-col gap-2">
+      <div className="grid grid-cols-1 gap-2 min-[22rem]:grid-cols-[minmax(0,1fr)_7.5rem]">
         <Popover>
           <PopoverTrigger
             render={
@@ -72,7 +72,7 @@ export function DateTimePicker({
                 id={id}
                 type="button"
                 variant="outline"
-                className="justify-start font-normal"
+                className="w-full justify-start font-normal"
                 aria-invalid={ariaInvalid}
               />
             }
@@ -98,7 +98,10 @@ export function DateTimePicker({
           onChange={(event) => setTime(event.target.value)}
         />
       </div>
-      <ButtonGroup aria-label="Quick time adjustments">
+      <ButtonGroup
+        aria-label="Quick time adjustments"
+        className="flex-wrap"
+      >
         <Button type="button" variant="outline" size="sm" onClick={setNow}>
           Now
         </Button>

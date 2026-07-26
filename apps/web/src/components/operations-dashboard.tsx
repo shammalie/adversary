@@ -320,7 +320,13 @@ export function OperationsDashboard() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>();
 
-  const targets = useMemo(() => (runtime ? Object.values(runtime.targetStates) : []), [runtime]);
+  const targets = useMemo(
+    () =>
+      runtime
+        ? Object.values(runtime.targetStates).filter((target) => target.appeared)
+        : [],
+    [runtime],
+  );
   const selectedTarget =
     targets.find((target) => target.targetId === selectedTargetId) ?? targets[0];
   const trackedTargets = useMemo(
@@ -342,8 +348,21 @@ export function OperationsDashboard() {
   }, []);
 
   useEffect(() => {
-    if (!selectedTargetId && targets[0]) setSelectedTargetId(targets[0].targetId);
+    if (!selectedTargetId) {
+      if (targets[0]) setSelectedTargetId(targets[0].targetId);
+      return;
+    }
+    if (!targets.some((target) => target.targetId === selectedTargetId)) {
+      setSelectedTargetId(targets[0]?.targetId);
+    }
   }, [selectedTargetId, targets]);
+
+  useEffect(() => {
+    setTrackedTargetIds((current) => {
+      const next = current.filter((id) => targets.some((target) => target.targetId === id));
+      return next.length === current.length ? current : next;
+    });
+  }, [targets]);
 
   useEffect(() => {
     if (cameraMode === "track" && trackedTargetIds.length === 0) {

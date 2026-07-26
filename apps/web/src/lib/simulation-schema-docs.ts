@@ -61,7 +61,14 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
     fields: [
       { name: "id", type: "string", required: true, notes: "Unique within the scenario." },
       { name: "callsign", type: "string", required: true, notes: "Unique, case-insensitive." },
-      { name: "revealOnFirstEvent", type: "boolean", required: true },
+      { name: "revealOnFirstEvent", type: "boolean", required: true, notes: "Mutually exclusive with appearOnFirstEvent." },
+      {
+        name: "appearOnFirstEvent",
+        type: "boolean",
+        required: false,
+        notes:
+          "Default false. Hide from roster/map until first event. Mutually exclusive with revealOnFirstEvent.",
+      },
       { name: "color", type: "string", required: true, notes: "Hex color #RRGGBB." },
       { name: "profile", type: "TargetProfile", required: true },
     ],

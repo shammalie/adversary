@@ -41,5 +41,6 @@
   "39": "utils.ts",
   "40": "test-setup.ts",
   "41": "vite-env.d.ts",
-  "42": "vite.config.ts"
+  "42": "vite.config.ts",
+  "43": "pwa.test.ts"
 }

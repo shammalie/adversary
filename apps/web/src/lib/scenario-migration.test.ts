@@ -69,6 +69,7 @@ describe("scenario migration", () => {
     const migrated = migrateScenarioV1ToV2(legacy);
     expect(migrated.schemaVersion).toBe(2);
     expect(migrated.targets[0]?.revealOnFirstEvent).toBe(true);
+    expect(migrated.targets[0]?.appearOnFirstEvent).toBe(false);
     expect(migrated.targets[0]?.profile.vehicleCategory).toBe("car");
     expect(migrated.events.some((event) => event.id === "identity-1")).toBe(false);
     expect(migrated.events.find((event) => event.id === "position-1")?.position).toEqual({
