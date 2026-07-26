@@ -1,16 +1,16 @@
 # Graph Report - web  (2026-07-26)
 
 ## Corpus Check
-- 83 files · ~46,689 words
+- 88 files · ~52,320 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 595 nodes · 1271 edges · 44 communities (27 shown, 17 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.56)
+- 636 nodes · 1389 edges · 44 communities (27 shown, 17 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.57)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `79bd3298`
+- Built from commit: `2ef1553d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -56,28 +56,28 @@
 - vite.config.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `ScenarioBuilder()` - 28 edges
-2. `SimulationEvent` - 19 edges
-3. `sortEvents()` - 18 edges
-4. `createDemoScenario()` - 16 edges
-5. `SimulationScenario` - 15 edges
-6. `scripts` - 13 edges
-7. `haversineDistanceNm()` - 13 edges
-8. `generatePointToPointEvents()` - 12 edges
-9. `VehicleCategory` - 12 edges
-10. `TargetDefinition` - 12 edges
+1. `ScenarioBuilder()` - 27 edges
+2. `createDemoScenario()` - 21 edges
+3. `sortEvents()` - 20 edges
+4. `SimulationEvent` - 20 edges
+5. `SimulationScenario` - 16 edges
+6. `MapLocationPicker()` - 14 edges
+7. `haversineDistanceNm()` - 14 edges
+8. `scripts` - 13 edges
+9. `TrackingMap()` - 13 edges
+10. `VehicleCategory` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `MapLocationPickerProps` --references--> `PositionPayload`  [EXTRACTED]
-  src/components/map-location-picker.tsx → src/types/target.ts
-- `OperationsDashboard()` --indirect_call--> `event()`  [INFERRED]
-  src/components/operations-dashboard.tsx → src/lib/build-event-graph.test.ts
+- `GroupedTimeline()` --indirect_call--> `event()`  [INFERRED]
+  src/components/grouped-timeline.tsx → src/lib/build-event-graph.test.ts
+- `EventIngestTable()` --indirect_call--> `event()`  [INFERRED]
+  src/components/ops-event-tables.tsx → src/lib/build-event-graph.test.ts
 - `ScenarioBuilder()` --indirect_call--> `event()`  [INFERRED]
   src/components/scenario-builder.tsx → src/lib/build-event-graph.test.ts
-- `EventDraft` --references--> `PositionPayload`  [EXTRACTED]
-  src/lib/event-draft.ts → src/types/target.ts
 - `EditTimelineEvent()` --calls--> `matchPriorityTerms()`  [EXTRACTED]
   src/components/grouped-timeline-event.tsx → src/lib/priority-terms.ts
+- `describeEvent()` --calls--> `derivePositionSnapshot()`  [EXTRACTED]
+  src/components/grouped-timeline.tsx → src/lib/position-telemetry.ts
 
 ## Import Cycles
 - None detected.
@@ -85,24 +85,24 @@
 ## Communities (44 total, 17 thin omitted)
 
 ### Community 0 - "target.ts"
-Cohesion: 0.12
-Nodes (35): defaultEndPoint(), FieldErrors, GenerateRouteForm(), isValidCoordinate(), MapLocationPicker, validateRouteForm(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING (+27 more)
+Cohesion: 0.10
+Nodes (43): defaultEndPoint(), FieldErrors, GenerateRouteForm(), isValidCoordinate(), MapLocationPicker, validateRouteForm(), MapLocationPickerProps, EventDraft (+35 more)
 
 ### Community 1 - "map-data-provider.tsx"
 Cohesion: 0.19
 Nodes (12): MapDataContext, MapDataContextValue, MapDataProvider(), resolveColorScheme(), getOnlineMapStyle(), isConfiguredStyleUrl(), isOnlineStyleUrl(), MapColorScheme (+4 more)
 
 ### Community 2 - "scenario-builder.tsx"
-Cohesion: 0.08
-Nodes (48): DateTimePicker(), DateTimePickerProps, parseValue(), PRESETS, toLocalInputValue(), DEFAULT_POSITION, EditTimelineEvent(), EditTimelineEventProps (+40 more)
+Cohesion: 0.07
+Nodes (44): BrandMark(), DateTimePicker(), DateTimePickerProps, parseValue(), PRESETS, toLocalInputValue(), describeEvent(), DEFAULT_POSITION (+36 more)
 
 ### Community 3 - "simulation-storage.ts"
 Cohesion: 0.10
-Nodes (39): SimulationProvider(), isLegacyScenario(), mergeProfile(), migrateRetiredVehicleCategories(), migrateScenarioV1ToV2(), migrateVehicleCategory(), legacy, VEHICLE_CATEGORY_SET (+31 more)
+Nodes (41): SimulationContext, SimulationContextValue, SimulationProvider(), isLegacyScenario(), mergeProfile(), migrateRetiredVehicleCategories(), migrateScenarioV1ToV2(), migrateVehicleCategory() (+33 more)
 
 ### Community 4 - "demo-scenario.ts"
-Cohesion: 0.08
-Nodes (36): countPayloadStats(), getTocItemOffset(), SCHEMA_TOC_ITEMS, SchemaBreakdown(), SchemaDialog(), schemaFieldId(), SchemaTocItem, SimulationImport() (+28 more)
+Cohesion: 0.07
+Nodes (45): countPayloadStats(), getTocItemOffset(), SCHEMA_TOC_ITEMS, SchemaBreakdown(), SchemaDialog(), schemaFieldId(), SchemaTocItem, slugifySchemaHeading() (+37 more)
 
 ### Community 5 - "build-event-graph.ts"
 Cohesion: 0.10
@@ -110,27 +110,27 @@ Nodes (32): TimedEventEdgeView(), EventGraphNodeView(), KIND_BADGE, KIND_COLOR, 
 
 ### Community 6 - "dependencies"
 Cohesion: 0.05
-Nodes (37): @adversary/env, @adversary/ui, date-fns, dotenv, @hookform/resolvers, idb, lucide-react, maplibre-gl (+29 more)
+Nodes (39): @adversary/env, @adversary/ui, date-fns, dotenv, @hookform/resolvers, idb, lucide-react, maplibre-gl (+31 more)
 
 ### Community 7 - "operations-dashboard.tsx"
-Cohesion: 0.22
-Nodes (16): eventPayloadBadges(), eventSummary(), matchesTargetSearch(), OperationsDashboard(), TargetRoster(), targetSearchFields(), TrackedTargetCard(), TrackingMap (+8 more)
+Cohesion: 0.18
+Nodes (23): AFFILIATION_COLORS, AFFILIATION_SET, isAccessibleAffiliationColor(), resolveAffiliationColor(), resolveAffiliationColorTheme(), channelLuminance(), contrastRatio(), findTargetColorLabel() (+15 more)
 
 ### Community 8 - "simulation-engine.ts"
-Cohesion: 0.18
-Nodes (23): SimulationContext, SimulationContextValue, clampPreviewTimeMs(), computePreviewRevision(), getPreviewRangeMs(), getPreviewStartMs(), applyEvent(), buildInterpolatedPreviewTargetStates() (+15 more)
+Cohesion: 0.20
+Nodes (20): clampPreviewTimeMs(), computePreviewRevision(), getPreviewRangeMs(), getPreviewStartMs(), appearTarget(), applyEvent(), buildInterpolatedPreviewTargetStates(), buildPreviewTargetStates() (+12 more)
 
 ### Community 9 - "map-location-picker.tsx"
-Cohesion: 0.13
-Nodes (24): useMapData(), buildNeighborCollection(), buildTrailCollection(), CompanionMapPoint, createCompanionPointElement(), createEventPointElement(), EMPTY_TRAIL, ensureLineLayer() (+16 more)
+Cohesion: 0.07
+Nodes (49): useMapData(), buildNeighborCollection(), buildTrailCollection(), CompanionMapPoint, createCompanionPointElement(), createEventPointElement(), EMPTY_TRAIL, ensureLineLayer() (+41 more)
 
 ### Community 10 - "components.json"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 11 - "__root.tsx"
-Cohesion: 0.14
-Nodes (14): BrandMark(), Header(), ModeToggle(), getDevtoolsEnabled(), RouterDevtoolsGate(), subscribeToDevtoolsFlag(), TanStackRouterDevtools, useSimulation() (+6 more)
+Cohesion: 0.18
+Nodes (10): getDevtoolsEnabled(), RouterDevtoolsGate(), subscribeToDevtoolsFlag(), TanStackRouterDevtools, FALLBACK_THEME_COLORS, readThemeColorCssVar(), ThemeColorSync(), ThemeProvider() (+2 more)
 
 ### Community 12 - "loader.tsx"
 Cohesion: 0.13
@@ -142,15 +142,15 @@ Nodes (15): ., ../../packages/ui/src/*, vite/client, compilerOptions, esModuleIn
 
 ### Community 14 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): @axe-core/playwright, devDependencies, @axe-core/playwright, postcss, to-ico, typescript, vite, @vitejs/plugin-react (+5 more)
+Nodes (13): @adversary/config, @axe-core/playwright, devDependencies, @adversary/config, @axe-core/playwright, to-ico, typescript, vite (+5 more)
 
 ### Community 15 - "scripts"
 Cohesion: 0.15
 Nodes (13): scripts, build, check-types, dev, generate-icons, generate-readme-images, serve, start (+5 more)
 
 ### Community 16 - "generate-route-dialog.tsx"
-Cohesion: 0.14
-Nodes (18): createDraftForTargetChange(), createEventDraft(), createFollowOnDraft(), DEFAULT_EVENT_POSITION, draftFromEvent(), EventDraft, eventFromDraft(), lastPositionForTarget() (+10 more)
+Cohesion: 0.15
+Nodes (17): createDraftForTargetChange(), createEventDraft(), createFollowOnDraft(), DEFAULT_EVENT_POSITION, draftFromEvent(), eventFromDraft(), lastPositionForTarget(), replaceEvent() (+9 more)
 
 ### Community 17 - "a11y.helpers.ts"
 Cohesion: 0.25
@@ -169,28 +169,28 @@ Cohesion: 0.40
 Nodes (4): __dir, files, outDir, srcDir
 
 ### Community 24 - "postcss"
-Cohesion: 0.11
-Nodes (30): buildBounds(), buildTrailCoordinates(), createMarkerElement(), EMPTY_TRAIL_COLLECTION, isOutsideViewport(), MapTargetDisplay, needsTrackRefit(), toDisplayTarget() (+22 more)
+Cohesion: 0.17
+Nodes (21): matchesTargetSearch(), OperationsDashboard(), TargetRoster(), targetSearchFields(), TrackedTargetCard(), TrackingMap, EventIngestTable(), eventPayloadBadges() (+13 more)
 
 ## Knowledge Gaps
-- **174 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+169 more)
+- **183 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+178 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SimulationEvent` connect `build-event-graph.ts` to `target.ts`, `scenario-builder.tsx`, `simulation-storage.ts`, `demo-scenario.ts`, `operations-dashboard.tsx`, `simulation-engine.ts`, `generate-route-dialog.tsx`, `postcss`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+- **Why does `SimulationEvent` connect `build-event-graph.ts` to `target.ts`, `scenario-builder.tsx`, `simulation-storage.ts`, `demo-scenario.ts`, `simulation-engine.ts`, `generate-route-dialog.tsx`, `postcss`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `Loader()` connect `loader.tsx` to `scenario-builder.tsx`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Why does `PositionPayload` connect `target.ts` to `generate-route-dialog.tsx`, `map-location-picker.tsx`, `scenario-builder.tsx`, `postcss`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `package.json`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _174 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _183 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `target.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.12270531400966184 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09898989898989899 - nodes in this community are weakly interconnected._
 - **Should `scenario-builder.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.07831677381648158 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06545879602571596 - nodes in this community are weakly interconnected._
 - **Should `simulation-storage.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.10465116279069768 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10175763182238667 - nodes in this community are weakly interconnected._

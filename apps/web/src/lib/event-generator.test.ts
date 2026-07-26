@@ -192,6 +192,51 @@ describe("event generator", () => {
     }
   });
 
+  it("does not pad a long-haul A→B route with parked zero-speed leftover events", () => {
+    let index = 0;
+    const startPoint = { latitude: -27.704648, longitude: 149.923111, altitude: 0 };
+    const endPoint = { latitude: 44.261976, longitude: -65.895905, altitude: 0 };
+    const startAt = "2026-07-26T14:23:46.244Z";
+    const endAt = deriveEndAtFromDistance({
+      startAt,
+      startPoint,
+      endPoint,
+      vehicleCategory: "aircraft",
+    });
+    // High random() biases toward max heading/speed noise — previously arrived early
+    // and filled the rest of the window with identical parked points.
+    const events = generateRouteEvents({
+      targetId: "target-pacific",
+      count: 60,
+      startAt,
+      endAt,
+      startPoint,
+      endPoint,
+      vehicleCategory: "aircraft",
+      random: () => 0.92,
+      idFactory: () => `pac-${index++}`,
+    });
+
+    expect(events.at(-1)?.position?.latitude).toBeCloseTo(endPoint.latitude, 4);
+    expect(events.at(-1)?.position?.longitude).toBeCloseTo(endPoint.longitude, 4);
+
+    let parkedTail = 0;
+    for (let eventIndex = 1; eventIndex < events.length; eventIndex += 1) {
+      const previous = events[eventIndex - 1]!;
+      const current = events[eventIndex]!;
+      const moved = haversineDistanceNm(previous.position!, current.position!);
+      if (moved < 0.05 && (current.position?.speed ?? 0) < 1) {
+        parkedTail += 1;
+      }
+    }
+    expect(parkedTail).toBeLessThanOrEqual(1);
+
+    // Still progressing for most of the schedule — last event near derived endAt.
+    const lastMs = Date.parse(events.at(-1)!.at);
+    const endMs = Date.parse(endAt);
+    expect(Math.abs(lastMs - endMs)).toBeLessThan(15 * 60_000);
+  });
+
   it("rejects an end window that exceeds aircraft max speed for the straight-line distance", () => {
     expect(() =>
       generateRouteEvents({

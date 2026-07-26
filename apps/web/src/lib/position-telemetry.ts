@@ -1,3 +1,4 @@
+import { normalizeLongitude, shortestLongitudeDelta } from "@/lib/geo-longitude";
 import { clampSpeedToCategory } from "@/lib/vehicle-speed";
 import type { PositionPayload, PositionSnapshot, VehicleCategory } from "@/types/target";
 
@@ -18,7 +19,7 @@ export function haversineDistanceNm(
   const lat1 = toRadians(from.latitude);
   const lat2 = toRadians(to.latitude);
   const deltaLat = toRadians(to.latitude - from.latitude);
-  const deltaLng = toRadians(to.longitude - from.longitude);
+  const deltaLng = toRadians(shortestLongitudeDelta(from.longitude, to.longitude));
   const a =
     Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2;
   return 2 * EARTH_RADIUS_NM * Math.asin(Math.min(1, Math.sqrt(a)));
@@ -30,7 +31,7 @@ export function initialBearingDegrees(
 ) {
   const lat1 = toRadians(from.latitude);
   const lat2 = toRadians(to.latitude);
-  const deltaLng = toRadians(to.longitude - from.longitude);
+  const deltaLng = toRadians(shortestLongitudeDelta(from.longitude, to.longitude));
   const y = Math.sin(deltaLng) * Math.cos(lat2);
   const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
   return (toDegrees(Math.atan2(y, x)) + 360) % 360;
@@ -57,7 +58,7 @@ export function destinationPoint(
       Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2),
     );
 
-  return { latitude: toDegrees(lat2), longitude: ((toDegrees(lng2) + 540) % 360) - 180 };
+  return { latitude: toDegrees(lat2), longitude: normalizeLongitude(toDegrees(lng2)) };
 }
 
 export function derivePositionSnapshot(

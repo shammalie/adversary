@@ -27,14 +27,6 @@ import {
 import { Label } from "@adversary/ui/components/label";
 import { ScrollArea } from "@adversary/ui/components/scroll-area";
 import { Switch } from "@adversary/ui/components/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@adversary/ui/components/table";
 import { ToggleGroup, ToggleGroupItem } from "@adversary/ui/components/toggle-group";
 import { cn } from "@adversary/ui/lib/utils";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -45,8 +37,6 @@ import {
   FocusIcon,
   Globe2Icon,
   MapIcon,
-  MapPinIcon,
-  MessageSquareIcon,
   RadioTowerIcon,
   RotateCcwIcon,
   SearchIcon,
@@ -56,11 +46,12 @@ import {
 } from "lucide-react";
 import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
+import { EventIngestTable, IntelligenceMessagesTable } from "@/components/ops-event-tables";
 import { useSimulation } from "@/components/simulation-provider";
 import type { CameraMode } from "@/components/tracking-map";
 import { isPriorityMessage, matchPriorityTerms } from "@/lib/priority-terms";
 import { getVehicleCategoryIcon } from "@/lib/vehicle-icon";
-import type { MapMode, RuntimeTargetState, SimulationEvent } from "@/types/target";
+import type { MapMode, RuntimeTargetState } from "@/types/target";
 
 const TrackingMap = lazy(() =>
   import("@/components/tracking-map").then((module) => ({ default: module.TrackingMap })),
@@ -70,36 +61,6 @@ const TrackingMap = lazy(() =>
 const OPS_WORKSPACE_HEIGHT = "h-[min(58vh,42rem)] min-h-88";
 /** Desktop row height — must be literal for Tailwind detection. */
 const OPS_WORKSPACE_ROW = "xl:h-[min(58vh,42rem)] xl:min-h-88";
-
-function eventSummary(event: SimulationEvent) {
-  const parts: string[] = [];
-  if (event.position) {
-    parts.push(
-      `Position ${event.position.latitude.toFixed(4)}, ${event.position.longitude.toFixed(4)}`,
-    );
-  }
-  if (event.message) parts.push(event.message);
-  return parts.join(" · ");
-}
-
-function eventPayloadBadges(event: SimulationEvent) {
-  return (
-    <div className="flex flex-wrap gap-1">
-      {event.position ? (
-        <Badge variant="outline">
-          <MapPinIcon data-icon="inline-start" />
-          Position
-        </Badge>
-      ) : null}
-      {event.message ? (
-        <Badge variant="outline">
-          <MessageSquareIcon data-icon="inline-start" />
-          Message
-        </Badge>
-      ) : null}
-    </div>
-  );
-}
 
 function targetSearchFields(target: RuntimeTargetState) {
   const fields = [target.callsign];
@@ -136,6 +97,7 @@ function TargetRoster({
   const trackedSet = new Set(trackedIds);
   const itemRefs = useRef(new Map<string, HTMLElement>());
   const targetsRef = useRef(targets);
+  const searchScrollKeyRef = useRef<string | null>(null);
   targetsRef.current = targets;
 
   const filteredTargets = useMemo(() => {
@@ -156,13 +118,21 @@ function TargetRoster({
     });
   }, [selectedId]);
 
+  // Scroll selected into view only while searching — not on roster scroll or live target updates.
   useEffect(() => {
-    if (!selectedId) return;
+    const needle = deferredQuery.trim().toLowerCase();
+    if (!selectedId || !needle) {
+      searchScrollKeyRef.current = null;
+      return;
+    }
+    const key = `${selectedId}:${needle}`;
+    if (searchScrollKeyRef.current === key) return;
     const node = itemRefs.current.get(selectedId);
     if (!node) return;
+    searchScrollKeyRef.current = key;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     node.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
-  }, [filteredTargets, selectedId]);
+  }, [deferredQuery, filteredTargets, selectedId]);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-2">
@@ -637,42 +607,12 @@ export function OperationsDashboard() {
             <CardTitle>Event ingest</CardTitle>
             <CardDescription>Complete ordered stream from the active scenario</CardDescription>
           </CardHeader>
-          <CardContent className="max-h-[24rem] overflow-auto px-0 scrollbar-thin">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Ingest time</TableHead>
-                  <TableHead>Callsign</TableHead>
-                  <TableHead>Payload</TableHead>
-                  <TableHead>Summary</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {runtime.ingestedEvents.toReversed().map((event) => {
-                  const target = runtime.targetStates[event.targetId];
-                  const critical = event.message && isPriorityMessage(event.message, priorityTerms);
-                  return (
-                    <TableRow key={event.id} className={cn(critical && "bg-destructive/10")}>
-                      <TableCell className="whitespace-nowrap font-mono text-xs">
-                        {new Date(event.at).toLocaleTimeString()}
-                      </TableCell>
-                      <TableCell className="font-medium">{target?.callsign}</TableCell>
-                      <TableCell>{eventPayloadBadges(event)}</TableCell>
-                      <TableCell className="max-w-md truncate text-muted-foreground">
-                        {eventSummary(event)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {runtime.ingestedEvents.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                      Listening for scheduled events…
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
+          <CardContent className="px-0">
+            <EventIngestTable
+              events={runtime.ingestedEvents}
+              priorityTerms={priorityTerms}
+              targetStates={runtime.targetStates}
+            />
           </CardContent>
         </Card>
 
@@ -681,50 +621,12 @@ export function OperationsDashboard() {
             <CardTitle>Intelligence messages</CardTitle>
             <CardDescription>Derived priority from scenario terms</CardDescription>
           </CardHeader>
-          <CardContent className="max-h-[24rem] overflow-auto px-0 scrollbar-thin">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Event time</TableHead>
-                  <TableHead>Callsign</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Message</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {messageEvents.toReversed().map((event) => {
-                  const matches = event.message
-                    ? matchPriorityTerms(event.message, priorityTerms)
-                    : [];
-                  return (
-                    <TableRow
-                      key={event.id}
-                      className={cn(matches.length > 0 && "bg-destructive/10 font-medium")}
-                    >
-                      <TableCell className="whitespace-nowrap font-mono text-xs">
-                        {new Date(event.at).toLocaleTimeString()}
-                      </TableCell>
-                      <TableCell>{runtime.targetStates[event.targetId]?.callsign}</TableCell>
-                      <TableCell>
-                        {matches.length > 0 ? (
-                          <Badge variant="destructive">Priority</Badge>
-                        ) : (
-                          <Badge variant="outline">Routine</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{event.message}</TableCell>
-                    </TableRow>
-                  );
-                })}
-                {messageEvents.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                      No intelligence messages ingested.
-                    </TableCell>
-                  </TableRow>
-                ) : null}
-              </TableBody>
-            </Table>
+          <CardContent className="px-0">
+            <IntelligenceMessagesTable
+              events={messageEvents}
+              priorityTerms={priorityTerms}
+              targetStates={runtime.targetStates}
+            />
           </CardContent>
         </Card>
       </div>

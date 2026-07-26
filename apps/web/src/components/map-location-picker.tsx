@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  LngLatBounds,
   Map as MapLibreMap,
   Marker,
   type GeoJSONSource,
@@ -28,6 +27,11 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@adversary/ui/c
 import { cn } from "@adversary/ui/lib/utils";
 
 import { useMapData } from "@/components/map-data-provider";
+import {
+  lngLatBoundsForPoints,
+  normalizeLongitude,
+  unwrapLineLongitudes,
+} from "@/lib/geo-longitude";
 import {
   SPEED_UNITS,
   formatSpeedInUnit,
@@ -147,7 +151,9 @@ function buildTrailCollection(
         properties: { color },
         geometry: {
           type: "LineString",
-          coordinates: points.map((point) => [point.longitude, point.latitude]),
+          coordinates: unwrapLineLongitudes(
+            points.map((point) => [point.longitude, point.latitude]),
+          ),
         },
       },
     ],
@@ -209,10 +215,10 @@ function buildNeighborCollection(
       properties: { color },
       geometry: {
         type: "LineString",
-        coordinates: [
+        coordinates: unwrapLineLongitudes([
           [previous.longitude, previous.latitude],
           draftCoord,
-        ],
+        ]),
       },
     });
   }
@@ -222,10 +228,10 @@ function buildNeighborCollection(
       properties: { color },
       geometry: {
         type: "LineString",
-        coordinates: [
+        coordinates: unwrapLineLongitudes([
           draftCoord,
           [next.longitude, next.latitude],
-        ],
+        ]),
       },
     });
   }
@@ -368,11 +374,13 @@ export function MapLocationPicker({
 
     const handleMapClick = (event: { lngLat?: { lat: number; lng: number } }) => {
       if (!marker || !event.lngLat) return;
-      marker.setLngLat(event.lngLat);
+      const longitude = normalizeLongitude(event.lngLat.lng);
+      const latitude = event.lngLat.lat;
+      marker.setLngLat({ lng: longitude, lat: latitude });
       onChangeRef.current({
         ...valueRef.current,
-        latitude: Number(event.lngLat.lat.toFixed(6)),
-        longitude: Number(event.lngLat.lng.toFixed(6)),
+        latitude: Number(latitude.toFixed(6)),
+        longitude: Number(longitude.toFixed(6)),
       });
     };
 
@@ -380,10 +388,11 @@ export function MapLocationPicker({
       if (!marker) return;
       const lngLat = marker.getLngLat();
       if (!lngLat || !Number.isFinite(lngLat.lng) || !Number.isFinite(lngLat.lat)) return;
+      const longitude = normalizeLongitude(lngLat.lng);
       onChangeRef.current({
         ...valueRef.current,
         latitude: Number(lngLat.lat.toFixed(6)),
-        longitude: Number(lngLat.lng.toFixed(6)),
+        longitude: Number(longitude.toFixed(6)),
       });
     };
 
@@ -636,19 +645,23 @@ export function MapLocationPicker({
       return;
     }
 
-    const bounds = new LngLatBounds();
-    for (const point of sortedExistingPoints) {
-      const pointLngLat = lngLatPair(point.longitude, point.latitude);
-      if (pointLngLat) bounds.extend(pointLngLat);
-    }
-    bounds.extend(valueLngLat);
-    if (companionLngLat) bounds.extend(companionLngLat);
-    if (!bounds.getSouthWest() || !bounds.getNorthEast()) return;
+    const fitPoints = [
+      ...sortedExistingPoints.map((point) => ({
+        longitude: point.longitude,
+        latitude: point.latitude,
+      })),
+      { longitude: value.longitude, latitude: value.latitude },
+      ...(companionPoint
+        ? [{ longitude: companionPoint.longitude, latitude: companionPoint.latitude }]
+        : []),
+    ].filter((point) => isFiniteLngLat(point.longitude, point.latitude));
+    const corners = lngLatBoundsForPoints(fitPoints);
+    if (!corners) return;
 
     programmaticCameraRef.current = true;
     try {
       map.resize();
-      map.fitBounds(bounds, { padding: 40, maxZoom: 12, duration: 0 });
+      map.fitBounds(corners, { padding: 40, maxZoom: 12, duration: 0 });
     } catch {
       programmaticCameraRef.current = false;
       return;

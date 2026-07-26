@@ -37,12 +37,42 @@ export interface GenerateRouteOptions {
   /** Aircraft A→B destination. When set, intermediates bias toward this point and the final event snaps here. */
   endPoint?: PositionPayload;
   vehicleCategory: VehicleCategory;
+  /**
+   * When set, every track point is clamped to ±this latitude. Near the bound,
+   * wander headings reflect so contacts do not stick to the Mercator clip edge.
+   */
+  maxAbsLatitude?: number;
   random?: () => number;
   idFactory?: () => string;
 }
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function clampLatitude(latitude: number, maxAbsLatitude?: number) {
+  if (maxAbsLatitude === undefined) return latitude;
+  const bound = Math.min(Math.abs(maxAbsLatitude), 90);
+  return clamp(latitude, -bound, bound);
+}
+
+function applyLatitudeBound(
+  point: Pick<PositionPayload, "latitude" | "longitude">,
+  heading: number,
+  maxAbsLatitude?: number,
+): { point: Pick<PositionPayload, "latitude" | "longitude">; heading: number } {
+  if (maxAbsLatitude === undefined) {
+    return { point, heading };
+  }
+  const bound = Math.min(Math.abs(maxAbsLatitude), 90);
+  if (Math.abs(point.latitude) <= bound) {
+    return { point, heading };
+  }
+  return {
+    point: { latitude: clamp(point.latitude, -bound, bound), longitude: point.longitude },
+    // Reflect north/south component so the next legs turn inland.
+    heading: (180 - heading + 360) % 360,
+  };
 }
 
 function sampleSpeed(category: VehicleCategory, random: () => number) {
@@ -153,13 +183,17 @@ function generateWanderEvents(options: {
   endMs: number;
   startPoint: PositionPayload;
   vehicleCategory: VehicleCategory;
+  maxAbsLatitude?: number;
   random: () => number;
   idFactory: () => string;
 }): SimulationEvent[] {
   const timestamps = distributeTimestamps(options.startMs, options.endMs, options.count);
   let heading = options.random() * 360;
   let speed = sampleSpeed(options.vehicleCategory, options.random);
-  let current = { ...options.startPoint };
+  let current: PositionPayload = {
+    ...options.startPoint,
+    latitude: clampLatitude(options.startPoint.latitude, options.maxAbsLatitude),
+  };
   const events: SimulationEvent[] = [];
 
   for (let index = 0; index < options.count; index += 1) {
@@ -172,9 +206,11 @@ function generateWanderEvents(options: {
       const smoothing = CATEGORY_MOVEMENT_SMOOTHING[options.vehicleCategory];
       heading = (heading + (options.random() * 2 - 1) * smoothing.maxHeadingChange + 360) % 360;
       const nextPoint = destinationPoint(current, distanceNm, heading);
+      const bounded = applyLatitudeBound(nextPoint, heading, options.maxAbsLatitude);
+      heading = bounded.heading;
       current = {
-        latitude: nextPoint.latitude,
-        longitude: nextPoint.longitude,
+        latitude: bounded.point.latitude,
+        longitude: bounded.point.longitude,
         altitude: options.startPoint.altitude,
       };
     }
@@ -203,32 +239,43 @@ function generatePointToPointEvents(options: {
   startPoint: PositionPayload;
   endPoint: PositionPayload;
   vehicleCategory: VehicleCategory;
+  maxAbsLatitude?: number;
   random: () => number;
   idFactory: () => string;
 }): SimulationEvent[] {
+  const startPoint: PositionPayload = {
+    ...options.startPoint,
+    latitude: clampLatitude(options.startPoint.latitude, options.maxAbsLatitude),
+  };
+  const endPoint: PositionPayload = {
+    ...options.endPoint,
+    latitude: clampLatitude(options.endPoint.latitude, options.maxAbsLatitude),
+  };
+
   assertFeasibleEndWindow({
     startMs: options.startMs,
     endMs: options.endMs,
-    startPoint: options.startPoint,
-    endPoint: options.endPoint,
+    startPoint,
+    endPoint,
     vehicleCategory: options.vehicleCategory,
   });
 
   const timestamps = distributeTimestamps(options.startMs, options.endMs, options.count);
   const range = CATEGORY_SPEED_RANGES[options.vehicleCategory];
   const smoothing = CATEGORY_MOVEMENT_SMOOTHING[options.vehicleCategory];
-  let speed = sampleSpeed(options.vehicleCategory, options.random);
-  let current: PositionPayload = { ...options.startPoint };
+  const totalNm = haversineDistanceNm(startPoint, endPoint);
+  const totalHours = Math.max((options.endMs - options.startMs) / 3_600_000, 1 / 3600);
+  // Seed near schedule pace (distance / window) so early legs don't burn the route.
+  let speed = clamp(totalNm / totalHours, range.minKnots, range.maxKnots);
+  let current: PositionPayload = { ...startPoint };
   const events: SimulationEvent[] = [];
   const lastIndex = options.count - 1;
+  /** Treat as arrived — avoid emitting parked duplicates for leftover timestamps. */
+  const arrivalEpsilonNm = 0.05;
 
   for (let index = 0; index < options.count; index += 1) {
     const progress = lastIndex === 0 ? 1 : index / lastIndex;
-    const altitude = lerpAltitude(
-      options.startPoint.altitude,
-      options.endPoint.altitude,
-      progress,
-    );
+    const altitude = lerpAltitude(startPoint.altitude, endPoint.altitude, progress);
 
     if (index === 0) {
       events.push({
@@ -236,8 +283,8 @@ function generatePointToPointEvents(options: {
         targetId: options.targetId,
         at: new Date(timestamps[0] ?? options.startMs).toISOString(),
         position: {
-          latitude: Number(options.startPoint.latitude.toFixed(6)),
-          longitude: Number(options.startPoint.longitude.toFixed(6)),
+          latitude: Number(startPoint.latitude.toFixed(6)),
+          longitude: Number(startPoint.longitude.toFixed(6)),
           altitude,
           speed: Number(speed.toFixed(1)),
         },
@@ -248,9 +295,10 @@ function generatePointToPointEvents(options: {
     const previousAt = timestamps[index - 1] ?? options.startMs;
     const currentAt = timestamps[index] ?? options.endMs;
     const elapsedHours = Math.max((currentAt - previousAt) / 3_600_000, 1 / 3600);
+    const remainingNm = haversineDistanceNm(current, endPoint);
 
-    if (index === lastIndex) {
-      const distanceNm = haversineDistanceNm(current, options.endPoint);
+    if (index === lastIndex || remainingNm <= arrivalEpsilonNm) {
+      const distanceNm = haversineDistanceNm(current, endPoint);
       const geometricSpeed = distanceNm / elapsedHours;
       if (geometricSpeed > range.maxKnots + 1) {
         throw new Error(
@@ -259,38 +307,55 @@ function generatePointToPointEvents(options: {
       }
       speed = clamp(geometricSpeed, 0, range.maxKnots);
       current = {
-        latitude: options.endPoint.latitude,
-        longitude: options.endPoint.longitude,
-        altitude: options.endPoint.altitude ?? altitude,
+        latitude: endPoint.latitude,
+        longitude: endPoint.longitude,
+        altitude: endPoint.altitude ?? altitude,
       };
-    } else {
-      const remainingNm = haversineDistanceNm(current, options.endPoint);
-      const desiredBearing = initialBearingDegrees(current, options.endPoint);
-      const hoursLeftAfter = Math.max((options.endMs - currentAt) / 3_600_000, 1 / 3600);
-      const maxLeaveNm = range.maxKnots * hoursLeftAfter;
-      const minStepNm = Math.max(0, remainingNm - maxLeaveNm);
-      const minSpeedForReserve = minStepNm / elapsedHours;
-
-      speed = updateSpeed(options.vehicleCategory, speed, options.random);
-      speed = clamp(Math.max(speed, minSpeedForReserve), range.minKnots, range.maxKnots);
-
-      // Keep distance = speed × Δt. Bias heading to the destination with light noise;
-      // fall back to true azimuth when the noisy step would stall closing.
-      const distanceNm = Math.min(speed * elapsedHours, Math.max(remainingNm - 1e-6, 0));
-      let heading =
-        (desiredBearing + (options.random() * 2 - 1) * smoothing.maxHeadingChange + 360) % 360;
-      let nextPoint = destinationPoint(current, distanceNm, heading);
-      if (remainingNm - haversineDistanceNm(nextPoint, options.endPoint) < distanceNm * 0.5) {
-        heading = desiredBearing;
-        nextPoint = destinationPoint(current, distanceNm, heading);
-      }
-      speed = clamp(haversineDistanceNm(current, nextPoint) / elapsedHours, 0, range.maxKnots);
-      current = {
-        latitude: nextPoint.latitude,
-        longitude: nextPoint.longitude,
-        altitude,
-      };
+      events.push({
+        id: options.idFactory(),
+        targetId: options.targetId,
+        at: new Date(timestamps[index] ?? options.startMs).toISOString(),
+        position: {
+          latitude: Number(current.latitude.toFixed(6)),
+          longitude: Number(current.longitude.toFixed(6)),
+          altitude: Number((current.altitude ?? altitude).toFixed(1)),
+          speed: Number(speed.toFixed(1)),
+        },
+      });
+      // Drop leftover timestamps after arrival — no parked zero-speed tail.
+      break;
     }
+
+    const hoursLeftFromPrev = Math.max((options.endMs - previousAt) / 3_600_000, 1 / 3600);
+    const hoursLeftAfter = Math.max((options.endMs - currentAt) / 3_600_000, 1 / 3600);
+    // Time-proportional slice of remaining distance (pace to arrive at endAt, not early).
+    const idealStepNm = remainingNm * (elapsedHours / hoursLeftFromPrev);
+    const maxLeaveNm = range.maxKnots * hoursLeftAfter;
+    const minStepNm = Math.max(0, remainingNm - maxLeaveNm);
+    const maxStepNm = Math.max(0, remainingNm - arrivalEpsilonNm);
+
+    const noise = (options.random() * 2 - 1) * smoothing.maxSpeedChangeFraction;
+    let distanceNm = clamp(idealStepNm * (1 + noise), minStepNm, maxStepNm);
+    speed = clamp(distanceNm / elapsedHours, 0, range.maxKnots);
+    // Allow below category min when the authored window is longer than cruise —
+    // otherwise minKnots would force early arrival and idle padding.
+    distanceNm = Math.min(speed * elapsedHours, maxStepNm);
+
+    const desiredBearing = initialBearingDegrees(current, endPoint);
+    let heading =
+      (desiredBearing + (options.random() * 2 - 1) * smoothing.maxHeadingChange + 360) % 360;
+    let nextPoint = destinationPoint(current, distanceNm, heading);
+    if (remainingNm - haversineDistanceNm(nextPoint, endPoint) < distanceNm * 0.5) {
+      heading = desiredBearing;
+      nextPoint = destinationPoint(current, distanceNm, heading);
+    }
+    const bounded = applyLatitudeBound(nextPoint, heading, options.maxAbsLatitude);
+    speed = clamp(haversineDistanceNm(current, bounded.point) / elapsedHours, 0, range.maxKnots);
+    current = {
+      latitude: bounded.point.latitude,
+      longitude: bounded.point.longitude,
+      altitude,
+    };
 
     events.push({
       id: options.idFactory(),
@@ -311,7 +376,7 @@ function generatePointToPointEvents(options: {
 /**
  * Builds a geodesic track where each leg's distance is speed × elapsed time.
  * Authored position.speed is always set so runtime does not invent speeds.
- * With `endPoint`, intermediates bias toward the destination and the last event snaps exactly there.
+ * With `endPoint`, intermediates bias toward the destination and the final event snaps exactly there.
  */
 export function generateRouteEvents(options: GenerateRouteOptions): SimulationEvent[] {
   const random = options.random ?? Math.random;
@@ -343,6 +408,7 @@ export function generateRouteEvents(options: GenerateRouteOptions): SimulationEv
       startPoint: options.startPoint,
       endPoint: options.endPoint,
       vehicleCategory: options.vehicleCategory,
+      maxAbsLatitude: options.maxAbsLatitude,
       random,
       idFactory,
     });
@@ -355,6 +421,7 @@ export function generateRouteEvents(options: GenerateRouteOptions): SimulationEv
     endMs,
     startPoint: options.startPoint,
     vehicleCategory: options.vehicleCategory,
+    maxAbsLatitude: options.maxAbsLatitude,
     random,
     idFactory,
   });

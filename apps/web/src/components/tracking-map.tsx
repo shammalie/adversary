@@ -25,7 +25,15 @@ import {
   resolveAffiliationColor,
   resolveAffiliationColorTheme,
 } from "@/lib/affiliation-colors";
-import { vehicleCategoryIconSvg } from "@/lib/vehicle-icon";
+import {
+  lngLatBoundsForPoints,
+  shortestLongitudeDelta,
+  unwrapLineLongitudes,
+} from "@/lib/geo-longitude";
+import {
+  vehicleCategoryIconSvg,
+  vehicleCategoryMarkerRotationDegrees,
+} from "@/lib/vehicle-icon";
 import type {
   Affiliation,
   MapMode,
@@ -108,27 +116,8 @@ function toDisplayTarget(target: MapTargetDisplay | RuntimeTargetState): MapTarg
 }
 
 function buildBounds(targets: MapTargetDisplay[]): LngLatBoundsLike | null {
-  const positioned = targets.filter((target) => target.position);
-  if (positioned.length === 0) return null;
-
-  let west = Number.POSITIVE_INFINITY;
-  let south = Number.POSITIVE_INFINITY;
-  let east = Number.NEGATIVE_INFINITY;
-  let north = Number.NEGATIVE_INFINITY;
-
-  for (const target of positioned) {
-    const position = target.position;
-    if (!position) continue;
-    west = Math.min(west, position.longitude);
-    south = Math.min(south, position.latitude);
-    east = Math.max(east, position.longitude);
-    north = Math.max(north, position.latitude);
-  }
-
-  return [
-    [west, south],
-    [east, north],
-  ];
+  const points = targets.flatMap((target) => (target.position ? [target.position] : []));
+  return lngLatBoundsForPoints(points);
 }
 
 function isOutsideViewport(
@@ -186,7 +175,7 @@ function buildTrailCoordinates(
   const coordinates = target.trail.map(
     (point) => [point.longitude, point.latitude] as [number, number],
   );
-  if (!target.position) return coordinates;
+  if (!target.position) return unwrapLineLongitudes(coordinates);
 
   const lastTrailPoint = target.trail.at(-1);
   if (
@@ -196,7 +185,7 @@ function buildTrailCoordinates(
   ) {
     coordinates.push([target.position.longitude, target.position.latitude]);
   }
-  return coordinates;
+  return unwrapLineLongitudes(coordinates);
 }
 
 function createMarkerElement(
@@ -444,11 +433,12 @@ export function TrackingMap({
             marker.setLngLat(destination);
           } else {
             const startedAt = performance.now();
+            const deltaLng = shortestLongitudeDelta(origin.lng, destination.lng);
             const animate = (frameTime: number) => {
               const progress = Math.min((frameTime - startedAt) / 650, 1);
               const eased = 1 - (1 - progress) ** 3;
               marker?.setLngLat({
-                lng: origin.lng + (destination.lng - origin.lng) * eased,
+                lng: origin.lng + deltaLng * eased,
                 lat: origin.lat + (destination.lat - origin.lat) * eased,
               });
               if (progress < 1) {
@@ -476,7 +466,11 @@ export function TrackingMap({
         typeof target.heading === "number" &&
         Number.isFinite(target.heading) &&
         target.trail.length > 1;
-      element.style.setProperty("--marker-rotate", hasHeading ? `${target.heading}deg` : "0deg");
+      const markerRotate = vehicleCategoryMarkerRotationDegrees(
+        hasHeading ? target.heading : undefined,
+        target.vehicleCategory,
+      );
+      element.style.setProperty("--marker-rotate", `${markerRotate}deg`);
       element.dataset.selected = String(target.targetId === selectedTargetId);
       element.dataset.tracked = String(trackedSet.has(target.targetId));
       element.dataset.highlighted = String(Boolean(highlightedEventId));

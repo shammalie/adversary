@@ -17,9 +17,37 @@ const VEHICLE_ICONS: Record<VehicleCategory, LucideIcon> = {
   other: BoxIcon,
 };
 
+/**
+ * Lucide glyphs are not drawn nose-north. CSS `rotate(heading)` alone leaves
+ * aircraft ~45° off (nose NE) and car/truck ~90° off (side profiles face east).
+ * Add this offset to navigation heading so 0° points north on the map.
+ */
+const HEADING_ARTWORK_OFFSET_DEG: Record<VehicleCategory, number> = {
+  aircraft: -45,
+  boat: 0,
+  car: -90,
+  truck: -90,
+  other: 0,
+};
+
 export function getVehicleCategoryIcon(category?: VehicleCategory): LucideIcon {
   if (!category) return BoxIcon;
   return VEHICLE_ICONS[category] ?? BoxIcon;
+}
+
+export function vehicleCategoryHeadingOffsetDegrees(category?: VehicleCategory): number {
+  if (!category) return 0;
+  return HEADING_ARTWORK_OFFSET_DEG[category] ?? 0;
+}
+
+/** Map marker CSS rotation: navigation heading + Lucide artwork offset. */
+export function vehicleCategoryMarkerRotationDegrees(
+  heading: number | undefined,
+  category?: VehicleCategory,
+): number {
+  const offset = vehicleCategoryHeadingOffsetDegrees(category);
+  if (typeof heading !== "number" || !Number.isFinite(heading)) return 0;
+  return heading + offset;
 }
 
 /** SVG markup for MapLibre DOM markers (lucide paths). */

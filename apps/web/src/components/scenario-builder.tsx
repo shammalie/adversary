@@ -15,23 +15,25 @@ import {
   CardTitle,
 } from "@adversary/ui/components/card";
 import { Checkbox } from "@adversary/ui/components/checkbox";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@adversary/ui/components/collapsible";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@adversary/ui/components/field";
 import { Input } from "@adversary/ui/components/input";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@adversary/ui/components/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@adversary/ui/components/dialog";
 import {
   Select,
   SelectContent,
@@ -53,9 +55,6 @@ import { ScrollArea } from "@adversary/ui/components/scroll-area";
 import { cn } from "@adversary/ui/lib/utils";
 import { toast } from "sonner";
 import {
-  ChevronDownIcon,
-  ChevronsDownUpIcon,
-  ChevronsUpDownIcon,
   CircleAlertIcon,
   DownloadIcon,
   FolderOpenIcon,
@@ -77,19 +76,19 @@ import { BrandMark } from "@/components/brand-mark";
 import Loader from "@/components/loader";
 
 import { DateTimePicker } from "@/components/date-time-picker";
-import {
-  EditTimelineEvent,
-  ViewTimelineEvent,
-} from "@/components/grouped-timeline-event";
 import { GenerateRouteForm } from "@/components/generate-route-form";
+import { GroupedTimeline } from "@/components/grouped-timeline";
 import { useSimulation } from "@/components/simulation-provider";
 import { useTheme } from "@/components/theme-provider";
 import {
   createDemoScenario,
   defaultTargetProfile,
+  DEMO_START_LOCATIONS,
   MAX_DEMO_TARGETS,
   MIN_DEMO_TARGETS,
   parseDemoTargetCount,
+  pickRandomDemoOrigin,
+  type DemoOrigin,
   type DemoVehicleSelection,
 } from "@/lib/demo-scenario";
 import {
@@ -98,7 +97,6 @@ import {
   createFollowOnDraft,
   eventFromDraft,
 } from "@/lib/event-draft";
-import { derivePositionSnapshot } from "@/lib/position-telemetry";
 import { addPriorityTerm, matchPriorityTerms, removePriorityTerm } from "@/lib/priority-terms";
 import { sortEvents } from "@/lib/simulation-engine";
 import {
@@ -113,7 +111,6 @@ import {
 import {
   fieldHasIssue,
   formatValidationIssueLabel,
-  getIssuesForEvent,
   getIssuesForTarget,
   getScenarioValidationIssues,
   getValidationIssueFocusId,
@@ -133,7 +130,6 @@ import { PREVIEW_SPEEDS, describePreviewEvent, useBuilderPreview } from "@/lib/u
 import { VEHICLE_CATEGORIES } from "@/types/target";
 import type {
   Affiliation,
-  PositionPayload,
   SimulationEvent,
   SimulationScenario,
   TargetDefinition,
@@ -166,6 +162,23 @@ const PreviewEventGraph = lazy(() =>
   })),
 );
 
+function DemoMapPickerFallback() {
+  return (
+    <div className="grid h-44 place-items-center rounded-lg border bg-muted text-sm text-muted-foreground">
+      Loading map…
+    </div>
+  );
+}
+
+function matchingDemoLocationName(origin: DemoOrigin) {
+  return (
+    DEMO_START_LOCATIONS.find(
+      (location) =>
+        location.latitude === origin.latitude && location.longitude === origin.longitude,
+    )?.name ?? null
+  );
+}
+
 function blankScenario(): SimulationScenario {
   const now = new Date().toISOString();
   return {
@@ -179,36 +192,6 @@ function blankScenario(): SimulationScenario {
     targets: [],
     events: [],
   };
-}
-
-function describeEvent(
-  event: SimulationEvent,
-  previousPosition?: PositionPayload,
-  vehicleCategory?: VehicleCategory,
-) {
-  const parts: string[] = [];
-  if (event.position) {
-    const derived = derivePositionSnapshot(
-      event.position,
-      event.at,
-      previousPosition
-        ? {
-            ...previousPosition,
-            altitude: previousPosition.altitude ?? 0,
-            speed: previousPosition.speed ?? 0,
-            heading: 0,
-            course: 0,
-            at: event.at,
-          }
-        : undefined,
-      vehicleCategory,
-    );
-    parts.push(
-      `${event.position.latitude.toFixed(4)}, ${event.position.longitude.toFixed(4)} · ${derived.speed} kt · ${derived.heading}°`,
-    );
-  }
-  if (event.message) parts.push(event.message);
-  return parts.join(" · ");
 }
 
 function OptionSelect({
@@ -338,17 +321,24 @@ export function ScenarioBuilder() {
   const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [storedScenariosOpen, setStoredScenariosOpen] = useState(false);
-  const [demoMenuOpen, setDemoMenuOpen] = useState(false);
+  const [demoDialogOpen, setDemoDialogOpen] = useState(false);
   const [demoVehicleRandom, setDemoVehicleRandom] = useState(true);
   const [demoVehicleCategories, setDemoVehicleCategories] = useState<VehicleCategory[]>([]);
   const [demoTargetCountInput, setDemoTargetCountInput] = useState("10");
+  const [demoStartAt, setDemoStartAt] = useState(() => new Date().toISOString());
+  const [demoEndAt, setDemoEndAt] = useState("");
+  const [demoOrigin, setDemoOrigin] = useState<DemoOrigin | null>(null);
 
   const demoTargetCount = parseDemoTargetCount(demoTargetCountInput);
   const demoTargetCountInvalid =
     demoTargetCountInput.trim().length > 0 && demoTargetCount === null;
+  const demoEndAtInvalid =
+    demoEndAt.trim().length > 0 &&
+    (!Number.isFinite(Date.parse(demoEndAt)) || Date.parse(demoEndAt) <= Date.parse(demoStartAt));
   const demoVehicleSelection: DemoVehicleSelection = demoVehicleRandom
     ? "random"
     : demoVehicleCategories;
+  const demoLocationLabel = demoOrigin ? matchingDemoLocationName(demoOrigin) : null;
 
   useEffect(() => {
     if (demoVehicleCategories.length === 0 && !demoVehicleRandom) {
@@ -701,9 +691,16 @@ export function ScenarioBuilder() {
       toast.error("Select Random or at least one vehicle type.");
       return;
     }
+    if (demoEndAtInvalid) {
+      toast.error("End time must be after start time.");
+      return;
+    }
     const demo = createDemoScenario(Date.now(), Math.random, {
       vehicleSelection: demoVehicleSelection,
       targetCount: demoTargetCount,
+      startAt: demoStartAt,
+      endAt: demoEndAt.trim() || undefined,
+      origin: demoOrigin ?? undefined,
     });
     setScenario(demo);
     setSelectedTargetId(demo.targets[0]?.id ?? null);
@@ -715,7 +712,7 @@ export function ScenarioBuilder() {
           : createEventDraft(),
       );
     }
-    setDemoMenuOpen(false);
+    setDemoDialogOpen(false);
     const typeLabel = demoVehicleRandom
       ? "mixed"
       : demoVehicleCategories.length === 1
@@ -724,6 +721,10 @@ export function ScenarioBuilder() {
     toast.success(
       `Loaded ${demo.targets.length} ${typeLabel} target${demo.targets.length === 1 ? "" : "s"}.`,
     );
+  }
+
+  function randomizeDemoOrigin() {
+    setDemoOrigin(pickRandomDemoOrigin());
   }
 
   function beginSimulation() {
@@ -868,134 +869,205 @@ export function ScenarioBuilder() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {!validationSuccess ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    aria-label={`${validationIssues.length} validation errors`}
-                  />
-                }
-              >
-                <CircleAlertIcon data-icon="inline-start" />
-                {validationIssues.length}{" "}
-                {validationIssues.length === 1 ? "error" : "errors"}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                {(["scenario", "targets", "events"] as const).map((section) => {
-                  const issues = groupedIssues[section];
-                  if (issues.length === 0) return null;
-                  return (
-                    <DropdownMenuGroup key={section}>
-                      <DropdownMenuLabel className="capitalize">{section}</DropdownMenuLabel>
-                      {issues.map((issue) => (
-                        <DropdownMenuItem
-                          key={`${issue.path}-${issue.message}`}
-                          className="items-start"
-                          onClick={() => navigateToIssue(issue)}
-                        >
-                          <span className="flex min-w-0 flex-col gap-0.5">
-                            <span className="truncate font-medium">
-                              {formatValidationIssueLabel(issue, scenario)}
-                            </span>
-                            <span className="text-xs text-muted-foreground whitespace-normal">
-                              {issue.message}
-                            </span>
-                          </span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuGroup>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : null}
-          <DropdownMenu open={demoMenuOpen} onOpenChange={setDemoMenuOpen}>
-            <DropdownMenuTrigger render={<Button variant="outline" />}>
+          <Dialog open={demoDialogOpen} onOpenChange={setDemoDialogOpen}>
+            <DialogTrigger render={<Button variant="outline" />}>
               <SparklesIcon data-icon="inline-start" />
               Load random demo
-              <ChevronDownIcon data-icon="inline-end" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Vehicle type</DropdownMenuLabel>
-                <DropdownMenuCheckboxItem
-                  checked={demoVehicleRandom}
-                  onCheckedChange={(checked) => {
-                    if (checked) selectDemoVehicleRandom();
-                  }}
-                >
-                  Random
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuSeparator />
-                {VEHICLE_CATEGORIES.map((category) => (
-                  <DropdownMenuCheckboxItem
-                    key={category}
-                    className="capitalize"
-                    checked={demoVehicleCategories.includes(category)}
-                    onCheckedChange={(checked) => {
-                      toggleDemoVehicleCategory(category, checked === true);
-                    }}
-                  >
-                    {category}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <div
-                className="px-1.5 py-1.5"
-                onKeyDown={(event) => event.stopPropagation()}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <Field data-invalid={demoTargetCountInvalid || undefined}>
-                  <FieldLabel htmlFor="demo-target-count">Target size</FieldLabel>
-                  <Input
-                    id="demo-target-count"
-                    type="number"
-                    inputMode="numeric"
-                    min={MIN_DEMO_TARGETS}
-                    max={MAX_DEMO_TARGETS}
-                    step={1}
-                    value={demoTargetCountInput}
-                    onChange={(event) => setDemoTargetCountInput(event.target.value)}
-                    aria-invalid={demoTargetCountInvalid || undefined}
-                    aria-describedby={
-                      demoTargetCountInvalid ? "demo-target-count-error" : "demo-target-count-hint"
-                    }
-                  />
-                  {demoTargetCountInvalid ? (
-                    <FieldError id="demo-target-count-error">
-                      Enter an integer greater than 1 and at most {MAX_DEMO_TARGETS}.
-                    </FieldError>
-                  ) : (
-                    <FieldDescription id="demo-target-count-hint">
-                      {MIN_DEMO_TARGETS}–{MAX_DEMO_TARGETS} contacts
-                    </FieldDescription>
-                  )}
-                </Field>
+            </DialogTrigger>
+            <DialogContent className="flex max-h-[90vh] max-w-[calc(100%-2rem)] flex-col overflow-hidden sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Load random demo</DialogTitle>
+                <DialogDescription>
+                  Configure vehicle mix and schedule. Optionally pin a start region, or leave it
+                  unset to randomize.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="-mx-4 min-h-0 flex-1 overflow-y-auto border-y px-4 py-4">
+                <div className="flex flex-col gap-5">
+                  <Field>
+                    <FieldLabel>Vehicle type</FieldLabel>
+                    <div className="flex flex-wrap gap-3">
+                      <label className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={demoVehicleRandom}
+                          onCheckedChange={(checked) => {
+                            if (checked) selectDemoVehicleRandom();
+                          }}
+                        />
+                        Random
+                      </label>
+                      {VEHICLE_CATEGORIES.map((category) => (
+                        <label key={category} className="flex items-center gap-2 text-sm capitalize">
+                          <Checkbox
+                            checked={demoVehicleCategories.includes(category)}
+                            onCheckedChange={(checked) => {
+                              toggleDemoVehicleCategory(category, checked === true);
+                            }}
+                          />
+                          {category}
+                        </label>
+                      ))}
+                    </div>
+                  </Field>
+
+                  <Field data-invalid={demoTargetCountInvalid || undefined}>
+                    <FieldLabel htmlFor="demo-target-count">Target size</FieldLabel>
+                    <Input
+                      id="demo-target-count"
+                      type="number"
+                      inputMode="numeric"
+                      min={MIN_DEMO_TARGETS}
+                      max={MAX_DEMO_TARGETS}
+                      step={1}
+                      value={demoTargetCountInput}
+                      onChange={(event) => setDemoTargetCountInput(event.target.value)}
+                      aria-invalid={demoTargetCountInvalid || undefined}
+                      aria-describedby={
+                        demoTargetCountInvalid ? "demo-target-count-error" : "demo-target-count-hint"
+                      }
+                    />
+                    {demoTargetCountInvalid ? (
+                      <FieldError id="demo-target-count-error">
+                        Enter an integer greater than 1 and at most {MAX_DEMO_TARGETS}.
+                      </FieldError>
+                    ) : (
+                      <FieldDescription id="demo-target-count-hint">
+                        {MIN_DEMO_TARGETS}–{MAX_DEMO_TARGETS} contacts
+                      </FieldDescription>
+                    )}
+                  </Field>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="demo-start-at">Start time</FieldLabel>
+                      <DateTimePicker
+                        id="demo-start-at"
+                        value={demoStartAt}
+                        onChange={setDemoStartAt}
+                      />
+                    </Field>
+                    <Field data-invalid={demoEndAtInvalid || undefined}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <FieldLabel htmlFor="demo-end-at">End time (optional)</FieldLabel>
+                        {demoEndAt.trim() ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setDemoEndAt("")}
+                          >
+                            Clear
+                          </Button>
+                        ) : null}
+                      </div>
+                      <DateTimePicker
+                        id="demo-end-at"
+                        value={demoEndAt}
+                        onChange={setDemoEndAt}
+                        aria-invalid={demoEndAtInvalid || undefined}
+                      />
+                      {demoEndAtInvalid ? (
+                        <FieldError>End time must be after start time.</FieldError>
+                      ) : (
+                        <FieldDescription>
+                          Leave empty for per-contact random durations from start.
+                        </FieldDescription>
+                      )}
+                    </Field>
+                  </div>
+
+                  <Field>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <FieldLabel>Starting location (optional)</FieldLabel>
+                      <div className="flex flex-wrap gap-1">
+                        {demoOrigin ? (
+                          <>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={randomizeDemoOrigin}
+                            >
+                              <ShuffleIcon data-icon="inline-start" />
+                              Randomize
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setDemoOrigin(null)}
+                            >
+                              Clear
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={randomizeDemoOrigin}
+                          >
+                            <MapIcon data-icon="inline-start" />
+                            Choose location
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    {demoOrigin ? (
+                      <>
+                        <FieldDescription>
+                          {demoLocationLabel
+                            ? `Preset: ${demoLocationLabel}. Contacts scatter nearby.`
+                            : "Custom point. Contacts scatter nearby."}
+                        </FieldDescription>
+                        <Suspense fallback={<DemoMapPickerFallback />}>
+                          <MapLocationPicker
+                            idPrefix="demo-origin"
+                            value={{
+                              latitude: demoOrigin.latitude,
+                              longitude: demoOrigin.longitude,
+                              altitude: 0,
+                            }}
+                            onChange={(point) =>
+                              setDemoOrigin({
+                                latitude: point.latitude,
+                                longitude: point.longitude,
+                              })
+                            }
+                            showSpeedField={false}
+                            mapClassName="h-44 sm:h-52"
+                            mapAriaLabel="Demo starting location. Click or tap to place the region center."
+                          />
+                        </Suspense>
+                      </>
+                    ) : (
+                      <FieldDescription>
+                        Leave unset for a random world location per contact/group.
+                      </FieldDescription>
+                    )}
+                  </Field>
+                </div>
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                disabled={demoTargetCount === null}
-                onClick={() => loadRandomDemo()}
-              >
-                <SparklesIcon />
-                Load demo
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDemoDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  disabled={demoTargetCount === null || demoEndAtInvalid}
+                  onClick={() => loadRandomDemo()}
+                >
+                  <SparklesIcon data-icon="inline-start" />
+                  Load demo
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           {runtime?.status === "running" ? (
             <Button variant="secondary" render={<Link to="/operations" />}>
               <RadioIcon data-icon="inline-start" />
               View live simulation
             </Button>
           ) : null}
-          <Button onClick={beginSimulation} disabled={!validationSuccess}>
-            <PlayIcon data-icon="inline-start" />
-            Start simulation
-          </Button>
         </div>
       </section>
 
@@ -1203,11 +1275,58 @@ export function ScenarioBuilder() {
       </Card>
 
       <section className="overflow-hidden rounded-lg border bg-card shadow-sm" aria-labelledby="compose-banner-title">
-        <div className="flex items-center justify-between bg-foreground px-3.5 py-2.5 text-background">
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-foreground px-3.5 py-2.5 text-background">
           <h2 id="compose-banner-title" className="text-xs font-semibold uppercase tracking-[0.08em]">
             Compose
           </h2>
-          <span className="text-xs text-background/60">targets + event</span>
+          <div className="flex flex-wrap items-center gap-2">
+            {!validationSuccess ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 border-destructive/50 bg-destructive/20 text-red-100 hover:bg-destructive/30 hover:text-red-50"
+                      aria-label={`${validationIssues.length} validation errors`}
+                    />
+                  }
+                >
+                  <CircleAlertIcon data-icon="inline-start" />
+                  {validationIssues.length}{" "}
+                  {validationIssues.length === 1 ? "error" : "errors"}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  {(["scenario", "targets", "events"] as const).map((section) => {
+                    const issues = groupedIssues[section];
+                    if (issues.length === 0) return null;
+                    return (
+                      <DropdownMenuGroup key={section}>
+                        <DropdownMenuLabel className="capitalize">{section}</DropdownMenuLabel>
+                        {issues.map((issue) => (
+                          <DropdownMenuItem
+                            key={`${issue.path}-${issue.message}`}
+                            className="items-start"
+                            onClick={() => navigateToIssue(issue)}
+                          >
+                            <span className="flex min-w-0 flex-col gap-0.5">
+                              <span className="truncate font-medium">
+                                {formatValidationIssueLabel(issue, scenario)}
+                              </span>
+                              <span className="text-xs text-muted-foreground whitespace-normal">
+                                {issue.message}
+                              </span>
+                            </span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
+            <span className="text-xs text-background/60">targets + event</span>
+          </div>
         </div>
         <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,0.68fr)]">
           <div id="targets-section" className="flex min-w-0 flex-col gap-3">
@@ -1650,14 +1769,34 @@ export function ScenarioBuilder() {
       </section>
 
       <section className="overflow-hidden rounded-lg border bg-card shadow-sm" aria-labelledby="review-banner-title">
-        <div className="flex items-center justify-between bg-foreground px-3.5 py-2.5 text-background">
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-foreground px-3.5 py-2.5 text-background">
           <h2 id="review-banner-title" className="text-xs font-semibold uppercase tracking-[0.08em]">
             Review
           </h2>
-          <span className="text-xs text-background/60">timeline + map / graph preview</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-background/60">timeline + map / graph preview</span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background"
+              onClick={save}
+            >
+              <SaveIcon data-icon="inline-start" />
+              Save
+            </Button>
+            <Button
+              size="sm"
+              className="h-7 bg-background text-foreground hover:bg-background/90"
+              onClick={beginSimulation}
+              disabled={!validationSuccess}
+            >
+              <PlayIcon data-icon="inline-start" />
+              Start simulation
+            </Button>
+          </div>
         </div>
-        <div className="grid gap-3 p-3 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,0.68fr)]">
-          <div id="events-section" className="flex min-w-0 flex-col gap-2">
+        <div className="grid items-start gap-3 p-3 xl:grid-cols-[minmax(0,0.32fr)_minmax(0,0.68fr)]">
+          <div id="events-section" className="flex min-h-0 min-w-0 flex-col gap-2 overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-border pb-2">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <strong className="text-sm">Grouped timeline</strong>
@@ -1689,135 +1828,25 @@ export function ScenarioBuilder() {
                 Add targets to build a grouped timeline.
               </p>
             ) : (
-              <>
-                <div className="flex flex-wrap gap-1.5">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAllTimelineExpanded(true)}
-                  >
-                    <ChevronsUpDownIcon data-icon="inline-start" />
-                    Expand all
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAllTimelineExpanded(false)}
-                  >
-                    <ChevronsDownUpIcon data-icon="inline-start" />
-                    Collapse all
-                  </Button>
-                </div>
-                <ScrollArea className="h-[min(36rem,58vh)] pr-2">
-                  <div className="flex flex-col gap-1.5">
-                    {scenario.targets.map((target) => {
-                      const placementEvents = eventsByTarget.get(target.id) ?? [];
-                      const events =
-                        timelineMode === "edit"
-                          ? placementEvents
-                          : sortEvents(placementEvents);
-                      const timedEvents = sortEvents(placementEvents);
-                      const firstAt = timedEvents[0]?.at;
-                      const lastAt = timedEvents.at(-1)?.at;
-                      const graphSelected = previewGraphTargetId === target.id;
-                      let previousPosition: PositionPayload | undefined;
-                      return (
-                        <Collapsible
-                          key={target.id}
-                          open={isTimelineExpanded(target.id)}
-                          onOpenChange={(open) => {
-                            setOpenTimelineIds((current) => ({ ...current, [target.id]: open }));
-                            if (open) setPreviewGraphTargetId(target.id);
-                          }}
-                        >
-                          <div
-                            className={cn(
-                              "rounded-md border",
-                              graphSelected && "border-primary/50 ring-1 ring-primary/30",
-                            )}
-                          >
-                            <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-1 rounded-t-md border-b bg-card/95 px-2 py-1 backdrop-blur-md">
-                              <CollapsibleTrigger
-                                className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                onClick={() => setPreviewGraphTargetId(target.id)}
-                              >
-                                <span
-                                  className="size-2 shrink-0 rounded-full"
-                                  style={{ backgroundColor: target.color }}
-                                  aria-hidden="true"
-                                />
-                                <span className="truncate font-medium">{target.callsign}</span>
-                                <Badge variant="outline" className="text-[10px]">
-                                  {events.length}
-                                </Badge>
-                                <ChevronDownIcon className="size-3.5 text-muted-foreground" />
-                              </CollapsibleTrigger>
-                            </div>
-                            <CollapsibleContent>
-                              <p className="px-2 py-1 text-[11px] text-muted-foreground">
-                                {firstAt && lastAt
-                                  ? `${new Date(firstAt).toLocaleString()} – ${new Date(lastAt).toLocaleString()}`
-                                  : "No events scheduled"}
-                              </p>
-                              <ul
-                                className={cn(
-                                  "flex flex-col px-1.5 pb-1.5",
-                                  timelineMode === "edit" ? "gap-1.5" : "gap-0.5",
-                                )}
-                              >
-                                {events.map((event) => {
-                                  const eventIssues = getIssuesForEvent(
-                                    validationIssues,
-                                    event.id,
-                                    scenario,
-                                  );
-                                  const summary = describeEvent(
-                                    event,
-                                    previousPosition,
-                                    target.profile.vehicleCategory,
-                                  );
-                                  if (event.position) previousPosition = event.position;
-                                  if (timelineMode === "edit") {
-                                    return (
-                                      <EditTimelineEvent
-                                        key={event.id}
-                                        event={event}
-                                        callsign={target.callsign}
-                                        priorityTerms={scenario.priorityTerms}
-                                        issues={eventIssues}
-                                        highlighted={highlightEventId === event.id}
-                                        onChange={updateEvent}
-                                        onDelete={() => removeEvent(event.id)}
-                                      />
-                                    );
-                                  }
-                                  return (
-                                    <ViewTimelineEvent
-                                      key={event.id}
-                                      event={event}
-                                      callsign={target.callsign}
-                                      summary={summary}
-                                      issues={eventIssues}
-                                      highlighted={highlightEventId === event.id}
-                                      onDelete={() => removeEvent(event.id)}
-                                    />
-                                  );
-                                })}
-                              </ul>
-                            </CollapsibleContent>
-                          </div>
-                        </Collapsible>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
-              </>
+              <GroupedTimeline
+                scenario={scenario}
+                eventsByTarget={eventsByTarget}
+                mode={timelineMode}
+                isExpanded={isTimelineExpanded}
+                onOpenChange={(targetId, open) => {
+                  setOpenTimelineIds((current) => ({ ...current, [targetId]: open }));
+                }}
+                onExpandAll={() => setAllTimelineExpanded(true)}
+                onCollapseAll={() => setAllTimelineExpanded(false)}
+                previewGraphTargetId={previewGraphTargetId}
+                onSelectGraphTarget={setPreviewGraphTargetId}
+                validationIssues={validationIssues}
+                highlightEventId={highlightEventId}
+                onUpdateEvent={updateEvent}
+                onDeleteEvent={removeEvent}
+              />
             )}
             <div className="flex flex-wrap gap-1.5 border-t border-dashed border-border pt-2">
-              <Button variant="outline" size="sm" onClick={save}>
-                <SaveIcon data-icon="inline-start" />
-                Save
-              </Button>
               <Button
                 variant="outline"
                 size="sm"

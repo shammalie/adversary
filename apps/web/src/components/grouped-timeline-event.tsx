@@ -43,7 +43,7 @@ function TimelineEventShell({
   actions,
 }: TimelineEventShellProps) {
   return (
-    <li
+    <div
       id={`event-row-${eventId}`}
       className={cn(
         "flex items-start justify-between gap-2 rounded-md hover:bg-muted/40",
@@ -54,7 +54,7 @@ function TimelineEventShell({
     >
       <div className="min-w-0 flex-1">{children}</div>
       <div className="flex shrink-0 gap-1">{actions}</div>
-    </li>
+    </div>
   );
 }
 
