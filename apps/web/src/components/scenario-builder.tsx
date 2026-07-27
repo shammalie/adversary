@@ -15,7 +15,15 @@ import {
   CardTitle,
 } from "@adversary/ui/components/card";
 import { Checkbox } from "@adversary/ui/components/checkbox";
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@adversary/ui/components/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@adversary/ui/components/field";
 import { Input } from "@adversary/ui/components/input";
 import {
   DropdownMenu,
@@ -69,7 +77,7 @@ import {
   Trash2Icon,
   WaypointsIcon,
 } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 
 import { BrandMark } from "@/components/brand-mark";
@@ -80,15 +88,16 @@ import { GenerateRouteForm } from "@/components/generate-route-form";
 import { GroupedTimeline } from "@/components/grouped-timeline";
 import { useSimulation } from "@/components/simulation-provider";
 import { useTheme } from "@/components/theme-provider";
+import { DEMO_REGIONS, regionCenter } from "@/lib/demo-regions";
 import {
   createDemoScenario,
   defaultTargetProfile,
-  DEMO_START_LOCATIONS,
   MAX_DEMO_TARGETS,
   MIN_DEMO_TARGETS,
   parseDemoTargetCount,
   pickRandomDemoOrigin,
   type DemoOrigin,
+  type DemoRegionSelection,
   type DemoVehicleSelection,
 } from "@/lib/demo-scenario";
 import {
@@ -172,11 +181,31 @@ function DemoMapPickerFallback() {
 
 function matchingDemoLocationName(origin: DemoOrigin) {
   return (
-    DEMO_START_LOCATIONS.find(
-      (location) =>
-        location.latitude === origin.latitude && location.longitude === origin.longitude,
-    )?.name ?? null
+    DEMO_REGIONS.find((region) => {
+      const center = regionCenter(region);
+      return (
+        center.latitude === origin.latitude && center.longitude === origin.longitude
+      );
+    })?.name ?? null
   );
+}
+
+function formatRegionSupports(supports: readonly VehicleCategory[]): string {
+  return supports.join(", ");
+}
+
+function demoGeneratingShell(nowIso: string): SimulationScenario {
+  return {
+    schemaVersion: 2,
+    id: crypto.randomUUID(),
+    name: "Generating demo…",
+    description: "Authentic geo routes are being planned.",
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    priorityTerms: ["critical", "proximity threshold"],
+    targets: [],
+    events: [],
+  };
 }
 
 function blankScenario(): SimulationScenario {
@@ -328,6 +357,15 @@ export function ScenarioBuilder() {
   const [demoStartAt, setDemoStartAt] = useState(() => new Date().toISOString());
   const [demoEndAt, setDemoEndAt] = useState("");
   const [demoOrigin, setDemoOrigin] = useState<DemoOrigin | null>(null);
+  /** Empty selection means `"anywhere"`. */
+  const [demoRegionIds, setDemoRegionIds] = useState<string[]>([]);
+  const [demoProgress, setDemoProgress] = useState<{ ready: number; total: number } | null>(
+    null,
+  );
+  const [isDemoPending, startDemoTransition] = useTransition();
+  const demoAbortRef = useRef<AbortController | null>(null);
+  const demoScenarioSnapshotRef = useRef<SimulationScenario | null>(null);
+  const demoFirstReadyRef = useRef(false);
 
   const demoTargetCount = parseDemoTargetCount(demoTargetCountInput);
   const demoTargetCountInvalid =
@@ -339,6 +377,26 @@ export function ScenarioBuilder() {
     ? "random"
     : demoVehicleCategories;
   const demoLocationLabel = demoOrigin ? matchingDemoLocationName(demoOrigin) : null;
+  const demoRegionAnywhere = demoRegionIds.length === 0;
+  const demoRegionSelection: DemoRegionSelection = demoRegionAnywhere
+    ? "anywhere"
+    : demoRegionIds;
+  const demoPinOverridesRegions = demoOrigin !== null;
+  const demoIncompatibleCategories = useMemo(() => {
+    if (demoPinOverridesRegions || demoRegionAnywhere || demoVehicleRandom) {
+      return [] as VehicleCategory[];
+    }
+    const selected = DEMO_REGIONS.filter((region) => demoRegionIds.includes(region.id));
+    return demoVehicleCategories.filter(
+      (category) => !selected.some((region) => region.supports.includes(category)),
+    );
+  }, [
+    demoPinOverridesRegions,
+    demoRegionAnywhere,
+    demoRegionIds,
+    demoVehicleCategories,
+    demoVehicleRandom,
+  ]);
 
   useEffect(() => {
     if (demoVehicleCategories.length === 0 && !demoVehicleRandom) {
@@ -682,6 +740,31 @@ export function ScenarioBuilder() {
     });
   }
 
+  function selectDemoRegionsAnywhere() {
+    setDemoRegionIds([]);
+  }
+
+  function toggleDemoRegion(regionId: string, checked: boolean) {
+    setDemoRegionIds((current) => {
+      if (checked) {
+        return current.includes(regionId) ? current : [...current, regionId];
+      }
+      return current.filter((id) => id !== regionId);
+    });
+  }
+
+  function cancelDemoGeneration() {
+    demoAbortRef.current?.abort();
+  }
+
+  function handleDemoDialogOpenChange(open: boolean) {
+    if (!open && isDemoPending) {
+      cancelDemoGeneration();
+      return;
+    }
+    setDemoDialogOpen(open);
+  }
+
   function loadRandomDemo() {
     if (demoTargetCount === null) {
       toast.error(`Enter a target size between ${MIN_DEMO_TARGETS} and ${MAX_DEMO_TARGETS}.`);
@@ -695,32 +778,133 @@ export function ScenarioBuilder() {
       toast.error("End time must be after start time.");
       return;
     }
-    const demo = createDemoScenario(Date.now(), Math.random, {
-      vehicleSelection: demoVehicleSelection,
-      targetCount: demoTargetCount,
-      startAt: demoStartAt,
-      endAt: demoEndAt.trim() || undefined,
-      origin: demoOrigin ?? undefined,
-    });
-    setScenario(demo);
-    setSelectedTargetId(demo.targets[0]?.id ?? null);
-    {
-      const firstTargetId = demo.targets[0]?.id;
-      setDraft(
-        firstTargetId
-          ? createDraftForTargetChange(firstTargetId, demo.events, createEventDraft().at)
-          : createEventDraft(),
-      );
-    }
-    setDemoDialogOpen(false);
-    const typeLabel = demoVehicleRandom
+
+    const targetCount = demoTargetCount;
+    const vehicleSelection = demoVehicleSelection;
+    const vehicleRandom = demoVehicleRandom;
+    const vehicleCategories = demoVehicleCategories;
+    const startAt = demoStartAt;
+    const endAt = demoEndAt.trim() || undefined;
+    const origin = demoOrigin ?? undefined;
+    const regions: DemoRegionSelection | undefined = origin
+      ? undefined
+      : demoRegionSelection;
+    const typeLabel = vehicleRandom
       ? "mixed"
-      : demoVehicleCategories.length === 1
-        ? demoVehicleCategories[0]
-        : demoVehicleCategories.join("/");
-    toast.success(
-      `Loaded ${demo.targets.length} ${typeLabel} target${demo.targets.length === 1 ? "" : "s"}.`,
-    );
+      : vehicleCategories.length === 1
+        ? vehicleCategories[0]
+        : vehicleCategories.join("/");
+
+    demoAbortRef.current?.abort();
+    const abortController = new AbortController();
+    demoAbortRef.current = abortController;
+    demoScenarioSnapshotRef.current = scenario;
+    demoFirstReadyRef.current = false;
+    const relocatedCategories = new Set<VehicleCategory>();
+
+    startDemoTransition(async () => {
+      const now = Date.now();
+      const nowIso = new Date(now).toISOString();
+      setDemoProgress({ ready: 0, total: targetCount });
+      setScenario(demoGeneratingShell(nowIso));
+
+      try {
+        const result = await createDemoScenario(now, Math.random, {
+          vehicleSelection,
+          targetCount,
+          startAt,
+          endAt,
+          origin,
+          regions,
+          signal: abortController.signal,
+          onTargetReady: (update) => {
+            if (update.anywhereFallback) {
+              relocatedCategories.add(update.target.profile.vehicleCategory);
+            }
+            setDemoProgress((previous) => ({
+              ready: (previous?.ready ?? 0) + 1,
+              total: targetCount,
+            }));
+            setScenario((current) => {
+              if (current.targets.some((target) => target.id === update.target.id)) {
+                return current;
+              }
+              return {
+                ...current,
+                targets: [...current.targets, update.target],
+                events: sortEvents([...current.events, ...update.events]),
+                updatedAt: new Date().toISOString(),
+              };
+            });
+            if (!demoFirstReadyRef.current) {
+              demoFirstReadyRef.current = true;
+              setSelectedTargetId(update.target.id);
+              setDraft(
+                createDraftForTargetChange(
+                  update.target.id,
+                  update.events,
+                  createEventDraft().at,
+                ),
+              );
+            }
+          },
+        });
+
+        if (result.cancelled || abortController.signal.aborted) {
+          const snapshot = demoScenarioSnapshotRef.current;
+          if (snapshot) {
+            setScenario(snapshot);
+          }
+          toast.message("Demo generation cancelled.");
+          return;
+        }
+
+        setScenario(result.scenario);
+        if (!demoFirstReadyRef.current) {
+          const firstTargetId = result.scenario.targets[0]?.id ?? null;
+          setSelectedTargetId(firstTargetId);
+          setDraft(
+            firstTargetId
+              ? createDraftForTargetChange(
+                  firstTargetId,
+                  result.scenario.events,
+                  createEventDraft().at,
+                )
+              : createEventDraft(),
+          );
+        }
+
+        const authenticCount =
+          result.scenario.targets.length - result.degradedTrackCount;
+        const syntheticCount = result.degradedTrackCount;
+        const relocatedList = [...relocatedCategories];
+        let message = `Loaded ${result.scenario.targets.length} ${typeLabel} target${
+          result.scenario.targets.length === 1 ? "" : "s"
+        }.`;
+        if (syntheticCount > 0 || relocatedList.length > 0) {
+          message += ` ${authenticCount} routed authentically, ${syntheticCount} fell back to synthetic.`;
+          if (relocatedList.length > 0) {
+            message += ` Relocated for want of a compatible region: ${relocatedList.join(", ")}.`;
+          }
+        }
+        toast.success(message);
+        setDemoDialogOpen(false);
+      } catch (error) {
+        const snapshot = demoScenarioSnapshotRef.current;
+        if (snapshot) {
+          setScenario(snapshot);
+        }
+        const detail =
+          error instanceof Error ? error.message : "Demo generation failed.";
+        toast.error(detail);
+      } finally {
+        if (demoAbortRef.current === abortController) {
+          demoAbortRef.current = null;
+        }
+        demoScenarioSnapshotRef.current = null;
+        setDemoProgress(null);
+      }
+    });
   }
 
   function randomizeDemoOrigin() {
@@ -869,7 +1053,7 @@ export function ScenarioBuilder() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Dialog open={demoDialogOpen} onOpenChange={setDemoDialogOpen}>
+          <Dialog open={demoDialogOpen} onOpenChange={handleDemoDialogOpenChange}>
             <DialogTrigger render={<Button variant="outline" />}>
               <SparklesIcon data-icon="inline-start" />
               Load random demo
@@ -878,8 +1062,8 @@ export function ScenarioBuilder() {
               <DialogHeader>
                 <DialogTitle>Load random demo</DialogTitle>
                 <DialogDescription>
-                  Configure vehicle mix and schedule. Optionally pin a start region, or leave it
-                  unset to randomize.
+                  Configure vehicle mix, regions, and schedule. Placement precedence: map pin,
+                  then selected regions, then anywhere.
                 </DialogDescription>
               </DialogHeader>
               <div className="-mx-4 min-h-0 flex-1 overflow-y-auto border-y px-4 py-4">
@@ -890,6 +1074,7 @@ export function ScenarioBuilder() {
                       <label className="flex items-center gap-2 text-sm">
                         <Checkbox
                           checked={demoVehicleRandom}
+                          disabled={isDemoPending}
                           onCheckedChange={(checked) => {
                             if (checked) selectDemoVehicleRandom();
                           }}
@@ -900,6 +1085,7 @@ export function ScenarioBuilder() {
                         <label key={category} className="flex items-center gap-2 text-sm capitalize">
                           <Checkbox
                             checked={demoVehicleCategories.includes(category)}
+                            disabled={isDemoPending}
                             onCheckedChange={(checked) => {
                               toggleDemoVehicleCategory(category, checked === true);
                             }}
@@ -920,6 +1106,7 @@ export function ScenarioBuilder() {
                       max={MAX_DEMO_TARGETS}
                       step={1}
                       value={demoTargetCountInput}
+                      disabled={isDemoPending}
                       onChange={(event) => setDemoTargetCountInput(event.target.value)}
                       aria-invalid={demoTargetCountInvalid || undefined}
                       aria-describedby={
@@ -954,6 +1141,7 @@ export function ScenarioBuilder() {
                             type="button"
                             size="sm"
                             variant="ghost"
+                            disabled={isDemoPending}
                             onClick={() => setDemoEndAt("")}
                           >
                             Clear
@@ -976,9 +1164,90 @@ export function ScenarioBuilder() {
                     </Field>
                   </div>
 
+                  <FieldSet>
+                    <FieldLegend>Regions</FieldLegend>
+                    <FieldDescription id="demo-regions-hint">
+                      {demoPinOverridesRegions
+                        ? "A map pin is set — it overrides region selection until cleared."
+                        : "Select one or more regions, or Anywhere for world sampling. Each region lists the vehicle categories it can host."}
+                    </FieldDescription>
+                    <div
+                      data-slot="checkbox-group"
+                      aria-disabled={
+                        isDemoPending || demoPinOverridesRegions ? true : undefined
+                      }
+                      aria-describedby={
+                        demoIncompatibleCategories.length > 0
+                          ? "demo-regions-hint demo-regions-mismatch"
+                          : "demo-regions-hint"
+                      }
+                      className="mt-2 flex max-h-48 flex-col gap-2 overflow-y-auto rounded-md border p-3"
+                    >
+                      <label className="flex items-start gap-2 text-sm">
+                        <Checkbox
+                          checked={demoRegionAnywhere}
+                          disabled={isDemoPending || demoPinOverridesRegions}
+                          onCheckedChange={(checked) => {
+                            if (checked) selectDemoRegionsAnywhere();
+                          }}
+                          aria-describedby="demo-region-anywhere-desc"
+                        />
+                        <span>
+                          <span className="font-medium">Anywhere</span>
+                          <span
+                            id="demo-region-anywhere-desc"
+                            className="mt-0.5 block text-xs text-muted-foreground"
+                          >
+                            World sampling (default when no regions are selected)
+                          </span>
+                        </span>
+                      </label>
+                      {DEMO_REGIONS.map((region) => {
+                        const supportsLabel = formatRegionSupports(region.supports);
+                        const descriptionId = `demo-region-${region.id}-supports`;
+                        return (
+                          <label key={region.id} className="flex items-start gap-2 text-sm">
+                            <Checkbox
+                              checked={demoRegionIds.includes(region.id)}
+                              disabled={isDemoPending || demoPinOverridesRegions}
+                              onCheckedChange={(checked) => {
+                                toggleDemoRegion(region.id, checked === true);
+                              }}
+                              aria-describedby={descriptionId}
+                            />
+                            <span>
+                              <span className="font-medium">{region.name}</span>
+                              <span
+                                id={descriptionId}
+                                className="mt-0.5 block text-xs capitalize text-muted-foreground"
+                              >
+                                Supports: {supportsLabel}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {demoIncompatibleCategories.length > 0 ? (
+                      <FieldDescription
+                        id="demo-regions-mismatch"
+                        className="flex items-start gap-1.5 text-amber-700 dark:text-amber-400"
+                      >
+                        <CircleAlertIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                        <span>
+                          Selected regions do not support{" "}
+                          <span className="capitalize">
+                            {demoIncompatibleCategories.join(", ")}
+                          </span>
+                          . Those contacts will relocate (anywhere-sample) when generating.
+                        </span>
+                      </FieldDescription>
+                    ) : null}
+                  </FieldSet>
+
                   <Field>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <FieldLabel>Starting location (optional)</FieldLabel>
+                      <FieldLabel>Starting location pin (optional)</FieldLabel>
                       <div className="flex flex-wrap gap-1">
                         {demoOrigin ? (
                           <>
@@ -986,6 +1255,7 @@ export function ScenarioBuilder() {
                               type="button"
                               size="sm"
                               variant="outline"
+                              disabled={isDemoPending}
                               onClick={randomizeDemoOrigin}
                             >
                               <ShuffleIcon data-icon="inline-start" />
@@ -995,6 +1265,7 @@ export function ScenarioBuilder() {
                               type="button"
                               size="sm"
                               variant="ghost"
+                              disabled={isDemoPending}
                               onClick={() => setDemoOrigin(null)}
                             >
                               Clear
@@ -1005,6 +1276,7 @@ export function ScenarioBuilder() {
                             type="button"
                             size="sm"
                             variant="outline"
+                            disabled={isDemoPending}
                             onClick={randomizeDemoOrigin}
                           >
                             <MapIcon data-icon="inline-start" />
@@ -1017,8 +1289,8 @@ export function ScenarioBuilder() {
                       <>
                         <FieldDescription>
                           {demoLocationLabel
-                            ? `Preset: ${demoLocationLabel}. Contacts scatter nearby.`
-                            : "Custom point. Contacts scatter nearby."}
+                            ? `Pin overrides regions. Preset: ${demoLocationLabel}. Contacts scatter nearby.`
+                            : "Pin overrides regions. Custom point — contacts scatter nearby."}
                         </FieldDescription>
                         <Suspense fallback={<DemoMapPickerFallback />}>
                           <MapLocationPicker
@@ -1042,23 +1314,44 @@ export function ScenarioBuilder() {
                       </>
                     ) : (
                       <FieldDescription>
-                        Leave unset for a random world location per contact/group.
+                        Leave unset to use region selection or Anywhere sampling.
                       </FieldDescription>
                     )}
                   </Field>
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDemoDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  disabled={demoTargetCount === null || demoEndAtInvalid}
-                  onClick={() => loadRandomDemo()}
-                >
-                  <SparklesIcon data-icon="inline-start" />
-                  Load demo
-                </Button>
+              <DialogFooter className="flex-col gap-3 sm:flex-col sm:space-x-0">
+                {demoProgress ? (
+                  <p
+                    className="w-full text-sm text-muted-foreground"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
+                    Routing {demoProgress.ready} of {demoProgress.total} contacts…
+                    {isDemoPending ? " Generation in progress." : null}
+                  </p>
+                ) : null}
+                <div className="flex w-full flex-wrap items-center justify-end gap-2">
+                  {isDemoPending ? (
+                    <Button type="button" variant="outline" onClick={cancelDemoGeneration}>
+                      Cancel generation
+                    </Button>
+                  ) : (
+                    <Button variant="outline" onClick={() => setDemoDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                  )}
+                  <Button
+                    disabled={
+                      isDemoPending || demoTargetCount === null || demoEndAtInvalid
+                    }
+                    aria-busy={isDemoPending || undefined}
+                    onClick={() => loadRandomDemo()}
+                  >
+                    <SparklesIcon data-icon="inline-start" />
+                    {isDemoPending ? "Generating…" : "Load demo"}
+                  </Button>
+                </div>
               </DialogFooter>
             </DialogContent>
           </Dialog>

@@ -63,9 +63,13 @@ export async function setColorScheme(page: Page, scheme: ColorScheme) {
  */
 export async function assertNoWcag21AaViolations(
   page: Page,
-  options?: { exclude?: string[] },
+  options?: { exclude?: string[]; include?: string[] },
 ) {
   let builder = new AxeBuilder({ page }).withTags([...WCAG_21_AA_TAGS]);
+
+  for (const selector of options?.include ?? []) {
+    builder = builder.include(selector);
+  }
 
   for (const selector of options?.exclude ?? []) {
     builder = builder.exclude(selector);

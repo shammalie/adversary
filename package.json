@@ -21,7 +21,8 @@
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
-    "tiles:collect": "bash scripts/collect-map-tiles.sh"
+    "tiles:collect": "bash scripts/collect-map-tiles.sh",
+    "geo:seeds": "node scripts/build-geo-seeds.mjs"
   },
   "dependencies": {
     "@adversary/env": "workspace:*",

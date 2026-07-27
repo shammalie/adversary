@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 2,
+  "id": "38c4a9de-d779-41cd-a43d-56f99d06f693",
+  "name": "Random demo (2 targets)",
+  "description": "Generated demonstration with 2 contacts across mixed vehicle types.",
+  "createdAt": "2024-12-24T00:26:40.000Z",
+  "updatedAt": "2024-12-24T00:26:40.000Z",
+  "priorityTerms": [
+    "critical",
+    "proximity threshold"
+  ],
+  "targets": [
+    {
+      "id": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "callsign": "VIPER 01",
+      "revealOnFirstEvent": true,
+      "appearOnFirstEvent": false,
+      "color": "#22d3ee",
+      "profile": {
+        "vehicleCategory": "boat",
+        "vehicleSubtype": "Cargo vessel",
+        "affiliation": "friendly",
+        "status": "lost",
+        "identifier": "BOA-100",
+        "description": "Demo boat contact."
+      }
+    },
+    {
+      "id": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "callsign": "SPECTRE 02",
+      "revealOnFirstEvent": true,
+      "appearOnFirstEvent": false,
+      "color": "#67e8f9",
+      "profile": {
+        "vehicleCategory": "other",
+        "vehicleSubtype": "Unclassified contact",
+        "affiliation": "friendly",
+        "status": "unknown",
+        "identifier": "OTH-101",
+        "description": "Demo other contact."
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "2b73ad54-4bf1-45e4-ae34-72554559992f",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:27:57.000Z",
+      "position": {
+        "latitude": 57.642747,
+        "longitude": 9.105923,
+        "altitude": 0,
+        "speed": 48.3
+      }
+    },
+    {
+      "id": "909dbbe1-2a60-459a-a549-4c4eb6b1bfae",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:28:02.000Z",
+      "position": {
+        "latitude": -53.91111,
+        "longitude": 40.127783,
+        "altitude": 0,
+        "speed": 14.2
+      }
+    },
+    {
+      "id": "b618abb3-59ae-4c39-b3d1-2bdf3b5a963b",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:31:05.529Z",
+      "position": {
+        "latitude": -53.920429,
+        "longitude": 40.133715,
+        "altitude": 0,
+        "speed": 11.7
+      }
+    },
+    {
+      "id": "b3e0b614-2ff0-4cda-9a37-a3b669bc3bdc",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:31:14.143Z",
+      "position": {
+        "latitude": 57.62353,
+        "longitude": 9.023775,
+        "altitude": 0,
+        "speed": 52.6
+      }
+    },
+    {
+      "id": "2fc6e926-efe3-4d96-a606-a9feb203a9b8",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:34:09.059Z",
+      "position": {
+        "latitude": -53.928728,
+        "longitude": 40.140613,
+        "altitude": 0,
+        "speed": 10.9
+      }
+    },
+    {
+      "id": "4d2dd504-f869-4f78-a832-0b62845e7623",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:34:31.286Z",
+      "position": {
+        "latitude": 57.595515,
+        "longitude": 8.946093,
+        "altitude": 0,
+        "speed": 55
+      }
+    },
+    {
+      "id": "cae36170-b934-4237-9eef-c35242b8724e",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:37:12.588Z",
+      "position": {
+        "latitude": -53.93723,
+        "longitude": 40.148636,
+        "altitude": 0,
+        "speed": 11.5
+      }
+    },
+    {
+      "id": "eb6422d1-a2ee-480c-9af2-d7d81b658f71",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:37:48.429Z",
+      "position": {
+        "latitude": 57.578467,
+        "longitude": 8.858076,
+        "altitude": 0,
+        "speed": 55
+      }
+    },
+    {
+      "id": "6b001f7a-e847-4e74-ba1f-b1be77278b26",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:40:16.118Z",
+      "position": {
+        "latitude": -53.947,
+        "longitude": 40.155635,
+        "altitude": 0,
+        "speed": 12.5
+      }
+    },
+    {
+      "id": "d7793e4a-16e9-4110-a577-241f9a2d5c56",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:41:05.571Z",
+      "position": {
+        "latitude": 57.561406,
+        "longitude": 8.786471,
+        "altitude": 0,
+        "speed": 46.1
+      }
+    },
+    {
+      "id": "08afc38a-3f0c-4b0b-bacd-bf4fd15f4cb8",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:43:19.647Z",
+      "position": {
+        "latitude": -53.95887,
+        "longitude": 40.16363,
+        "altitude": 0,
+        "speed": 15
+      }
+    },
+    {
+      "id": "78615106-9902-4241-a527-78cfbf13f205",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:44:22.714Z",
+      "position": {
+        "latitude": 57.548149,
+        "longitude": 8.714432,
+        "altitude": 0,
+        "speed": 44.8
+      }
+    },
+    {
+      "id": "8eab56de-e73d-403f-9d92-3d9c5617e360",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:46:23.176Z",
+      "position": {
+        "latitude": -53.970669,
+        "longitude": 40.174241,
+        "altitude": 0,
+        "speed": 15.7
+      }
+    },
+    {
+      "id": "bacd5756-1dee-47fe-8864-e1924978ba9a",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:47:39.857Z",
+      "position": {
+        "latitude": 57.531324,
+        "longitude": 8.655768,
+        "altitude": 0,
+        "speed": 39.1
+      }
+    },
+    {
+      "id": "2042cb8f-518c-4da6-b156-012996694483",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:49:26.706Z",
+      "position": {
+        "latitude": -53.984351,
+        "longitude": 40.185134,
+        "altitude": 0,
+        "speed": 17.8
+      }
+    },
+    {
+      "id": "2e04bff3-e502-4d8c-b0a1-42cf2ebe6401",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:50:57.000Z",
+      "message": "Contact entered monitored sector."
+    },
+    {
+      "id": "993e3f69-1b54-4759-8508-dd6359b87995",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:50:57.000Z",
+      "position": {
+        "latitude": 57.523981,
+        "longitude": 8.598315,
+        "altitude": 0,
+        "speed": 34.8
+      }
+    },
+    {
+      "id": "fb9436ef-bdf2-4f7e-957a-8c375243c315",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:52:30.235Z",
+      "position": {
+        "latitude": -53.998781,
+        "longitude": 40.199825,
+        "altitude": 0,
+        "speed": 19.8
+      }
+    },
+    {
+      "id": "21d2f49f-9727-4292-9fb9-afb04751f4d9",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:54:02.000Z",
+      "message": "Primary sensor contact intermittent."
+    },
+    {
+      "id": "0d48a92e-370a-48b3-a136-a411a3381b7c",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:54:14.143Z",
+      "position": {
+        "latitude": 57.514722,
+        "longitude": 8.54499,
+        "altitude": 0,
+        "speed": 33
+      }
+    },
+    {
+      "id": "075dc66f-0be9-4b7e-bf05-a806ea8d8f72",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:55:33.765Z",
+      "position": {
+        "latitude": -54.016027,
+        "longitude": 40.215053,
+        "altitude": 0,
+        "speed": 22.9
+      }
+    },
+    {
+      "id": "02ce1e11-3cd3-4c56-b0bf-b46f3dfcd1b1",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T00:57:31.286Z",
+      "position": {
+        "latitude": 57.512424,
+        "longitude": 8.482669,
+        "altitude": 0,
+        "speed": 36.8
+      }
+    },
+    {
+      "id": "cb7dadd9-ca9a-4054-a0cd-ad3736d4dfdd",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T00:58:37.294Z",
+      "position": {
+        "latitude": -54.034492,
+        "longitude": 40.233774,
+        "altitude": 0,
+        "speed": 25.3
+      }
+    },
+    {
+      "id": "522a4793-f56e-4faf-887f-9a8adbd2ba12",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T01:00:48.429Z",
+      "position": {
+        "latitude": 57.503387,
+        "longitude": 8.416509,
+        "altitude": 0,
+        "speed": 40.2
+      }
+    },
+    {
+      "id": "0bafd50c-b4d9-4125-be8b-99bbd66ae5b7",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:01:40.824Z",
+      "position": {
+        "latitude": -54.053454,
+        "longitude": 40.253267,
+        "altitude": 0,
+        "speed": 26.1
+      }
+    },
+    {
+      "id": "461a8ca0-90fe-4ed4-aa67-d6bbc2fa1988",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T01:04:05.571Z",
+      "position": {
+        "latitude": 57.501059,
+        "longitude": 8.34565,
+        "altitude": 0,
+        "speed": 41.8
+      }
+    },
+    {
+      "id": "20ab54cd-21d1-4727-a9ce-134b56de090e",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:04:44.353Z",
+      "position": {
+        "latitude": -54.07501,
+        "longitude": 40.272788,
+        "altitude": 0,
+        "speed": 28.7
+      }
+    },
+    {
+      "id": "7e3b3226-5431-408c-8053-d4e599dbe036",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T01:07:22.714Z",
+      "position": {
+        "latitude": 57.497832,
+        "longitude": 8.288961,
+        "altitude": 0,
+        "speed": 33.6
+      }
+    },
+    {
+      "id": "1b1c7ae1-f336-4ab0-8df7-061d91efa555",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:07:47.882Z",
+      "position": {
+        "latitude": -54.09517,
+        "longitude": 40.290808,
+        "altitude": 0,
+        "speed": 26.8
+      }
+    },
+    {
+      "id": "592677e1-f1c1-4087-b4c4-1e650968e69b",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T01:10:39.857Z",
+      "position": {
+        "latitude": 57.491953,
+        "longitude": 8.244746,
+        "altitude": 0,
+        "speed": 26.8
+      }
+    },
+    {
+      "id": "0d9f1cc7-f47e-495e-be77-94c71383e9f1",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:10:51.412Z",
+      "position": {
+        "latitude": -54.117862,
+        "longitude": 40.307223,
+        "altitude": 0,
+        "speed": 29
+      }
+    },
+    {
+      "id": "61cc5293-27de-462a-8037-5d011010e83d",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:13:54.941Z",
+      "position": {
+        "latitude": -54.14161,
+        "longitude": 40.319215,
+        "altitude": 0,
+        "speed": 29.2
+      }
+    },
+    {
+      "id": "cf48f12c-aff6-4754-8be4-7a2447273cb6",
+      "targetId": "3053aedd-c3cf-4e3f-ba69-93ffaffed8fe",
+      "at": "2024-12-24T01:13:57.000Z",
+      "position": {
+        "latitude": 57.487713,
+        "longitude": 8.187496,
+        "altitude": 0,
+        "speed": 34.1
+      }
+    },
+    {
+      "id": "52cb3e95-8379-449a-99bd-6db224f98870",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:16:58.471Z",
+      "position": {
+        "latitude": -54.165032,
+        "longitude": 40.330302,
+        "altitude": 0,
+        "speed": 28.6
+      }
+    },
+    {
+      "id": "db37c352-dcc9-4641-b127-d732ac1dfe3e",
+      "targetId": "19d32ad4-a4b0-49ef-a8b3-0109da32cabd",
+      "at": "2024-12-24T01:20:02.000Z",
+      "position": {
+        "latitude": -54.189098,
+        "longitude": 40.33802,
+        "altitude": 0,
+        "speed": 28.8
+      }
+    }
+  ]
+}

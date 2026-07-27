@@ -53,5 +53,20 @@ for (const theme of themes) {
       await page.getByRole("menu").waitFor({ state: "visible" });
       await assertNoWcag21AaViolations(page, { exclude: MAP_EXCLUDE });
     });
+
+    test("open demo dialog has no axe violations", async ({ page }) => {
+      await page.goto("/builder");
+      await page.waitForLoadState("networkidle");
+      await page.getByRole("button", { name: "Load random demo" }).click();
+      await page.getByRole("dialog", { name: "Load random demo" }).waitFor({
+        state: "visible",
+      });
+      // Scope to the dialog so pre-existing builder chrome (empty-scenario
+      // disabled labels / inactive tabs) does not fail this Phase 4b check.
+      await assertNoWcag21AaViolations(page, {
+        include: ['[data-slot="dialog-content"]'],
+        exclude: MAP_EXCLUDE,
+      });
+    });
   });
 }

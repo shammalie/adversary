@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Randomised demo route generation — review &amp; plan</title>
+  <style>
+    :root {
+      --bg: #f0f1f3;
+      --ink: #1a1d23;
+      --muted: #6b7280;
+      --line: #9ca3af;
+      --panel: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --dim: #e5e7eb;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --danger-line: #fecaca;
+      --warn: #b45309;
+      --warn-soft: #fffbeb;
+      --warn-line: #fde68a;
+      --ok: #15803d;
+      --ok-soft: #f0fdf4;
+      --ok-line: #bbf7d0;
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+      --radius: 6px;
+      --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(255,255,255,.92);
+      border-bottom: 1px solid #d1d5db;
+      backdrop-filter: blur(8px);
+    }
+    .nav strong {
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-right: 8px;
+    }
+    .nav a {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12px;
+      background: #fff;
+    }
+    .nav a:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+    .intro { padding: 32px 0 4px; }
+    .intro h1 { margin: 0 0 4px; font-size: 24px; font-weight: 650; letter-spacing: -0.01em; }
+    .intro .sub { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+    .intro .tldr {
+      padding: 14px 16px;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      border-radius: var(--radius);
+      max-width: 92ch;
+    }
+    .intro .tldr p { margin: 0 0 8px; }
+    .intro .tldr p:last-child { margin-bottom: 0; }
+
+    section { padding: 34px 0 10px; scroll-margin-top: 64px; }
+    .sec-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      align-items: baseline;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .sec-head h2 { margin: 0; font-size: 18px; font-weight: 650; }
+    .sec-head .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .sec-head .intent { flex: 1 1 320px; margin: 0; color: var(--muted); }
+
+    h3 { font-size: 14px; font-weight: 650; margin: 24px 0 10px; }
+    p { max-width: 92ch; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--dim);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px;
+      margin: 0 0 14px;
+    }
+    .card > h4 {
+      margin: 0 0 8px;
+      font-size: 13.5px;
+      font-weight: 650;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .card p { margin: 0 0 10px; }
+    .card p:last-child { margin-bottom: 0; }
+    .card.crit { border-left: 3px solid var(--danger); }
+    .card.warn { border-left: 3px solid var(--warn); }
+    .card.good { border-left: 3px solid var(--ok); }
+
+    .sev {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .sev.crit { color: var(--danger); background: var(--danger-soft); border: 1px solid var(--danger-line); }
+    .sev.warn { color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); }
+    .sev.good { color: var(--ok); background: var(--ok-soft); border: 1px solid var(--ok-line); }
+    .sev.info { color: var(--accent); background: var(--accent-soft); border: 1px solid #bfdbfe; }
+
+    code, .path { font-family: var(--mono); font-size: 12px; }
+    code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; }
+    .path { color: var(--muted); font-size: 11.5px; }
+
+    pre {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.5;
+      background: #1e232b;
+      color: #e5e7eb;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    pre .cm { color: #8b95a5; }
+    pre .kw { color: #c98cf0; }
+    pre .st { color: #9ecb8a; }
+    pre .nm { color: #f0b672; }
+    pre .fn { color: #7cc0f0; }
+    pre b { color: #fca5a5; font-weight: 600; }
+
+    table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 12px; background: var(--panel); }
+    th, td { text-align: left; padding: 7px 10px; border: 1px solid var(--dim); vertical-align: top; }
+    th { background: #f9fafb; font-weight: 650; font-size: 11px; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); }
+    td code { font-size: 11px; }
+
+    ul, ol { max-width: 92ch; padding-left: 22px; margin: 8px 0 12px; }
+    li { margin-bottom: 6px; }
+
+    .locked {
+      padding: 14px 16px;
+      border: 1px solid var(--ok-line);
+      background: var(--ok-soft);
+      border-radius: var(--radius);
+      max-width: 92ch;
+    }
+    .locked h4 { margin: 0 0 10px; font-size: 13px; color: #166534; }
+    .locked dl { margin: 0; display: grid; grid-template-columns: minmax(120px, 190px) 1fr; gap: 7px 16px; }
+    .locked dt { font-weight: 650; color: #166534; }
+    .locked dd { margin: 0; }
+
+    .phase { display: grid; grid-template-columns: 60px 1fr; gap: 0 18px; margin: 0 0 4px; }
+    .phase .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 650;
+      color: #fff;
+      background: var(--ink);
+      border-radius: 4px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .phase .body { padding-bottom: 20px; }
+    .phase .body > h3 { margin-top: 0; }
+
+    .files { margin: 8px 0 0; font-size: 12px; }
+    .files li { margin-bottom: 5px; }
+    .files .new { color: var(--ok); font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+    .files .mod { color: var(--warn); font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+    figure { margin: 16px 0 20px; }
+    figure svg { display: block; width: 100%; height: auto; background: var(--panel); border: 1px solid var(--dim); border-radius: var(--radius); }
+    figcaption { color: var(--muted); font-size: 11.5px; margin-top: 8px; }
+
+    footer { padding: 30px 0 60px; color: var(--muted); font-size: 11.5px; }
+    hr { border: 0; border-top: 1px solid var(--dim); margin: 26px 0; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <strong>Contents</strong>
+  <a href="#tldr">Summary</a>
+  <a href="#decisions">Decisions</a>
+  <a href="#review">Review</a>
+  <a href="#asset">Local asset</a>
+  <a href="#regions">Regions</a>
+  <a href="#budget">Budget</a>
+  <a href="#arch">Architecture</a>
+  <a href="#phases">Phases</a>
+  <a href="#risks">Risks</a>
+  <a href="#done">Done means</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="intro" id="tldr">
+    <h1>Randomised demo route generation</h1>
+    <p class="sub">Review of current state, and a plan for an authentic local-first simulation.</p>
+    <div class="tldr">
+      <p><strong>The generator has no concept of terrain, and that is by design and under test.</strong> Contacts are placed at uniformly random world coordinates, roughly 92% of them have no destination at all, and per-category behaviour amounts to two tuning constants. A car and a fighter jet trace the same shape at different speeds.</p>
+      <p><strong>The fix needs no new third-party services.</strong> You already host a full-planet OpenMapTiles vector dataset locally (<span class="path">data/tiles/openmaptiles.mbtiles</span>, 95&nbsp;GB, z0&ndash;14), served by the existing <code>tiles</code> service. It contains roads, water, runways and aerodromes &mdash; everything the three vehicle classes need.</p>
+    </div>
+  </div>
+
+  <!-- ================= DECISIONS ================= -->
+  <section id="decisions">
+    <div class="sec-head">
+      <h2>Locked decisions</h2>
+      <span class="tag">from grilling</span>
+      <p class="intent">Answers that shaped the plan. Everything below follows from these.</p>
+    </div>
+
+    <div class="locked">
+      <h4>Confirmed</h4>
+      <dl>
+        <dt>Geo source</dt>
+        <dd>Hybrid. A build-time script mines the local mbtiles into a small curated seed bundle shipped with the app, plus runtime vector-tile fetches for actual road and water geometry.</dd>
+
+        <dt>Dev vs Docker</dt>
+        <dd>Dev may reach a public provider, following the existing <span class="path">.env.example</span> pattern. Docker stays fully local.</dd>
+
+        <dt>Geographic scope</dt>
+        <dd>Truly global with validity filtering &mdash; candidate points are probed and retried until they satisfy the vehicle constraint. Plus a multi-select so users can pick <em>one or many</em> regions when loading the demo.</dd>
+
+        <dt>Region model</dt>
+        <dd>Typed catalogue. Regions declare which categories they can authentically host, and the existing origin pin stays as a separate override. Precedence is <strong>pin &gt; regions &gt; anywhere</strong>.</dd>
+
+        <dt>Generation budget</dt>
+        <dd>Under about 2&nbsp;seconds to first contacts, streamed. Targets are revealed as their routes complete, with bounded worker concurrency and a Cancel button.</dd>
+
+        <dt>Fidelity budget</dt>
+        <dd>Adaptive densification. Roughly 60&ndash;150 points per track with Douglas&ndash;Peucker simplification, so corners survive and straights stay sparse. Totals stay in the low thousands of events.</dd>
+
+        <dt>Failure mode</dt>
+        <dd>Graceful degradation. Fall back to the existing synthetic geodesic generator for affected tracks and surface a toast noting reduced realism.</dd>
+
+        <dt>Sequencing</dt>
+        <dd>Prove the riskiest assumption first. A throwaway spike had to show that tile-clipped road geometry stitches into a connected graph <em>before</em> any foundations work began. <strong style="color: var(--ok);">Done &mdash; verdict GO</strong>, so the road router proceeds as planned.</dd>
+
+        <dt>Kinematic scope</dt>
+        <dd>Full profile catalogue. Every vehicle subtype gets real physics, making subtype the single source of kinematic truth rather than category.</dd>
+
+        <dt>Constraint</dt>
+        <dd>Local-first. No new <span class="path">docker-compose.yml</span> service.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ================= REVIEW ================= -->
+  <section id="review">
+    <div class="sec-head">
+      <h2>Review of current state</h2>
+      <span class="tag">as built</span>
+      <p class="intent">Nine findings, ordered by impact on authenticity. Each cites the code it comes from.</p>
+    </div>
+
+    <div class="card crit">
+      <h4><span class="sev crit">Critical</span> Placement ignores terrain &mdash; and a test enforces it</h4>
+      <p><code>randomWorldOrigin</code> samples uniformly across &plusmn;85&deg; latitude and &plusmn;180&deg; longitude. Since roughly 71% of Earth is ocean, most cars and trucks spawn mid-Atlantic and most boats spawn inland. Antarctic and open-ocean spawns are common.</p>
+      <pre><span class="cm">// apps/web/src/lib/demo-scenario.ts:149</span>
+<span class="kw">function</span> <span class="fn">randomWorldOrigin</span>(random: () =&gt; number): DemoOrigin {
+  <span class="kw">return</span> {
+    latitude: (<span class="fn">random</span>() - <span class="nm">0.5</span>) * <span class="nm">2</span> * DEMO_MAX_ABS_LATITUDE,
+    longitude: (<span class="fn">random</span>() - <span class="nm">0.5</span>) * <span class="nm">360</span>,
+  };
+}</pre>
+      <p>Critically, this is not an oversight. <span class="path">demo-scenario.test.ts</span> L165&ndash;196 asserts latitude span &gt; 20&deg;, longitude span &gt; 40&deg;, and fewer than three close pairs. <strong>The global scatter that causes the implausibility is an enshrined contract</strong> and must be deliberately replaced.</p>
+    </div>
+
+    <div class="card crit">
+      <h4><span class="sev crit">Critical</span> About 92% of contacts have no destination</h4>
+      <p><code>GROUP_JOIN_PROBABILITY = 0.08</code>, and <code>endPoint</code> is only populated when <code>plan.sharedPath</code> is true, which requires a multi-member travel group. Every solo target therefore takes the <code>generateWanderEvents</code> path: an endless heading random-walk with no intent, no origin meaning, and no arrival.</p>
+      <pre><span class="cm">// apps/web/src/lib/demo-scenario.ts:444</span>
+<span class="kw">const</span> endPoint: PositionPayload | undefined = plan.sharedPath
+  ? { <span class="cm">/* &hellip; A&rarr;B corridor &hellip; */</span> }
+  : <b>undefined</b>;   <span class="cm">// solo targets just drift</span></pre>
+      <p>The rare group that does get an <code>endPoint</code> receives a noisy great circle from <code>generatePointToPointEvents</code> &mdash; better, but still geographically arbitrary.</p>
+    </div>
+
+    <div class="card crit">
+      <h4><span class="sev crit">Critical</span> Per-category behaviour is two tuning constants</h4>
+      <p>The only differentiation between a truck and a fighter jet is a speed range and a per-step heading/speed limiter. The path geometry generation is identical.</p>
+      <pre><span class="cm">// apps/web/src/lib/event-generator.ts:22</span>
+<span class="kw">const</span> CATEGORY_MOVEMENT_SMOOTHING: Record&lt;VehicleCategory, MovementSmoothing&gt; = {
+  aircraft: { maxHeadingChange: <span class="nm">4</span>,  maxSpeedChangeFraction: <span class="nm">0.06</span> },
+  boat:     { maxHeadingChange: <span class="nm">7</span>,  maxSpeedChangeFraction: <span class="nm">0.08</span> },
+  car:      { maxHeadingChange: <span class="nm">14</span>, maxSpeedChangeFraction: <span class="nm">0.16</span> },
+  truck:    { maxHeadingChange: <span class="nm">12</span>, maxSpeedChangeFraction: <span class="nm">0.12</span> },
+};</pre>
+    </div>
+
+    <div class="card crit">
+      <h4><span class="sev crit">Critical</span> Aircraft have an altitude number, not a vertical profile</h4>
+      <p><code>demoAircraftAltitude</code> picks one band once at spawn. <code>lerpAltitude</code> linearly interpolates start to end. And for groups, <code>endPoint.altitude</code> is set equal to <code>startPoint.altitude</code>, so cruise altitude never changes. Solo aircraft reuse <code>startPoint.altitude</code> for every wander point.</p>
+      <p><strong>There is no climb, no descent, no loiter, and no return-to-origin anywhere in the system.</strong></p>
+    </div>
+
+    <div class="card warn">
+      <h4><span class="sev warn">High</span> Speed bands are too wide and detached from the declared subtype</h4>
+      <p><code>CATEGORY_SPEED_RANGES.aircraft</code> is <code>90&ndash;1400 kt</code>, sampled uniformly. Meanwhile <code>vehicleSubtype</code> is chosen independently at L460. The result is that a &ldquo;Transport&rdquo; can cruise at 1,300&nbsp;kt and a &ldquo;Multi-role fighter&rdquo; can plod at 95&nbsp;kt. <code>car: 10&ndash;85 kt</code> is up to 98&nbsp;mph on a random walk.</p>
+      <table>
+        <thead><tr><th>Category</th><th>Generation band</th><th>Hard ceiling</th><th>Problem</th></tr></thead>
+        <tbody>
+          <tr><td>aircraft</td><td>90&ndash;1400 kt</td><td>1800 kt</td><td>Subtype-agnostic; 15&times; spread</td></tr>
+          <tr><td>boat</td><td>6&ndash;50 kt</td><td>80 kt</td><td>Trawler and RHIB share a band</td></tr>
+          <tr><td>car</td><td>10&ndash;85 kt</td><td>130 kt</td><td>85 kt sustained is implausible</td></tr>
+          <tr><td>truck</td><td>8&ndash;60 kt</td><td>85 kt</td><td>Ignores road class limits</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card warn">
+      <h4><span class="sev warn">High</span> The only spatial constraint is a rendering guard</h4>
+      <p><code>DEMO_MAX_ABS_LATITUDE = 85</code> with <code>steerHeadingForLatitudeBound</code> exists purely to avoid Web Mercator clip-line artifacts near the poles. It is a render concern being mistaken for a realism feature. There is no land/water test, no road network, and no airport awareness in the entire generator.</p>
+    </div>
+
+    <div class="card warn">
+      <h4><span class="sev warn">High</span> Sampling is too coarse and uniform in time to represent turns</h4>
+      <p><code>pointCount = 10 + floor(random() * 15)</code> yields 10&ndash;24 points per track, and <code>distributeTimestamps</code> spaces them evenly in time. A road route needs its vertices concentrated at corners. At this density, road-following is not expressible.</p>
+    </div>
+
+    <div class="card warn">
+      <h4><span class="sev warn">Medium</span> Latent performance wall in the playback engine</h4>
+      <p><code>positionEventsForTarget</code> calls <code>sortEvents(scenario.events)</code> <em>inside a per-target loop</em>, making interpolated preview <code>O(targets &times; n log n)</code>. At 100 targets &times; 150 points that is a 15,000-element sort performed 100 times per preview frame. Fine at today's ~2,400 events; a wall at higher fidelity.</p>
+      <pre><span class="cm">// apps/web/src/lib/simulation-engine.ts:161</span>
+<span class="kw">function</span> <span class="fn">positionEventsForTarget</span>(scenario: SimulationScenario, targetId: string) {
+  <span class="kw">return</span> <b>sortEvents(scenario.events)</b>  <span class="cm">// re-sorts the whole list, per target</span>
+    .<span class="fn">filter</span>((event) =&gt; event.targetId === targetId &amp;&amp; event.position);
+}</pre>
+      <p>Separately, runtime state persists to <strong>localStorage</strong> through <code>safeWrite</code>, which swallows quota errors silently &mdash; so a large scenario can fail to persist with no signal.</p>
+    </div>
+
+    <div class="card good">
+      <h4><span class="sev good">Keep</span> Two things are already right and worth building on</h4>
+      <p><strong>Kinematic consistency.</strong> Distance is derived as speed &times; elapsed time, <code>assertFeasibleEndWindow</code> rejects windows that would require exceeding category maximums, and <code>position.speed</code> is always authored so runtime never invents speeds. The new routers should honour exactly this contract.</p>
+      <p><strong>Non-uniform spacing is already safe.</strong> <code>interpolatePositionSnapshot</code> computes progress <em>per segment</em>, so dense-at-corners, sparse-on-straights waypoints need no engine change. This is what makes the adaptive densification budget viable.</p>
+    </div>
+  </section>
+
+  <!-- ================= ASSET ================= -->
+  <section id="asset">
+    <div class="sec-head">
+      <h2>The asset you already have</h2>
+      <span class="tag">zero new services</span>
+      <p class="intent">A full-planet vector dataset is already downloaded, already served, and completely unused outside basemap rendering.</p>
+    </div>
+
+    <p><span class="path">data/tiles/openmaptiles.mbtiles</span> is an OpenFreeMap / planetiler planet build: 95&nbsp;GB, zoom 0&ndash;14, schema version 3.16.0, OSM data dated 2026-06-15. It is already mounted into the <code>tiles</code> service in <span class="path">docker-compose.yml</span>. Every layer the three vehicle classes need is present.</p>
+
+    <table>
+      <thead><tr><th>Layer</th><th>Zooms</th><th>Useful fields</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>transportation</code></td><td>4&ndash;14</td>
+          <td><code>class</code>, <code>oneway</code>, <code>surface</code>, <code>toll</code>, <code>expressway</code>, <code>ramp</code>, <code>brunnel</code>, <code>access</code></td>
+          <td>Road graph for cars and trucks. Also carries <code>class=ferry</code> &mdash; real maritime routes.</td>
+        </tr>
+        <tr>
+          <td><code>water</code></td><td>0&ndash;14</td>
+          <td><code>class</code> (<code>ocean</code>, <code>lake</code>, <code>river</code>, <code>dock</code>), <code>intermittent</code></td>
+          <td>Navigability mask for boats; land/water test for placement.</td>
+        </tr>
+        <tr>
+          <td><code>waterway</code></td><td>3&ndash;14</td>
+          <td><code>class</code> (<code>river</code>, <code>canal</code>), <code>name</code></td>
+          <td>Inland vessel routes.</td>
+        </tr>
+        <tr>
+          <td><code>aeroway</code></td><td>10&ndash;14</td>
+          <td><code>class</code> (<code>runway</code>, <code>taxiway</code>, <code>apron</code>), <code>ref</code></td>
+          <td>Runway geometry, so departures and approaches align to a real runway heading.</td>
+        </tr>
+        <tr>
+          <td><code>aerodrome_label</code></td><td>8&ndash;14</td>
+          <td><code>icao</code>, <code>iata</code>, <code>name</code>, <code>class</code>, <code>ele_ft</code></td>
+          <td>Origin and destination airport selection.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Zoom availability gives a routing hierarchy for free</h3>
+    <p>OpenMapTiles introduces road classes progressively by zoom, which is exactly the structure a hierarchical router wants. Motorways appear from z4, trunk and primary around z7&ndash;8, secondary around z9&ndash;10, minor roads from z12. A long-haul truck corridor can therefore be planned from a handful of z10 tiles (each covering roughly 40&nbsp;km) and only refined at z13&ndash;14 near the endpoints. This keeps tile fetch counts low without sacrificing realism.</p>
+
+    <h3>Dev and Docker read byte-identical geography</h3>
+    <p>Rather than hardcoding a tile URL template, resolve it from a <strong>TileJSON</strong> endpoint. This mirrors the existing <code>VITE_MAP_STYLE_*</code> pattern in <span class="path">packages/env/src/web.ts</span> and <span class="path">.env.example</span>, and it is version-proof.</p>
+    <table>
+      <thead><tr><th>Environment</th><th><code>VITE_GEO_TILEJSON_URL</code></th><th>Resolves to</th></tr></thead>
+      <tbody>
+        <tr><td>Dev (Vite)</td><td><code>https://tiles.openfreemap.org/planet</code></td><td><code>&hellip;/planet/20260621_080001_pt/{z}/{x}/{y}.pbf</code></td></tr>
+        <tr><td>Docker</td><td><code>http://tiles.adversary/data/openmaptiles.json</code></td><td><code>&hellip;/data/openmaptiles/{z}/{x}/{y}.pbf</code></td></tr>
+      </tbody>
+    </table>
+    <p>Verified: the public OpenFreeMap TileJSON resolves to build <code>20260621_080001_pt</code>, and <span class="path">data/tiles/SOURCE.txt</span> records the local mbtiles as <code>&hellip;/planet/20260621_080001_pt/tiles.mbtiles</code>. Both report schema version 3.16.0. <strong>Dev and production read the same data</strong>, so the split carries no divergence risk.</p>
+  </section>
+
+  <!-- ================= REGION MODEL ================= -->
+  <section id="regions">
+    <div class="sec-head">
+      <h2>Region model</h2>
+      <span class="tag">correctness</span>
+      <p class="intent">The current presets would reproduce the exact bug being fixed. This is the one place where a naive implementation quietly fails.</p>
+    </div>
+
+    <div class="card crit">
+      <h4><span class="sev crit">Trap</span> Today's presets are 9 out of 10 maritime</h4>
+      <p><code>DEMO_START_LOCATIONS</code> contains English Channel, North Sea, New York Harbor, Singapore Strait, Tokyo Bay, Persian Gulf, South China Sea, Mediterranean and Gulf of Aden &mdash; all water. Only London is land. Wiring those into a region picker and then asking for trucks puts road vehicles in open ocean, which is precisely the failure this work exists to remove.</p>
+    </div>
+
+    <p>Replace the flat preset list with a typed catalogue:</p>
+    <pre><span class="kw">interface</span> DemoRegion {
+  id: string;
+  name: string;
+  bbox: [west: number, south: number, east: number, north: number];
+  <span class="cm">/** Categories this region can authentically host. */</span>
+  supports: <span class="kw">readonly</span> VehicleCategory[];
+}</pre>
+
+    <ul>
+      <li>A selected region only receives <strong>compatible</strong> contacts. An incompatible contact relocates to another selected region that supports its category.</li>
+      <li>If no selected region supports a category, those contacts fall back to <code>"anywhere"</code> validity-filtered sampling, and the completion toast says so.</li>
+      <li><code>supports</code> is <strong>derived from real geometry</strong> by the phase&nbsp;1 build script &mdash; each bbox is probed for usable road classes, navigable water and nearby aerodromes &mdash; rather than hand-asserted. A region cannot claim to host trucks unless the tiles actually contain roads there.</li>
+      <li>The catalogue gains land and mixed-coastal entries (Central Europe, US Eastern Seaboard, Benelux) alongside the existing maritime straits.</li>
+      <li><strong>The origin pin stays and wins.</strong> <code>demoOrigin</code> and <code>MapLocationPicker</code> remain a separate override, giving one unambiguous precedence rule: <strong>pin &gt; regions &gt; anywhere</strong>.</li>
+      <li><strong><code>other</code> category</strong> is routed by terrain rather than declaration: sea router if its start point classifies as water, road router otherwise. Documented assumption, easy to override.</li>
+    </ul>
+  </section>
+
+  <!-- ================= BUDGET ================= -->
+  <section id="budget">
+    <div class="sec-head">
+      <h2>Generation budget and streaming</h2>
+      <span class="tag">under ~2s to first contact</span>
+      <p class="intent">Targets are revealed as their routes complete, rather than blocking on all 100.</p>
+    </div>
+
+    <ul>
+      <li><code>scenario-planner.ts</code> exposes an async iterator or <code>onTargetReady</code> callback instead of resolving one finished scenario, so the builder can append targets progressively.</li>
+      <li><strong>Bounded worker concurrency</strong>, starting around 4&ndash;6 in-flight route requests, to avoid a fetch stampede against the tile source.</li>
+      <li><strong>Cancellation</strong> via <code>AbortSignal</code>, threaded from a Cancel button in the dialog through the planner into the worker, aborting in-flight tile fetches too.</li>
+      <li>Progress feedback showing routed count against total.</li>
+      <li><strong>Aircraft are planned first</strong>, because they need no runtime tile fetches at all &mdash; airports and runway headings come from the seed bundle. First contacts therefore appear almost immediately while road and sea routes are still resolving.</li>
+    </ul>
+
+    <div class="card warn">
+      <h4><span class="sev warn">Watch</span> Streaming interacts with existing selection state</h4>
+      <p><code>loadRandomDemo</code> currently calls <code>setSelectedTargetId(demo.targets[0]?.id)</code> and <code>setDraft(...)</code> after generation completes. With targets streaming in, these must fire <strong>once on the first ready target</strong>, not on every append, or the builder's selection will thrash as contacts arrive.</p>
+    </div>
+  </section>
+
+  <!-- ================= ARCHITECTURE ================= -->
+  <section id="arch">
+    <div class="sec-head">
+      <h2>Target architecture</h2>
+      <span class="tag">pipeline</span>
+      <p class="intent">All tile decoding and routing runs in a worker. Every stage can degrade to the existing synthetic generator.</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 1160 620" role="img" aria-label="Pipeline: demo options and seed bundle feed a scenario planner, which uses placement and terrain classification plus three routers, then track synthesis, producing simulation events, with a fallback to the synthetic generator.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280" />
+          </marker>
+          <marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309" />
+          </marker>
+        </defs>
+
+        <style>
+          .bx { fill: #ffffff; stroke: #9ca3af; stroke-width: 1.2; }
+          .bx.pl { fill: #eff6ff; stroke: #2563eb; }
+          .bx.dt { fill: #f9fafb; stroke: #6b7280; stroke-dasharray: 4 3; }
+          .bx.fb { fill: #fffbeb; stroke: #b45309; }
+          .bx.out { fill: #f0fdf4; stroke: #15803d; }
+          .t  { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 12.5px; fill: #1a1d23; font-weight: 600; }
+          .s  { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 10.5px; fill: #6b7280; }
+          .m  { font-family: "IBM Plex Mono", monospace; font-size: 11px; fill: #1a1d23; }
+          .ln { stroke: #6b7280; stroke-width: 1.3; fill: none; }
+          .ln.dash { stroke: #b45309; stroke-dasharray: 5 4; }
+          .lbl { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 10px; fill: #b45309; }
+        </style>
+
+        <!-- row 0: inputs -->
+        <rect class="bx" x="40" y="24" width="480" height="54" rx="6" />
+        <text class="t" x="56" y="46">Demo options</text>
+        <text class="s" x="56" y="64">regions (one to many) &middot; categories &middot; count &middot; time window &middot; seed</text>
+
+        <rect class="bx dt" x="700" y="24" width="420" height="54" rx="6" />
+        <text class="m" x="716" y="46">geo-seeds.json</text>
+        <text class="s" x="716" y="64">build-time from mbtiles &middot; precached &middot; offline tier</text>
+
+        <!-- row 1: planner -->
+        <rect class="bx pl" x="40" y="130" width="620" height="54" rx="6" />
+        <text class="m" x="56" y="152">scenario-planner.ts</text>
+        <text class="s" x="56" y="170">picks a plan per target, enforces the time window and point budget</text>
+
+        <rect class="bx dt" x="700" y="130" width="420" height="54" rx="6" />
+        <text class="m" x="716" y="152">tile-source.ts</text>
+        <text class="s" x="716" y="170">resolves VITE_GEO_TILEJSON_URL &rarr; {z}/{x}/{y}.pbf</text>
+
+        <!-- row 2: placement + terrain + client -->
+        <rect class="bx" x="40" y="236" width="290" height="54" rx="6" />
+        <text class="t" x="56" y="258">Placement</text>
+        <text class="s" x="56" y="276">validity-filtered rejection sampling</text>
+
+        <rect class="bx" x="370" y="236" width="290" height="54" rx="6" />
+        <text class="m" x="386" y="258">terrain.ts</text>
+        <text class="s" x="386" y="276">classifyPoint: water class, nearest road</text>
+
+        <rect class="bx dt" x="700" y="236" width="420" height="54" rx="6" />
+        <text class="m" x="716" y="258">vector-tile-client.ts + LRU</text>
+        <text class="s" x="716" y="276">pbf decode inside geo-router.worker.ts</text>
+
+        <!-- row 3: routers -->
+        <rect class="bx" x="40" y="342" width="196" height="60" rx="6" />
+        <text class="m" x="56" y="364">road-router</text>
+        <text class="s" x="56" y="381">hierarchical A*</text>
+        <text class="s" x="56" y="395">car and truck</text>
+
+        <rect class="bx" x="252" y="342" width="196" height="60" rx="6" />
+        <text class="m" x="268" y="364">sea-router</text>
+        <text class="s" x="268" y="381">ferry lines +</text>
+        <text class="s" x="268" y="395">water-grid A*</text>
+
+        <rect class="bx" x="464" y="342" width="196" height="60" rx="6" />
+        <text class="m" x="480" y="364">air-router</text>
+        <text class="s" x="480" y="381">runway to runway</text>
+        <text class="s" x="480" y="395">loiter &middot; return to base</text>
+
+        <rect class="bx fb" x="700" y="342" width="420" height="60" rx="6" />
+        <text class="t" x="716" y="364">Fallback: existing synthetic generator</text>
+        <text class="s" x="716" y="381">tiles unreachable, slow, or region has no usable geometry</text>
+        <text class="s" x="716" y="395">per-track, so successful routed tracks are kept</text>
+
+        <!-- row 4: synthesis -->
+        <rect class="bx pl" x="40" y="454" width="620" height="54" rx="6" />
+        <text class="m" x="56" y="476">path-to-events.ts</text>
+        <text class="s" x="56" y="494">walk polyline at profile speed &rarr; turn limits &rarr; Douglas&ndash;Peucker to 60&ndash;150 pts</text>
+
+        <!-- row 5: output -->
+        <rect class="bx out" x="40" y="546" width="1080" height="52" rx="6" />
+        <text class="m" x="56" y="568">SimulationEvent[]</text>
+        <text class="s" x="56" y="586">authored speed and altitude per point &mdash; consumed unchanged by the existing engine</text>
+
+        <!-- arrows -->
+        <path class="ln" d="M 280 78 L 280 130" marker-end="url(#ah)" />
+        <path class="ln" d="M 700 51 L 676 51 Q 660 51 660 70 L 660 130" marker-end="url(#ah)" />
+        <path class="ln" d="M 185 184 L 185 236" marker-end="url(#ah)" />
+        <path class="ln" d="M 330 263 L 370 263" marker-end="url(#ah)" />
+        <path class="ln" d="M 700 263 L 668 263" marker-end="url(#ah)" />
+        <path class="ln" d="M 910 78 L 910 130" marker-end="url(#ah)" />
+        <path class="ln" d="M 910 184 L 910 236" marker-end="url(#ah)" />
+        <path class="ln" d="M 138 290 L 138 342" marker-end="url(#ah)" />
+        <path class="ln" d="M 350 290 L 350 342" marker-end="url(#ah)" />
+        <path class="ln" d="M 562 290 L 562 342" marker-end="url(#ah)" />
+        <path class="ln" d="M 138 402 L 138 454" marker-end="url(#ah)" />
+        <path class="ln" d="M 350 402 L 350 454" marker-end="url(#ah)" />
+        <path class="ln" d="M 562 402 L 562 454" marker-end="url(#ah)" />
+        <path class="ln" d="M 350 508 L 350 546" marker-end="url(#ah)" />
+        <path class="ln dash" d="M 660 170 L 680 170 Q 692 170 692 200 L 692 360 L 700 360" marker-end="url(#ahd)" />
+        <text class="lbl" x="700" y="326">degrade</text>
+        <path class="ln dash" d="M 910 402 L 910 520 Q 910 546 890 546" marker-end="url(#ahd)" />
+      </svg>
+      <figcaption>Solid arrows are the authentic path; dashed amber is graceful degradation. Dashed grey boxes are data access, all of which runs inside the worker.</figcaption>
+    </figure>
+
+    <h3>Per-class routing strategy</h3>
+    <table>
+      <thead><tr><th>Requirement</th><th>Data source</th><th>Method</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Cars and trucks follow roadways</strong></td>
+          <td><code>transportation</code> LineStrings</td>
+          <td>Stitch tile-clipped lines into a graph by quantizing node coordinates to about 5 decimals (~1.1&nbsp;m), which rejoins geometry split at tile boundaries. Weight edges by length divided by class speed; respect <code>oneway</code> and <code>access</code>; exclude <code>rail</code>, <code>path</code>, <code>track</code>, <code>aerialway</code>, <code>transit</code>. Plan the long-haul skeleton at z10 and refine locally at z13&ndash;14. Trucks bias to motorway, trunk and primary; cars may use minor and service roads.</td>
+        </tr>
+        <tr>
+          <td><strong>Boats stay in waterways and oceans</strong></td>
+          <td><code>water</code> polygons, <code>waterway</code> lines, <code>transportation class=ferry</code></td>
+          <td>Prefer real ferry LineStrings where they exist &mdash; these are genuine maritime routes. Otherwise A* over a navigable grid rasterized from <code>class=ocean</code> and <code>class=lake</code> polygons at z6&ndash;8 with 8-neighbour connectivity, which keeps vessels off land and yields plausible lanes. Snap starts near harbours and ferry terminals from the seed bundle.</td>
+        </tr>
+        <tr>
+          <td><strong>Planes fly common patterns, loiter, and can return to origin</strong></td>
+          <td><code>aerodrome_label</code> + <code>aeroway class=runway</code></td>
+          <td>Pick an origin and destination aerodrome, then compose a profile: runway-aligned departure, climb at the profile's rate, cruise great circle at a flight level suited to distance and subtype, optional loiter (racetrack or orbit), descent, runway-aligned approach, landing. <strong>Return-to-origin is simply destination equals origin</strong> with a loiter or patrol block in the middle. Because airports and runway headings are precomputed into the seed bundle, the common aircraft case needs no runtime tile fetch at all.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= PHASES ================= -->
+  <section id="phases">
+    <div class="sec-head">
+      <h2>Implementation phases</h2>
+      <span class="tag">1 gate + 6 phases</span>
+      <p class="intent">A gating spike comes first. After that, each phase leaves the app working. Phase 0 and 1 are prerequisites; the three routers in phase 2 are independent of each other.</p>
+    </div>
+
+    <div class="phase">
+      <div class="num" style="background: var(--ok);">GO</div>
+      <div class="body">
+        <h3>Viability spike &mdash; <span style="color: var(--ok);">resolved, road routing is viable</span></h3>
+        <p>The riskiest assumption in this plan held. Tile-clipped <code>transportation</code> geometry <strong>does</strong> stitch back into a connected graph, so runtime client-side routing goes ahead and the offline corridor-mining fallback is not needed. Measured on real London tiles (z14 2&times;2 block <code>14/8185/5447</code>&ndash;<code>14/8186/5448</code>, plus the same area at z10) and independently re-verified, including confirming the sample A* route genuinely crosses a tile seam.</p>
+
+        <table>
+          <thead><tr><th>Layer</th><th>Nodes</th><th>Edges</th><th>Components</th><th>Largest component</th></tr></thead>
+          <tbody>
+            <tr><td>z14 all classes</td><td>32,270</td><td>31,991</td><td>1,984</td><td>67.56%</td></tr>
+            <tr><td>z14 drivable</td><td>8,724</td><td>8,599</td><td>595</td><td>71.26%</td></tr>
+            <tr><td><strong>z14 arterial</strong></td><td><strong>5,938</strong></td><td><strong>6,177</strong></td><td><strong>179</strong></td><td><strong>88.18%</strong></td></tr>
+            <tr><td>z10 arterial</td><td>20,527</td><td>21,700</td><td>831</td><td>79.84%</td></tr>
+          </tbody>
+        </table>
+
+        <p>Seam stitching at z14 arterial: 54, 48, 31 and 27 shared nodes across the four adjacent tile pairs, and the largest component spans all four tiles.</p>
+
+        <h4>Parameters now locked for phase 2a</h4>
+        <ul>
+          <li><strong>Quantize to 5 decimal places (~1.1&nbsp;m), with no snap tolerance.</strong> The snap sweep says snapping is not worth its complexity: at 0.5&nbsp;m, 1&nbsp;m and 2&nbsp;m the component count stays <em>exactly</em> 179 while the largest component slightly shrinks. Only 5&ndash;10&nbsp;m moves it at all, and that is also where false bridge-to-ground merges begin.</li>
+          <li><strong>Class filtering is the real connectivity lever, not snapping.</strong> Filtering to arterial lifts the largest component from 67.56% to 88.18% and collapses components from 1,984 to 179 &mdash; and 177 of those 179 are tiny stubs of 20 nodes or fewer.</li>
+          <li><strong>Snap endpoints into the largest component</strong>, not merely to the nearest edge. About 12% of arterial nodes sit outside it, so nearest-edge snapping would occasionally strand a vehicle on an isolated stub.</li>
+          <li><strong>Fetch by corridor, never by bbox.</strong> A 10&nbsp;km corridor at z14 is ~21 tiles; a 25&nbsp;km bbox is 289.</li>
+          <li><strong>No class filter needed at z10</strong> &mdash; the z10 drivable and arterial graphs came out byte-identical, because OpenMapTiles already carries only arterial classes at that zoom.</li>
+        </ul>
+
+        <div class="card warn">
+          <h4><span class="sev warn">Carry forward</span> The long-haul layer is the weaker one</h4>
+          <p>The z10 skeleton is <em>more</em> fragmented than z14 arterial &mdash; 79.84% largest across 831 components, versus 88.18% across 179. Boundary effects inflate this, since the z10 block spans roughly 48&nbsp;km and many roads simply continue outside the sample. Still, phase 2a should expect long-haul planning to depend on endpoint snapping more than local refinement does, and should degrade that single track rather than fail hard.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">0</div>
+      <div class="body">
+        <h3>Foundations</h3>
+        <p>Groundwork with no behaviour change, so later phases stay small.</p>
+        <ul class="files">
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/random.ts</span> &mdash; extract the LCG currently duplicated in <span class="path">demo-scenario.test.ts</span> L8, <span class="path">event-generator.test.ts</span> L114 and <span class="path">simulation-schema-docs.ts</span> L10 into a shared <code>createSeededRandom(seed)</code>. Add an optional <code>seed</code> demo option so scenarios become reproducible.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/src/lib/simulation-schema-docs.ts</span> &mdash; <code>getExampleScenarioJson()</code> currently calls <code>createDemoScenario</code> synchronously during render in <span class="path">simulation-import.tsx</span> L344. Replace with a committed static fixture so async generation never leaks into docs rendering.</li>
+          <li><span class="mod">mod</span> <span class="path">packages/env/src/web.ts</span>, <span class="path">.env.example</span>, <span class="path">docker-compose.yml</span> &mdash; add <code>VITE_GEO_TILEJSON_URL</code> following the existing <code>VITE_MAP_STYLE_*</code> pattern.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/package.json</span> &mdash; promote <code>pbf</code> and <code>@mapbox/vector-tile</code> to direct dependencies. Both are already transitive via <code>maplibre-gl</code>; roughly 25&nbsp;KB combined.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/tile-source.ts</span> &mdash; fetch TileJSON once and cache the resolved template. Handle raw-gzip bodies via <code>DecompressionStream("gzip")</code> when <code>Content-Encoding</code> is absent but gzip magic bytes are present.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/vector-tile-client.ts</span> &mdash; fetch, decode, project tile coordinates to lng/lat, with an in-memory LRU keyed by <code>z/x/y/layer</code>.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/geo-router.worker.ts</span> &mdash; the app's first owned worker. Follow the <code>setWorkerUrl</code> pattern already used in <span class="path">apps/web/src/lib/maplibre.ts</span>. All decode and routing happens here so a 100-target generation never blocks the UI.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">1</div>
+      <div class="body">
+        <h3>Seed bundle and terrain classification</h3>
+        <p>The seed bundle is what makes region selection instant, aircraft routing fetch-free, and offline operation possible.</p>
+        <ul class="files">
+          <li><span class="new">new</span> <span class="path">scripts/build-geo-seeds.mjs</span> &mdash; reads <span class="path">data/tiles/openmaptiles.mbtiles</span> directly using Node&nbsp;22's built-in <code>node:sqlite</code> (verified available on v22.14), so <strong>no new dependency</strong>. Emits <span class="path">apps/web/public/geo-seeds.json</span> containing aerodromes (<code>icao</code>, <code>iata</code>, <code>name</code>, <code>class</code>, <code>ele_ft</code>) with runway headings derived from <code>aeroway class=runway</code> bearings, ports and ferry terminals, coarse sea-lane waypoints, per-region road anchors, and the region catalogue itself. Filter aerodromes to those with an IATA code or a runway over roughly 1,500&nbsp;m to keep the file to a few thousand entries.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/terrain.ts</span> &mdash; <code>classifyPoint(lngLat)</code> returning water class via point-in-polygon over <code>water</code> at z8&ndash;10, plus the nearest road candidate. This is the primitive that makes globally-valid rejection sampling work: sample a candidate, probe, accept or retry within a bounded attempt count, then relocate.</li>
+        </ul>
+        <p>The bundle is precached automatically by the existing workbox glob <code>**/*.{js,css,html,ico,png,svg,woff2,mjs,json}</code>, so it doubles as the offline tier with no config change.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">2</div>
+      <div class="body">
+        <h3>The three routers</h3>
+        <p>Independent of one another, so they can be built and reviewed separately. Each returns a plain polyline; none of them knows about events or timing.</p>
+        <ul class="files">
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/road-router.ts</span> &mdash; hierarchical A* over a stitched road graph, with class-weighted edges and per-category class preferences.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/sea-router.ts</span> &mdash; ferry-line preference with water-grid A* fallback.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/air-router.ts</span> &mdash; aerodrome pairing, runway-aligned departure and approach, climb/cruise/descent, loiter patterns, and return-to-base.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">3</div>
+      <div class="body">
+        <h3>Kinematics and track synthesis</h3>
+        <p>This is where the speed realism finding gets fixed, and where the point budget is enforced.</p>
+        <ul class="files">
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/vehicle-profiles.ts</span> &mdash; <strong>the single source of kinematic truth</strong>, keyed by <code>vehicleSubtype</code> rather than category, which directly fixes the &ldquo;Transport at 1,300&nbsp;kt&rdquo; problem. Today <code>VEHICLE_SUBTYPES</code> is only a flat list of display strings with no physics attached; every entry gains a full profile carrying cruise band, max speed, climb and descent rate, turn radius, typical flight level, and loiter / return-to-base flags. <code>CATEGORY_SPEED_RANGES</code> is demoted to a fallback for targets with no subtype, and <code>CATEGORY_TOP_SPEED_KNOTS</code> remains the hard clamp used by <code>clampSpeedToCategory</code>. Turn radius and climb rate feed the synthesis step below; the loiter and RTB flags drive the air router's pattern choice back in phase 2.</li>
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/geo/path-to-events.ts</span> &mdash; walk the routed polyline at profile speed, apply turn-rate limits and speed reduction through turns, then simplify with <strong>Douglas&ndash;Peucker by perpendicular distance in metres</strong> to hit the 60&ndash;150 point budget. Emit authored <code>speed</code> and <code>altitude</code> per point, since the engine already prefers authored speed.</li>
+        </ul>
+        <p>Reuse the <code>assertFeasibleEndWindow</code> semantics so a routed distance that cannot fit the authored window is retimed or rejected, rather than producing a physically impossible track.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">4</div>
+      <div class="body">
+        <h3>Orchestration and UI</h3>
+        <ul class="files">
+          <li><span class="new">new</span> <span class="path">apps/web/src/lib/scenario-planner.ts</span> &mdash; per-target plan selection, budget enforcement and the degradation decision. <strong>Async and streaming</strong>: emits targets as they complete, with bounded concurrency, <code>AbortSignal</code> cancellation, and aircraft planned first for fast first paint.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/src/lib/demo-scenario.ts</span> &mdash; <code>createDemoScenario</code> becomes async and streaming, delegating to the planner. Keep the current synthetic implementation exported as <code>createSyntheticDemoScenario</code> for the fallback tier and for fast unit tests. Replace <code>DEMO_START_LOCATIONS</code> with the typed <code>DEMO_REGIONS</code> catalogue described above, accepting <strong>one to many regions</strong> plus an &ldquo;Anywhere&rdquo; mode, with precedence pin &gt; regions &gt; anywhere.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/src/components/scenario-builder.tsx</span> &mdash; add a region multi-select to the demo dialog (currently around L979; the dialog uses only <code>Checkbox</code>, <code>Input</code>, <code>DateTimePicker</code> and <code>MapLocationPicker</code>, no <code>Select</code>), showing each region's supported categories so a mismatch is visible <em>before</em> generating. Convert <code>loadRandomDemo</code> (L685&ndash;724) to async with <code>useTransition</code> &mdash; there is no <code>useTransition</code> anywhere in the app yet, so this establishes the pattern &mdash; plus a progress readout and a Cancel button wired to an <code>AbortController</code>.</li>
+        </ul>
+        <p>Degradation is <strong>per track</strong>: routed tracks that succeeded are kept, only the failures fall back, and a single toast reports how many were routed authentically versus synthetically.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">5</div>
+      <div class="body">
+        <h3>Performance, caching and tests</h3>
+        <ul class="files">
+          <li><span class="mod">mod</span> <span class="path">apps/web/src/lib/simulation-engine.ts</span> &mdash; sort once and memoize a per-target position index instead of re-sorting the full event array inside the per-target loop at L161. Required before event counts rise.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/src/lib/simulation-storage.ts</span> &mdash; surface localStorage quota failures instead of letting <code>safeWrite</code> (L36&ndash;43) swallow them.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/vite.config.ts</span> &mdash; raise the <code>local-tileserver</code> <code>maxEntries</code> well above its current 64 to cope with route-generation fetches, and add a <code>runtimeCaching</code> rule for <code>tiles.openfreemap.org</code> so dev is cacheable too.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/src/lib/demo-scenario.test.ts</span> &mdash; replace the global-scatter contract at L165&ndash;196 with <strong>terrain-validity</strong> assertions: road vehicles near a road, boats on water, aircraft near an aerodrome. Drive these from a mocked tile source backed by small committed fixture tiles. Convert the remaining <code>createDemoScenario</code> tests to async; keep synthetic-path tests synchronous and fast.</li>
+          <li><span class="new">new</span> unit tests per router, for Douglas&ndash;Peucker simplification, and for profile kinematics.</li>
+          <li><span class="mod">mod</span> <span class="path">apps/web/e2e/a11y.spec.ts</span> &mdash; open the demo dialog so axe actually scans the new region multi-select. Today the spec only visits <code>/builder</code> and never opens the dialog, so none of the demo controls are covered.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RISKS ================= -->
+  <section id="risks">
+    <div class="sec-head">
+      <h2>Risks and mitigations</h2>
+      <span class="tag">known unknowns</span>
+      <p class="intent">The honest list. Road routing from vector tiles is the riskiest piece.</p>
+    </div>
+
+    <table>
+      <thead><tr><th>Risk</th><th>Why it matters</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Graph stitching across tile boundaries</strong></td>
+          <td>Vector tiles clip geometry per tile, splitting LineStrings. If nodes do not rejoin, the router finds no path.</td>
+          <td><strong>Resolved &mdash; the spike returned GO.</strong> 5dp quantization yields an 88.18% largest component across a real z14 seam, with 27&ndash;54 stitches per adjacent tile pair. Class filtering, not snap tolerance, turned out to be the lever. The offline corridor-mining fallback is no longer needed.</td>
+        </tr>
+        <tr>
+          <td><strong>Tile fetch volume</strong></td>
+          <td>A dense urban z14 tile can hold thousands of features; covering a long route naively could mean hundreds of fetches.</td>
+          <td>Hierarchical routing: z10 skeleton for long haul, z13&ndash;14 only near endpoints. LRU cache in the worker. Aircraft avoid runtime fetches entirely via the seed bundle.</td>
+        </tr>
+        <tr>
+          <td><strong>Tile-simplified geometry at low zoom</strong></td>
+          <td>Planetiler simplifies per zoom, so a z10 motorway is coarser than the OSM way.</td>
+          <td>Acceptable for the skeleton, since the visual result is a smooth motorway corridor. Refine near endpoints where the viewer is likely to zoom in.</td>
+        </tr>
+        <tr>
+          <td><strong>Async generation breaks existing tests</strong></td>
+          <td>Every <code>createDemoScenario</code> test is synchronous, and the docs example calls it during render.</td>
+          <td>Phase&nbsp;0 decouples the docs example first. Keeping <code>createSyntheticDemoScenario</code> synchronous preserves fast tests.</td>
+        </tr>
+        <tr>
+          <td><strong>Rejection sampling could loop</strong></td>
+          <td>&ldquo;Anywhere&rdquo; mode probing for a road-valid point could retry many times over ocean.</td>
+          <td>Bounded attempt count, then relocate to a seed-bundle anchor, then degrade. Bias initial candidates toward <code>landuse</code> and <code>place</code> presence rather than pure uniform sampling.</td>
+        </tr>
+        <tr>
+          <td><strong>Review doc ships in the build</strong></td>
+          <td>This file lives in <span class="path">apps/web/public/</span>, so it is served and precached by the service worker, exactly like the existing wireframe docs.</td>
+          <td>Consistent with the current convention. Worth a deliberate decision later on whether these review artifacts should be excluded from the production build.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= DONE ================= -->
+  <section id="done">
+    <div class="sec-head">
+      <h2>What &ldquo;done&rdquo; looks like</h2>
+      <span class="tag">acceptance</span>
+      <p class="intent">Checkable outcomes, tied back to the three stated requirements.</p>
+    </div>
+
+    <ol>
+      <li><strong>Cars and trucks follow roadways.</strong> Every position event for a <code>car</code> or <code>truck</code> target lies within a small tolerance of a <code>transportation</code> LineString, and tracks turn at junctions rather than cutting corners. Trucks visibly prefer major classes.</li>
+      <li><strong>Boats sit in navigable water.</strong> No <code>boat</code> position event falls on land. Vessels either follow a real <code>class=ferry</code> route or a coherent lane that rounds headlands instead of crossing them.</li>
+      <li><strong>Planes fly recognisable patterns.</strong> Tracks begin and end at real aerodromes, aligned to actual runway headings; altitude shows a climb, a cruise plateau and a descent; loiter targets hold a racetrack or orbit; and return-to-base targets land where they departed.</li>
+      <li><strong>Region typing holds.</strong> Selecting only maritime regions never produces a road vehicle in water &mdash; it relocates or degrades, and says which.</li>
+      <li><strong>Local-first holds.</strong> No new service in <span class="path">docker-compose.yml</span>. Docker reaches only <code>tiles.adversary</code>. Dev may reach OpenFreeMap, controlled by one env var.</li>
+      <li><strong>Budget holds.</strong> First contacts are visible in under about 2&nbsp;seconds at 100 targets, Cancel works, a 100-target scenario stays in the low thousands of events, generation never blocks the UI thread, and interpolated preview stays responsive after the engine indexing fix.</li>
+      <li><strong>Degrades cleanly.</strong> With the tile source blocked, the demo still loads via the synthetic path and says so.</li>
+      <li><strong>Reproducible.</strong> The same seed produces the same scenario, so the terrain-validity tests are deterministic.</li>
+    </ol>
+  </section>
+
+  <hr />
+  <footer>
+    Review and plan for randomised demo route generation &middot; Adversary &middot; based on
+    <span class="path">apps/web/src/lib/demo-scenario.ts</span>,
+    <span class="path">event-generator.ts</span>,
+    <span class="path">position-telemetry.ts</span>,
+    <span class="path">simulation-engine.ts</span>,
+    and mbtiles metadata from <span class="path">data/tiles/openmaptiles.mbtiles</span> (OpenFreeMap 3.16.0, OSM 2026-06-15).
+  </footer>
+
+</div>
+</body>
+</html>

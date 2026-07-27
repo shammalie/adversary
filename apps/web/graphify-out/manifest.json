@@ -5,18 +5,18 @@
     "semantic_hash": ""
   },
   "e2e/a11y.helpers.ts": {
-    "mtime": 1784911951.4900281,
-    "ast_hash": "7a9ad59151eff0f389e2f572927bb1be",
+    "mtime": 1785184248.8660264,
+    "ast_hash": "e6cb874747699ecaf3b65b8a82ed70f4",
     "semantic_hash": ""
   },
   "e2e/a11y.spec.ts": {
-    "mtime": 1784911945.733628,
-    "ast_hash": "28c97b469c67e53882612834c1072cb7",
+    "mtime": 1785184249.174561,
+    "ast_hash": "b5b00c73ea99df64ff636ebb25789eb2",
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1785081134.3604972,
-    "ast_hash": "913c241f99497bad5cb6c1fc452b7c09",
+    "mtime": 1785182146.526604,
+    "ast_hash": "b67e09bf99467e29c9d2c14a89dae97a",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "src/components/operations-dashboard.tsx": {
-    "mtime": 1785081182.2715285,
-    "ast_hash": "6b61f92dbb4014c81cbbd06e4e2614de",
+    "mtime": 1785178526.1603856,
+    "ast_hash": "b76039b40acfb1b1b1cbe338482df459",
     "semantic_hash": ""
   },
   "src/components/preview-event-graph.tsx": {
@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "src/components/scenario-builder.tsx": {
-    "mtime": 1785082099.9237351,
-    "ast_hash": "95672f95201b40fac6555e87e5b38ae6",
+    "mtime": 1785184274.0747871,
+    "ast_hash": "5994e02510fbbfebb4be2b9cdd0aa77d",
     "semantic_hash": ""
   },
   "src/components/simulation-import.tsx": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "src/components/theme-provider.tsx": {
-    "mtime": 1784897251.767842,
-    "ast_hash": "28ec9cc0e7b8acfd30d39c3d5f2fc0d3",
+    "mtime": 1785182395.8390894,
+    "ast_hash": "1431a4668b25f3b5fda9a7c0febca4bb",
     "semantic_hash": ""
   },
   "src/components/tracking-map.tsx": {
@@ -145,13 +145,13 @@
     "semantic_hash": ""
   },
   "src/lib/demo-scenario.test.ts": {
-    "mtime": 1785080622.1652143,
-    "ast_hash": "8f9056642cef31a06c34c52548910561",
+    "mtime": 1785183796.8760638,
+    "ast_hash": "9993bfea099cd23e843cf00f1e7d6c71",
     "semantic_hash": ""
   },
   "src/lib/demo-scenario.ts": {
-    "mtime": 1785081044.9709592,
-    "ast_hash": "c92a3b30e2eba516afd31fd34da65d0d",
+    "mtime": 1785183728.3029416,
+    "ast_hash": "30a241e185914eeb3854ac070781e7bf",
     "semantic_hash": ""
   },
   "src/lib/event-draft.test.ts": {
@@ -165,13 +165,13 @@
     "semantic_hash": ""
   },
   "src/lib/event-generator.test.ts": {
-    "mtime": 1785076096.6462638,
-    "ast_hash": "384b3632376c1200f8802764711975cc",
+    "mtime": 1785182079.6688306,
+    "ast_hash": "4670a66afb18ba74f49bf66d67ad9b35",
     "semantic_hash": ""
   },
   "src/lib/event-generator.ts": {
-    "mtime": 1785076071.4841754,
-    "ast_hash": "31f7d79ddad768c48227e23f7c7b42b5",
+    "mtime": 1785178536.6487684,
+    "ast_hash": "569fc787eb5105ac151069506ee62cb7",
     "semantic_hash": ""
   },
   "src/lib/flow-zoom.test.ts": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "src/lib/simulation-schema-docs.ts": {
-    "mtime": 1785066786.7709498,
-    "ast_hash": "3f541171851225f559121a1548704cc3",
+    "mtime": 1785182080.5974588,
+    "ast_hash": "07cb4a674ce153b68171fa9791f3a655",
     "semantic_hash": ""
   },
   "src/lib/simulation-schema.test.ts": {
@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "src/lib/vehicle-speed.ts": {
-    "mtime": 1784910775.3595188,
-    "ast_hash": "697749902a3e61fb81e2a7e285aefd9f",
+    "mtime": 1785182609.6987817,
+    "ast_hash": "d7c8d476646e62961bb6aa983a86846a",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -385,13 +385,13 @@
     "semantic_hash": ""
   },
   "tsconfig.json": {
-    "mtime": 1784897242.7429338,
-    "ast_hash": "fbf01fcae3b76401472c48b28b7da596",
+    "mtime": 1785182120.9347703,
+    "ast_hash": "d2fba37d844a9f7baffbd9f64e0390c7",
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1785065964.229698,
-    "ast_hash": "83fd819bbc6a665ab338ab76f23912d9",
+    "mtime": 1785182317.570034,
+    "ast_hash": "407adadf29aedae352cbddbc7c9db991",
     "semantic_hash": ""
   },
   "index.html": {
@@ -647,6 +647,146 @@
   "src/lib/vehicle-icon.test.ts": {
     "mtime": 1785079274.6926765,
     "ast_hash": "f09af22e11bd3d3e40e6f8e0feb0095c",
+    "semantic_hash": ""
+  },
+  "public/geo-seeds.json": {
+    "mtime": 1785182987.8644977,
+    "ast_hash": "2d9b7056fe4f6837eae4b3f9838626a3",
+    "semantic_hash": ""
+  },
+  "src/lib/demo-regions.ts": {
+    "mtime": 1785183527.0714753,
+    "ast_hash": "0fc4ca886f335f9179ef5c871d072a39",
+    "semantic_hash": ""
+  },
+  "src/lib/fixtures/example-scenario.json": {
+    "mtime": 1785182063.590519,
+    "ast_hash": "21018ace1f98946d5092be6198c69047",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/air-router.test.ts": {
+    "mtime": 1785183249.5164363,
+    "ast_hash": "df2e95bf824456540d98fef5c4f76beb",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/air-router.ts": {
+    "mtime": 1785183270.9516969,
+    "ast_hash": "534cc45ae0dbbfe414c336f7a274ad07",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/fixtures/tiles/manifest.json": {
+    "mtime": 1785183148.1896715,
+    "ast_hash": "47dc365dddac023041c23b1a53810449",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/geo-router-client.ts": {
+    "mtime": 1785183534.1195943,
+    "ast_hash": "20f9321edc22fc7f731a85c0d6b7c17a",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/geo-router-protocol.ts": {
+    "mtime": 1785182109.6682694,
+    "ast_hash": "11dc291bb19a5db585eb55f4b0f9a66d",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/geo-router.ts": {
+    "mtime": 1785182115.9383926,
+    "ast_hash": "78ba95fb669bae427c91263d4f823004",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/geo-router.worker.ts": {
+    "mtime": 1785183323.698303,
+    "ast_hash": "fa73ddf1d14a036b6c42cb1d7e3cd6b6",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/path-to-events.test.ts": {
+    "mtime": 1785182678.8749568,
+    "ast_hash": "26ad1cb48f83bff2b0e892c53686b165",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/path-to-events.ts": {
+    "mtime": 1785182762.049278,
+    "ast_hash": "d3b9746a47be84f9ba6f1248863670cf",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/road-router.test.ts": {
+    "mtime": 1785183386.3650773,
+    "ast_hash": "815c7102880487e7ca768e1824ecf016",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/road-router.ts": {
+    "mtime": 1785183301.1937714,
+    "ast_hash": "107a3e961e418897603220f182953807",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/sea-router.test.ts": {
+    "mtime": 1785183262.8231966,
+    "ast_hash": "31df08ec4331de808eac8550882a0781",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/sea-router.ts": {
+    "mtime": 1785183292.633729,
+    "ast_hash": "5b452d97b39245380bd0909b65aef509",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/terrain.test.ts": {
+    "mtime": 1785182887.7693882,
+    "ast_hash": "2a03d13d25abeedd57791c7224e83353",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/terrain.ts": {
+    "mtime": 1785182813.1947172,
+    "ast_hash": "3de8516e66b515ed5e7577bbb439cf84",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/tile-source.ts": {
+    "mtime": 1785182099.6803145,
+    "ast_hash": "58d19fc0a6b1eaf273240048bb4e202e",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/vector-tile-client.test.ts": {
+    "mtime": 1785182116.2722518,
+    "ast_hash": "e142f598efb95c8d5b8927f293f53668",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/vector-tile-client.ts": {
+    "mtime": 1785182100.0526962,
+    "ast_hash": "2a4a6a3c9c4786ab784ca4a3e6f435ee",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/vehicle-profiles.test.ts": {
+    "mtime": 1785182678.54893,
+    "ast_hash": "a4c0da7c7b3d9e39150ab601da64de39",
+    "semantic_hash": ""
+  },
+  "src/lib/geo/vehicle-profiles.ts": {
+    "mtime": 1785182606.8903744,
+    "ast_hash": "d134165a5d7b1a7ed871615030905990",
+    "semantic_hash": ""
+  },
+  "src/lib/random.test.ts": {
+    "mtime": 1785182049.6378663,
+    "ast_hash": "638f5b8366168678f5b7ea1c8a6460dd",
+    "semantic_hash": ""
+  },
+  "src/lib/random.ts": {
+    "mtime": 1785182048.65162,
+    "ast_hash": "e777c7f37e1f2415f2dcfaf617d2d187",
+    "semantic_hash": ""
+  },
+  "src/lib/scenario-planner.test.ts": {
+    "mtime": 1785183865.0596893,
+    "ast_hash": "2c4667501151b828a7dfd4a28a1804b8",
+    "semantic_hash": ""
+  },
+  "src/lib/scenario-planner.ts": {
+    "mtime": 1785183900.169246,
+    "ast_hash": "085a4c0c697f77a6f26ee8937ca1a853",
+    "semantic_hash": ""
+  },
+  "public/random-demo-review.html": {
+    "mtime": 1785181870.6916459,
+    "ast_hash": "fdd9e4288475d1a5eca21fe738cbba91",
     "semantic_hash": ""
   }
 }

@@ -33,12 +33,30 @@ function safeRead(key: string): unknown {
   }
 }
 
+function isQuotaExceededError(error: unknown): boolean {
+  if (!(error instanceof DOMException)) return false;
+  return (
+    error.name === "QuotaExceededError" ||
+    error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+    // Legacy WebKit / IE code for quota exceeded
+    error.code === 22
+  );
+}
+
 function safeWrite(key: string, value: unknown) {
   if (!canUseStorage()) return false;
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
     return true;
-  } catch {
+  } catch (error) {
+    if (isQuotaExceededError(error)) {
+      console.warn(
+        `[adversary] localStorage quota exceeded while writing "${key}". Runtime was not persisted.`,
+        error,
+      );
+    } else {
+      console.warn(`[adversary] Failed to write localStorage key "${key}".`, error);
+    }
     return false;
   }
 }

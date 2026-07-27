@@ -18,8 +18,10 @@ export const CATEGORY_TOP_SPEED_KNOTS: Record<VehicleCategory, number> = {
 };
 
 /**
- * Typical generation bands (knots). Always within the category top speed.
- * Distance for generated routes is derived as speed × elapsed time.
+ * Category-level generation bands (knots). Always within the category top speed.
+ * Prefer subtype profiles in `geo/vehicle-profiles.ts` when a vehicleSubtype is
+ * known; this table is the fallback for targets with no recognised subtype and
+ * for the legacy synthetic event generator.
  */
 export const CATEGORY_SPEED_RANGES: Record<VehicleCategory, SpeedRange> = {
   aircraft: { minKnots: 90, maxKnots: 1_400 },

@@ -9,6 +9,7 @@ import {
   MAX_GENERATED_EVENTS,
 } from "@/lib/event-generator";
 import { haversineDistanceNm, initialBearingDegrees } from "@/lib/position-telemetry";
+import { createSeededRandom } from "@/lib/random";
 import { VEHICLE_CATEGORIES } from "@/types/target";
 
 function headingDifference(first: number, second: number) {
@@ -111,11 +112,7 @@ describe("event generator", () => {
     ["aircraft", 5],
     ["boat", 8],
   ] as const)("creates smooth, frequent %s movement updates", (vehicleCategory, maximumTurn) => {
-    let seed = 42;
-    const random = () => {
-      seed = (seed * 1_664_525 + 1_013_904_223) % 4_294_967_296;
-      return seed / 4_294_967_296;
-    };
+    const random = createSeededRandom(42);
     const events = generateRouteEvents({
       targetId: "target-smooth",
       count: 60,
@@ -268,11 +265,7 @@ describe("event generator", () => {
   });
 
   it("stays within maxAbsLatitude and turns gradually near the bound", () => {
-    let seed = 7;
-    const random = () => {
-      seed = (seed * 1_664_525 + 1_013_904_223) % 4_294_967_296;
-      return seed / 4_294_967_296;
-    };
+    const random = createSeededRandom(7);
     const maxAbsLatitude = 85;
     const events = generateRouteEvents({
       targetId: "target-bound",

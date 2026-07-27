@@ -1,22 +1,13 @@
-import { createDemoScenario } from "@/lib/demo-scenario";
+import exampleScenario from "@/lib/fixtures/example-scenario.json";
 import {
   AFFILIATIONS,
   TARGET_STATUSES,
   VEHICLE_CATEGORIES,
 } from "@/types/target";
 
+/** Static docs example — never call the demo generator during render. */
 export function getExampleScenarioJson() {
-  // Deterministic RNG so docs/examples stay stable across renders.
-  let seed = 0.37;
-  const random = () => {
-    seed = (seed * 1_664_525 + 1_013_904_223) % 4_294_967_296;
-    return seed / 4_294_967_296;
-  };
-  return JSON.stringify(
-    createDemoScenario(1_735_000_000_000, random, { targetCount: 2 }),
-    null,
-    2,
-  );
+  return JSON.stringify(exampleScenario, null, 2);
 }
 
 export type SchemaDocSection = {

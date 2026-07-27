@@ -10,7 +10,8 @@
   <a href="#quick-start"><strong>Quick start</strong></a> ·
   <a href="#how-to-use"><strong>How to use</strong></a> ·
   <a href="#scenario-format"><strong>Scenario format</strong></a> ·
-  <a href="#deployment"><strong>Deployment</strong></a>
+  <a href="#deployment"><strong>Deployment</strong></a> ·
+  <a href="#guides"><strong>Guides</strong></a>
 </p>
 
 ---
@@ -28,6 +29,7 @@ Train operators, demo tracking workflows, or prototype geospatial intelligence p
 
 - **Operations dashboard** — target roster, 2D / globe map, track / overview / pan camera, event ingest table, and priority message highlighting
 - **Scenario builder** — author targets and timed events, generate routes, load random demos, preview, and start a run
+- **Authentic random demos** — cars/trucks follow roads, boats stay in water, aircraft use runway-aligned flight patterns from local vector tiles (with per-track synthetic fallback)
 - **JSON import** — upload or paste scenarios with inline schema docs and validation
 - **Local-first maps** — planet OpenMapTiles via Docker tileserver-gl (Liberty / Dark), fronted by Traefik
 - **Client-first** — scenarios and runtime state persist in IndexedDB; installable as a PWA
@@ -64,6 +66,8 @@ From an empty Operations screen:
 2. Click **Load random demo** (or pick a vehicle type), *or* author targets and events yourself
 3. Click **Start simulation**
 4. Return to **Operations** (`/operations`) to watch the run
+
+**Load random demo** opens a dialog where you can multi-select regions (each shows supported vehicle categories), set an optional origin pin, choose vehicle types and target count, then generate. Placement precedence is **pin > selected regions > anywhere**. Generation streams targets into the builder with a progress readout and a **Cancel** button; if some tracks cannot be routed authentically they fall back to the synthetic generator and the completion toast reports how many degraded (and any categories relocated for lack of a compatible region).
 
 Alternatively: **Settings** → **Import** (`/import`), upload a scenario JSON file, then start it from the builder or import flow.
 
@@ -108,14 +112,16 @@ Client configuration lives in the **repo root** `.env` and is validated by [`pac
 | --- | --- |
 | `VITE_MAP_STYLE_LIGHT` | MapLibre style URL for light theme |
 | `VITE_MAP_STYLE_DARK` | MapLibre style URL for dark theme |
+| `VITE_GEO_TILEJSON_URL` | OpenMapTiles TileJSON for authentic demo routing (roads / water / terrain) |
 
-**Development (Vite):** public basemap URLs are fine (defaults in `.env.example`).
+**Development (Vite):** public basemap and TileJSON URLs are fine (defaults in `.env.example`). Geo routing defaults to `https://tiles.openfreemap.org/planet`.
 
 **Local-first Docker:** set (or uncomment) tileserver URLs in the root `.env` before building:
 
 ```bash
 VITE_MAP_STYLE_LIGHT=http://tiles.adversary/styles/liberty/style.json
 VITE_MAP_STYLE_DARK=http://tiles.adversary/styles/dark/style.json
+VITE_GEO_TILEJSON_URL=http://tiles.adversary/data/openmaptiles.json
 ```
 
 Compose also falls back to those tileserver URLs for build args if the variables are unset. `VITE_*` values are **baked in at build time**. Changing them for a Docker image requires `pnpm run docker:build` (or `docker:up --build`).
@@ -192,14 +198,18 @@ Full field docs live on the **Import** page in the app.
 adversary/
 ├── apps/
 │   └── web/              # React app (TanStack Router, MapLibre, PWA)
+│       ├── public/
+│       │   └── geo-seeds.json   # Build-time aerodromes / ports / regions
+│       └── src/lib/geo/         # Tile client, terrain, road/sea/air routers
 ├── packages/
 │   ├── ui/               # Shared shadcn/ui primitives & styles
 │   ├── env/              # @t3-oss/env-core + Zod client env schema
 │   └── config/           # Shared TypeScript / tooling config
 ├── data/tiles/           # OpenMapTiles MBTiles + styles (gitignored bulk)
 ├── scripts/
-│   └── collect-map-tiles.sh
-├── docs/images/          # README artwork
+│   ├── collect-map-tiles.sh
+│   └── build-geo-seeds.mjs      # Mine MBTiles → geo-seeds.json
+├── docs/                 # Guides + README artwork
 └── docker-compose.yml    # Traefik + nginx web + tileserver-gl
 ```
 
@@ -219,6 +229,7 @@ adversary/
 | `pnpm run lint` / `pnpm run format` | Lint or format |
 | `pnpm run test:a11y` | Playwright accessibility tests (web) |
 | `pnpm run tiles:collect` | Download planet MBTiles + Liberty/Dark styles into `data/tiles` |
+| `pnpm run geo:seeds` | Mine local MBTiles into `apps/web/public/geo-seeds.json` (Node 22+) |
 | `pnpm run docker:build` | Build Compose images |
 | `pnpm run docker:up` | Build and start Compose stack |
 | `pnpm run docker:logs` | Tail Compose logs |
@@ -292,6 +303,13 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 ```tsx
 import { Button } from "@adversary/ui/components/button";
 ```
+
+---
+
+## Guides
+
+- [Authentic geo routes](docs/authentic-geo-routes.md) — tile-backed random-demo pipeline, env, gate parameters, degradation / cancel, testing
+- [Geo seed bundle](docs/geo-seeds.md) — `geo-seeds.json` contents, derived region `supports`, `pnpm run geo:seeds`
 
 ---
 

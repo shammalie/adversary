@@ -1,0 +1,652 @@
+{
+  "components.json": {
+    "mtime": 1784899136.126041,
+    "ast_hash": "d5271f48c86b26035e2810c21923b18c",
+    "semantic_hash": ""
+  },
+  "e2e/a11y.helpers.ts": {
+    "mtime": 1784911951.4900281,
+    "ast_hash": "7a9ad59151eff0f389e2f572927bb1be",
+    "semantic_hash": ""
+  },
+  "e2e/a11y.spec.ts": {
+    "mtime": 1784911945.733628,
+    "ast_hash": "28c97b469c67e53882612834c1072cb7",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1785081134.3604972,
+    "ast_hash": "913c241f99497bad5cb6c1fc452b7c09",
+    "semantic_hash": ""
+  },
+  "playwright.config.ts": {
+    "mtime": 1784910053.6038105,
+    "ast_hash": "0e5c786db48898c3b0310a8c0239e5fe",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/generate.mjs": {
+    "mtime": 1784970598.3833747,
+    "ast_hash": "05ddbf82797392fc3e214158e7478ca8",
+    "semantic_hash": ""
+  },
+  "scripts/generate-brand-icons.mjs": {
+    "mtime": 1784971714.4186656,
+    "ast_hash": "ba3c2722ada9c0c9351accca4f622b45",
+    "semantic_hash": ""
+  },
+  "scripts/generate-readme-images.mjs": {
+    "mtime": 1784971838.374292,
+    "ast_hash": "1f8d282f11d646531ba32dc648232ea0",
+    "semantic_hash": ""
+  },
+  "src/components/brand-mark.tsx": {
+    "mtime": 1784971756.225087,
+    "ast_hash": "0a7573742b8e56486211d6c92038d87d",
+    "semantic_hash": ""
+  },
+  "src/components/date-time-picker.tsx": {
+    "mtime": 1785065964.2561326,
+    "ast_hash": "9bc7a9487c857809350ad5662f2c5c7b",
+    "semantic_hash": ""
+  },
+  "src/components/event-graph-edge.tsx": {
+    "mtime": 1784974683.2027917,
+    "ast_hash": "d5a9279fd80468e5350f6ff887ae6a52",
+    "semantic_hash": ""
+  },
+  "src/components/event-graph-node.tsx": {
+    "mtime": 1784984645.3534148,
+    "ast_hash": "cf7a4d88a609eb3e7a95b19b489ba2fd",
+    "semantic_hash": ""
+  },
+  "src/components/grouped-timeline-event.tsx": {
+    "mtime": 1785081685.756748,
+    "ast_hash": "b2a617eb6f1aa124fb73dd36dcc56213",
+    "semantic_hash": ""
+  },
+  "src/components/header.tsx": {
+    "mtime": 1784971755.1445353,
+    "ast_hash": "33233f9fca1732702f8e7a4a701a51bc",
+    "semantic_hash": ""
+  },
+  "src/components/loader.tsx": {
+    "mtime": 1784897242.7356002,
+    "ast_hash": "649746e59fcbc7de774ec412610921b7",
+    "semantic_hash": ""
+  },
+  "src/components/map-data-provider.tsx": {
+    "mtime": 1785065964.229698,
+    "ast_hash": "38ac6a2674bafc58ea1d589a3c66b411",
+    "semantic_hash": ""
+  },
+  "src/components/map-location-picker.tsx": {
+    "mtime": 1785075573.7085814,
+    "ast_hash": "19ca32d892a3765a5af5fd0492b486e0",
+    "semantic_hash": ""
+  },
+  "src/components/mode-toggle.tsx": {
+    "mtime": 1784897251.767842,
+    "ast_hash": "72b4c42569685952b9c20525a49cacfd",
+    "semantic_hash": ""
+  },
+  "src/components/operations-dashboard.tsx": {
+    "mtime": 1785081182.2715285,
+    "ast_hash": "6b61f92dbb4014c81cbbd06e4e2614de",
+    "semantic_hash": ""
+  },
+  "src/components/preview-event-graph.tsx": {
+    "mtime": 1784975535.0711427,
+    "ast_hash": "039ba4b6a9e78128c77c0684ef092075",
+    "semantic_hash": ""
+  },
+  "src/components/router-devtools-gate.tsx": {
+    "mtime": 1784906983.5900567,
+    "ast_hash": "f0ea3f014305e2494f49b1ca1e06c639",
+    "semantic_hash": ""
+  },
+  "src/components/scenario-builder.tsx": {
+    "mtime": 1785082099.9237351,
+    "ast_hash": "95672f95201b40fac6555e87e5b38ae6",
+    "semantic_hash": ""
+  },
+  "src/components/simulation-import.tsx": {
+    "mtime": 1784914260.7245798,
+    "ast_hash": "0ecce2d6783312e2ef75d0f7475d8b51",
+    "semantic_hash": ""
+  },
+  "src/components/simulation-provider.tsx": {
+    "mtime": 1784899725.579355,
+    "ast_hash": "51d4806782f8c58c7be5e43ee9b3029b",
+    "semantic_hash": ""
+  },
+  "src/components/theme-color-sync.tsx": {
+    "mtime": 1784911919.8653107,
+    "ast_hash": "b7917c808723dbc3b77fe12a668b2fe4",
+    "semantic_hash": ""
+  },
+  "src/components/theme-provider.tsx": {
+    "mtime": 1784897251.767842,
+    "ast_hash": "28ec9cc0e7b8acfd30d39c3d5f2fc0d3",
+    "semantic_hash": ""
+  },
+  "src/components/tracking-map.tsx": {
+    "mtime": 1785079274.3530276,
+    "ast_hash": "d3c0e65ce9f0556419d3f34c5cb52d5d",
+    "semantic_hash": ""
+  },
+  "src/lib/build-event-graph.test.ts": {
+    "mtime": 1785066626.743278,
+    "ast_hash": "7658deaa070ff193d00c7c9502db048f",
+    "semantic_hash": ""
+  },
+  "src/lib/build-event-graph.ts": {
+    "mtime": 1784974905.8894522,
+    "ast_hash": "ad26af32c11e65c92264d5e81eb49f8d",
+    "semantic_hash": ""
+  },
+  "src/lib/demo-scenario.test.ts": {
+    "mtime": 1785080622.1652143,
+    "ast_hash": "8f9056642cef31a06c34c52548910561",
+    "semantic_hash": ""
+  },
+  "src/lib/demo-scenario.ts": {
+    "mtime": 1785081044.9709592,
+    "ast_hash": "c92a3b30e2eba516afd31fd34da65d0d",
+    "semantic_hash": ""
+  },
+  "src/lib/event-draft.test.ts": {
+    "mtime": 1784967933.843661,
+    "ast_hash": "1ab97b78feac390bbc3632e483664a56",
+    "semantic_hash": ""
+  },
+  "src/lib/event-draft.ts": {
+    "mtime": 1784967861.7356913,
+    "ast_hash": "fc39af8dc1dc323bfe78a20fc8c88a7a",
+    "semantic_hash": ""
+  },
+  "src/lib/event-generator.test.ts": {
+    "mtime": 1785076096.6462638,
+    "ast_hash": "384b3632376c1200f8802764711975cc",
+    "semantic_hash": ""
+  },
+  "src/lib/event-generator.ts": {
+    "mtime": 1785076071.4841754,
+    "ast_hash": "31f7d79ddad768c48227e23f7c7b42b5",
+    "semantic_hash": ""
+  },
+  "src/lib/flow-zoom.test.ts": {
+    "mtime": 1784974672.8218033,
+    "ast_hash": "a00d793d81d4d4a9be248d59e64a025f",
+    "semantic_hash": ""
+  },
+  "src/lib/flow-zoom.ts": {
+    "mtime": 1784974672.8218033,
+    "ast_hash": "509e7fcfb148e9477735dbe01916c28f",
+    "semantic_hash": ""
+  },
+  "src/lib/map-styles.ts": {
+    "mtime": 1785065964.229698,
+    "ast_hash": "37d1cec523b4158282bf86e3e772e82e",
+    "semantic_hash": ""
+  },
+  "src/lib/maplibre.test.ts": {
+    "mtime": 1785065964.2561326,
+    "ast_hash": "9d01c4fa5d6e75f880fc18408aa7cef8",
+    "semantic_hash": ""
+  },
+  "src/lib/maplibre.ts": {
+    "mtime": 1785065964.229698,
+    "ast_hash": "cd393fd38c2905fab0998eee5e1b980f",
+    "semantic_hash": ""
+  },
+  "src/lib/position-telemetry.test.ts": {
+    "mtime": 1785075547.5323021,
+    "ast_hash": "2502576964b39b4d84157740dad8c0ba",
+    "semantic_hash": ""
+  },
+  "src/lib/position-telemetry.ts": {
+    "mtime": 1785075537.8412015,
+    "ast_hash": "ce80c693488efac64f66dec889f86e86",
+    "semantic_hash": ""
+  },
+  "src/lib/preview-revision.ts": {
+    "mtime": 1785066590.4814205,
+    "ast_hash": "248786d87a6fd0cb4e056c534c35c6d8",
+    "semantic_hash": ""
+  },
+  "src/lib/priority-terms.test.ts": {
+    "mtime": 1784901162.768658,
+    "ast_hash": "595bdbc2ccd5a1ee15b7b7ff89a22f92",
+    "semantic_hash": ""
+  },
+  "src/lib/priority-terms.ts": {
+    "mtime": 1784901196.6088622,
+    "ast_hash": "7588edcfa247277380b18025d1657682",
+    "semantic_hash": ""
+  },
+  "src/lib/scenario-migration.test.ts": {
+    "mtime": 1785066597.9758348,
+    "ast_hash": "545596355ae659931701d9fa7f0a7b3a",
+    "semantic_hash": ""
+  },
+  "src/lib/scenario-migration.ts": {
+    "mtime": 1785066589.3478289,
+    "ast_hash": "b1bc6bcca8a9a55bcec4ec977adbead8",
+    "semantic_hash": ""
+  },
+  "src/lib/scenario-validation-ui.test.ts": {
+    "mtime": 1785066699.4002101,
+    "ast_hash": "5701766d2b78b515d46be96fa992d64b",
+    "semantic_hash": ""
+  },
+  "src/lib/scenario-validation-ui.ts": {
+    "mtime": 1785066785.4992883,
+    "ast_hash": "745a0d04d9e960f1acbe8f8a6bea2e07",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-engine.test.ts": {
+    "mtime": 1785066631.5477307,
+    "ast_hash": "a890227a15e6bcf890bd378e512eb129",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-engine.ts": {
+    "mtime": 1785066614.468257,
+    "ast_hash": "1593a5859af1edcfef2ef05211f1d789",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-idb-storage.test.ts": {
+    "mtime": 1784908586.1509895,
+    "ast_hash": "b0220afc83bbe1cfe45144a177a2914d",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-idb-storage.ts": {
+    "mtime": 1784908485.7087128,
+    "ast_hash": "d4f505aa3b6da0798312bd5262fa44cc",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-schema-docs.ts": {
+    "mtime": 1785066786.7709498,
+    "ast_hash": "3f541171851225f559121a1548704cc3",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-schema.test.ts": {
+    "mtime": 1785066792.2021155,
+    "ast_hash": "f3cf234dd9867ed0524a5fd7a764c29d",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-schema.ts": {
+    "mtime": 1785066783.9358928,
+    "ast_hash": "0c8b3a72438f252362d3c3d84eb2fee1",
+    "semantic_hash": ""
+  },
+  "src/lib/simulation-storage.ts": {
+    "mtime": 1785066663.004272,
+    "ast_hash": "d238933bbd8393426a943c8ba5128cd7",
+    "semantic_hash": ""
+  },
+  "src/lib/speed-units.test.ts": {
+    "mtime": 1784909987.5351381,
+    "ast_hash": "cc902c68c3db4ef9706a7597404ee033",
+    "semantic_hash": ""
+  },
+  "src/lib/speed-units.ts": {
+    "mtime": 1784909974.1611378,
+    "ast_hash": "df8c9e330969c09eb11ea04502a9b3e0",
+    "semantic_hash": ""
+  },
+  "src/lib/target-colors.test.ts": {
+    "mtime": 1784970227.8473673,
+    "ast_hash": "0eb3f92d5193be1d408d90a5629aca94",
+    "semantic_hash": ""
+  },
+  "src/lib/target-colors.ts": {
+    "mtime": 1784970211.335352,
+    "ast_hash": "b5e7cc1ce11b67495255b04917f2bb2e",
+    "semantic_hash": ""
+  },
+  "src/lib/use-builder-preview.test.ts": {
+    "mtime": 1785066683.7197776,
+    "ast_hash": "e81a472e925fd638c2c082280543e97e",
+    "semantic_hash": ""
+  },
+  "src/lib/use-builder-preview.ts": {
+    "mtime": 1785066651.1468678,
+    "ast_hash": "10672e053f6d87603daeeb43202b1c59",
+    "semantic_hash": ""
+  },
+  "src/lib/utils.ts": {
+    "mtime": 1784899725.579355,
+    "ast_hash": "14d32a65e95a858572bdb67533dbbf31",
+    "semantic_hash": ""
+  },
+  "src/lib/vehicle-icon.tsx": {
+    "mtime": 1785079271.2249298,
+    "ast_hash": "45d3d7893f9ecf41d2523682a8642811",
+    "semantic_hash": ""
+  },
+  "src/lib/vehicle-speed.test.ts": {
+    "mtime": 1784910843.686774,
+    "ast_hash": "a3ec1c600f7850c6858111d385508ef2",
+    "semantic_hash": ""
+  },
+  "src/lib/vehicle-speed.ts": {
+    "mtime": 1784910775.3595188,
+    "ast_hash": "697749902a3e61fb81e2a7e285aefd9f",
+    "semantic_hash": ""
+  },
+  "src/main.tsx": {
+    "mtime": 1784903424.9411414,
+    "ast_hash": "9c0fe8cd8900f4674a9747678f138224",
+    "semantic_hash": ""
+  },
+  "src/routes/__root.tsx": {
+    "mtime": 1785067074.8727505,
+    "ast_hash": "49c27bdf5cfd4b29e6b21ccc3995bef0",
+    "semantic_hash": ""
+  },
+  "src/routes/_map.builder.tsx": {
+    "mtime": 1784908612.7684631,
+    "ast_hash": "d1b5c236e7bdfb9e457d3cdab7300250",
+    "semantic_hash": ""
+  },
+  "src/routes/_map.operations.tsx": {
+    "mtime": 1784906978.5042927,
+    "ast_hash": "d97215791b439d155369682f39fa4e28",
+    "semantic_hash": ""
+  },
+  "src/routes/_map.tsx": {
+    "mtime": 1784906978.5042927,
+    "ast_hash": "95a4760ac57f5531527e708ddca042f6",
+    "semantic_hash": ""
+  },
+  "src/routes/import.tsx": {
+    "mtime": 1784908522.5138013,
+    "ast_hash": "39b5eb4bb41194a8700fb6b3f0b2c58a",
+    "semantic_hash": ""
+  },
+  "src/routes/index.tsx": {
+    "mtime": 1784908541.5827343,
+    "ast_hash": "cd74f8b1c811248073cf983d0d051ffa",
+    "semantic_hash": ""
+  },
+  "src/test-setup.ts": {
+    "mtime": 1784903424.240636,
+    "ast_hash": "1004b817457d08df005db2c917966ada",
+    "semantic_hash": ""
+  },
+  "src/types/target.ts": {
+    "mtime": 1785066787.1374874,
+    "ast_hash": "9b90ce61a5f60078441e5789c29bb0c5",
+    "semantic_hash": ""
+  },
+  "src/vite-env.d.ts": {
+    "mtime": 1784903538.9525106,
+    "ast_hash": "11ecfcbd6f7344db8ce9e9ae76e70a6c",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1784897242.7429338,
+    "ast_hash": "fbf01fcae3b76401472c48b28b7da596",
+    "semantic_hash": ""
+  },
+  "vite.config.ts": {
+    "mtime": 1785065964.229698,
+    "ast_hash": "83fd819bbc6a665ab338ab76f23912d9",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1784971760.9589498,
+    "ast_hash": "11d2bff4827060732d207bb5c1d1ee80",
+    "semantic_hash": ""
+  },
+  "public/brand-icons.html": {
+    "mtime": 1784971145.1632268,
+    "ast_hash": "d87f2739023c07d0607f659eadfd8e2b",
+    "semantic_hash": ""
+  },
+  "public/builder-wireframes.html": {
+    "mtime": 1784973232.3520906,
+    "ast_hash": "28017ae3dfc95c2bab6dad42138ed001",
+    "semantic_hash": ""
+  },
+  "public/apple-touch-icon.png": {
+    "mtime": 1784971747.4620261,
+    "ast_hash": "f469e203bb24f55abd8406d5b1583d9b",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/01-intercept.svg": {
+    "mtime": 1784971074.1870816,
+    "ast_hash": "f2d8fcc3d03a5cd361c716ac404417a7",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/02-eclipse.svg": {
+    "mtime": 1784971113.5110414,
+    "ast_hash": "062b9c8061dfb6557168f535440ff7a1",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/03-apex-cut.svg": {
+    "mtime": 1784971077.6589878,
+    "ast_hash": "bf9216f6fcf680352490b4a366998bc0",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/04-slash-ring.svg": {
+    "mtime": 1784971114.959029,
+    "ast_hash": "27a73536a9c16a31ab39ca0c0a587e7a",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/05-signal-rise.svg": {
+    "mtime": 1784971081.4191217,
+    "ast_hash": "100f4629edf5ae020673d33fdb20040f",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/06-mark-a.svg": {
+    "mtime": 1784971082.4910944,
+    "ast_hash": "a0112330b1899ec3dfb3c203db25b193",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/07-pursuit.svg": {
+    "mtime": 1784971083.7630608,
+    "ast_hash": "059d66ae2c34c32235878c38345cd04c",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/08-shard.svg": {
+    "mtime": 1784971085.0190263,
+    "ast_hash": "305ef7d9c141720e591d7bea52e0d369",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/09-crescent-scan.svg": {
+    "mtime": 1784971086.479093,
+    "ast_hash": "cdfca48fc7f1e613a60e030ad923dd4f",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/10-twin-node.svg": {
+    "mtime": 1784971088.3671908,
+    "ast_hash": "7a3a90e32ea1fd4a47478582a3d3e989",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/11-bolt-frame.svg": {
+    "mtime": 1784971145.095228,
+    "ast_hash": "a809aa74f7f7922a3767ed57ecbf4048",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/12-oppose.svg": {
+    "mtime": 1784971090.8031392,
+    "ast_hash": "5928afb10f0ebe7942d0c3280aec9789",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/13-spike-disc.svg": {
+    "mtime": 1784971092.127109,
+    "ast_hash": "8b5bc056333c9a33585f215698b8bed7",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/14-fold-wing.svg": {
+    "mtime": 1784971093.771078,
+    "ast_hash": "1819f5e5707419e270dd6acb68036048",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/15-core-lock.svg": {
+    "mtime": 1784971094.083087,
+    "ast_hash": "e49bc1fa45fc98c10761a98a71380e98",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/01-intercept.svg": {
+    "mtime": 1784971146.1432123,
+    "ast_hash": "dbd84ac1a8757cbe3923bbb9e01806dd",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/02-eclipse.svg": {
+    "mtime": 1784971146.1472123,
+    "ast_hash": "0c381048d72c38f390de42e37d8318e3",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/03-apex-cut.svg": {
+    "mtime": 1784971146.1472123,
+    "ast_hash": "754988501e43d3cdcbcf8fc94fee5b82",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/04-slash-ring.svg": {
+    "mtime": 1784971146.1512122,
+    "ast_hash": "9cce155a70d40b233233afd41fc730cd",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/05-signal-rise.svg": {
+    "mtime": 1784971146.1512122,
+    "ast_hash": "1aedcdef387f694f181b4fc43790553f",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/06-mark-a.svg": {
+    "mtime": 1784971146.1512122,
+    "ast_hash": "5aa8a009354600b30636611e1bf04681",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/07-pursuit.svg": {
+    "mtime": 1784971146.1512122,
+    "ast_hash": "d817b9b3eda64c67e2f05d5b0639d65a",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/08-shard.svg": {
+    "mtime": 1784971146.1512122,
+    "ast_hash": "c6f8a22c9027e1f0cfab761df0e08630",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/09-crescent-scan.svg": {
+    "mtime": 1784971146.1552122,
+    "ast_hash": "9dafa46093f41d2e18efe9da5a1b46d9",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/10-twin-node.svg": {
+    "mtime": 1784971146.1552122,
+    "ast_hash": "8058536aefba58a5f7bcc3e43317ec9f",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/11-bolt-frame.svg": {
+    "mtime": 1784971146.1552122,
+    "ast_hash": "a1ba74787185e73ac035a38d7cec9ae6",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/12-oppose.svg": {
+    "mtime": 1784971146.1552122,
+    "ast_hash": "a99eb1b0c0bc2aae0770edcf0b3489af",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/13-spike-disc.svg": {
+    "mtime": 1784971146.1552122,
+    "ast_hash": "6d27e2915c029d554f87b66748bd5466",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/14-fold-wing.svg": {
+    "mtime": 1784971146.1552122,
+    "ast_hash": "b54c15e5e7e04230638ed04bc949381b",
+    "semantic_hash": ""
+  },
+  "public/brand-icons/solid/15-core-lock.svg": {
+    "mtime": 1784971146.159212,
+    "ast_hash": "9cd06ba31a6e2ee490efa0d003ea78c6",
+    "semantic_hash": ""
+  },
+  "public/favicon-16.png": {
+    "mtime": 1784971747.458003,
+    "ast_hash": "e2b10a416fdb15b93701db95d8722212",
+    "semantic_hash": ""
+  },
+  "public/favicon-32.png": {
+    "mtime": 1784971747.458003,
+    "ast_hash": "477a7c0799452496eeb24e2595998a6c",
+    "semantic_hash": ""
+  },
+  "public/icon-192.png": {
+    "mtime": 1784971747.4620261,
+    "ast_hash": "b11f79d162d11d183ab14a95c0bcedd6",
+    "semantic_hash": ""
+  },
+  "public/icon-512.png": {
+    "mtime": 1784971747.4660492,
+    "ast_hash": "86f1585d02f1a7af3f4597fa9d0f63f5",
+    "semantic_hash": ""
+  },
+  "public/icon-512.svg": {
+    "mtime": 1784971630.9041634,
+    "ast_hash": "15dc0e0fdeddc912ea09f95d20d58db8",
+    "semantic_hash": ""
+  },
+  "public/icon.svg": {
+    "mtime": 1784971630.6636753,
+    "ast_hash": "2f5a69aa5c684b5b73ff2d39682c2afc",
+    "semantic_hash": ""
+  },
+  "public/logo.svg": {
+    "mtime": 1784971629.8941374,
+    "ast_hash": "6df7d62605f995f176bd0b4e3e7c5386",
+    "semantic_hash": ""
+  },
+  "src/lib/affiliation-colors.test.ts": {
+    "mtime": 1785065964.2561326,
+    "ast_hash": "82612c608d57fce71c71eb98f51c9e3b",
+    "semantic_hash": ""
+  },
+  "src/lib/affiliation-colors.ts": {
+    "mtime": 1785065964.229698,
+    "ast_hash": "75fad745858819e88287549e74376d94",
+    "semantic_hash": ""
+  },
+  "public/route-create-wireframes.html": {
+    "mtime": 1785065964.2561326,
+    "ast_hash": "eccc2526dfb3f604748ccf6b5e2197f2",
+    "semantic_hash": ""
+  },
+  "src/components/generate-route-form.tsx": {
+    "mtime": 1785067152.6194828,
+    "ast_hash": "af16e7c90874e20e5fb86a4c1328e39c",
+    "semantic_hash": ""
+  },
+  "src/lib/pwa.test.ts": {
+    "mtime": 1785065964.229698,
+    "ast_hash": "ec40361654662daf4696c5e77f50615b",
+    "semantic_hash": ""
+  },
+  "src/components/grouped-timeline.tsx": {
+    "mtime": 1785082207.0023928,
+    "ast_hash": "31c4434c43cee279c8076be6bbb06bd4",
+    "semantic_hash": ""
+  },
+  "src/components/ops-event-tables.tsx": {
+    "mtime": 1785081192.0474045,
+    "ast_hash": "59bfdcff03f6b54bdd5394efbab3d65a",
+    "semantic_hash": ""
+  },
+  "src/lib/geo-longitude.test.ts": {
+    "mtime": 1785075537.5140827,
+    "ast_hash": "953065162884f5fd158ac0dd8ead7152",
+    "semantic_hash": ""
+  },
+  "src/lib/geo-longitude.ts": {
+    "mtime": 1785075517.4570646,
+    "ast_hash": "4cb4d305ee13c0ed9054470bb52ce183",
+    "semantic_hash": ""
+  },
+  "src/lib/vehicle-icon.test.ts": {
+    "mtime": 1785079274.6926765,
+    "ast_hash": "f09af22e11bd3d3e40e6f8e0feb0095c",
+    "semantic_hash": ""
+  }
+}

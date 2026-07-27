@@ -21,6 +21,7 @@ services:
       args:
         VITE_MAP_STYLE_LIGHT: ${VITE_MAP_STYLE_LIGHT:-http://tiles.adversary/styles/liberty/style.json}
         VITE_MAP_STYLE_DARK: ${VITE_MAP_STYLE_DARK:-http://tiles.adversary/styles/dark/style.json}
+        VITE_GEO_TILEJSON_URL: ${VITE_GEO_TILEJSON_URL:-http://tiles.adversary/data/openmaptiles.json}
     init: true
     env_file:
       - path: .env

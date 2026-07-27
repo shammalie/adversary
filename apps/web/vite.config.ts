@@ -95,7 +95,20 @@ export default defineConfig({
             options: {
               cacheName: "local-tileserver",
               expiration: {
-                maxEntries: 64,
+                // Route generation fetches many corridor tiles per demo;
+                // 64 was far too small and thrashed the cache.
+                maxEntries: 512,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/tiles\.openfreemap\.org\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "openfreemap-tiles",
+              expiration: {
+                maxEntries: 512,
                 maxAgeSeconds: 60 * 60 * 24 * 7,
               },
             },
@@ -107,5 +120,7 @@ export default defineConfig({
   test: {
     environment: "node",
     setupFiles: ["./src/test-setup.ts"],
+    // Playwright specs live under e2e/ and must not run under Vitest.
+    exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],
   },
 });

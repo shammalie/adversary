@@ -5,8 +5,10 @@ ENV SKIP_ENV_VALIDATION=1
 
 ARG VITE_MAP_STYLE_LIGHT=http://tiles.adversary/styles/liberty/style.json
 ARG VITE_MAP_STYLE_DARK=http://tiles.adversary/styles/dark/style.json
+ARG VITE_GEO_TILEJSON_URL=http://tiles.adversary/data/openmaptiles.json
 ENV VITE_MAP_STYLE_LIGHT=$VITE_MAP_STYLE_LIGHT
 ENV VITE_MAP_STYLE_DARK=$VITE_MAP_STYLE_DARK
+ENV VITE_GEO_TILEJSON_URL=$VITE_GEO_TILEJSON_URL
 
 COPY . .
 RUN --mount=type=cache,target=/pnpm-store pnpm install --store-dir /pnpm-store

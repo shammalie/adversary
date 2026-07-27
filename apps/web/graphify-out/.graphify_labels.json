@@ -42,5 +42,15 @@
   "40": "test-setup.ts",
   "41": "vite-env.d.ts",
   "42": "vite.config.ts",
-  "43": "pwa.test.ts"
+  "43": "pwa.test.ts",
+  "44": "sea-router.ts",
+  "45": "terrain.ts",
+  "46": "geo-router.worker.ts",
+  "47": "vector-tile-client.ts",
+  "48": "simulation-storage.ts",
+  "49": "simulation-import.tsx",
+  "50": "scenario-migration.ts",
+  "51": "sea-router.test.ts",
+  "52": "LruCache",
+  "53": "@adversary/config"
 }

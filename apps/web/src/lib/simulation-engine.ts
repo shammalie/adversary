@@ -158,8 +158,18 @@ export function getEventsDueByTime(scenario: SimulationScenario, previewTimeMs: 
   return sortEvents(scenario.events).filter((event) => Date.parse(event.at) <= previewTimeMs);
 }
 
-function positionEventsForTarget(scenario: SimulationScenario, targetId: string) {
-  return sortEvents(scenario.events).filter((event) => event.targetId === targetId && event.position);
+/** Sort once, then bucket position events per target (preserves sort order). */
+function buildPositionEventsByTarget(
+  scenario: SimulationScenario,
+): Map<string, SimulationEvent[]> {
+  const byTarget = new Map<string, SimulationEvent[]>();
+  for (const event of sortEvents(scenario.events)) {
+    if (!event.position) continue;
+    const list = byTarget.get(event.targetId);
+    if (list) list.push(event);
+    else byTarget.set(event.targetId, [event]);
+  }
+  return byTarget;
 }
 
 export function buildInterpolatedPreviewTargetStates(
@@ -172,12 +182,13 @@ export function buildInterpolatedPreviewTargetStates(
     dueEvents.map((event) => event.id),
   );
   const nextStates = { ...baseStates };
+  const positionEventsByTarget = buildPositionEventsByTarget(scenario);
 
   for (const target of scenario.targets) {
     const state = baseStates[target.id];
     if (!state) continue;
 
-    const positionEvents = positionEventsForTarget(scenario, target.id);
+    const positionEvents = positionEventsByTarget.get(target.id) ?? [];
     if (positionEvents.length === 0) continue;
 
     let lastAppliedIndex = -1;

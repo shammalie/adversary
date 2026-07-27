@@ -1,0 +1,66 @@
+[
+  {
+    "id": "ocean-z9",
+    "file": "ocean-z9-9-199-211.pbf",
+    "z": 9,
+    "x": 199,
+    "y": 211,
+    "layers": ["water"]
+  },
+  {
+    "id": "london-z10-511-339",
+    "file": "london-z10-10-511-339.pbf",
+    "z": 10,
+    "x": 511,
+    "y": 339,
+    "layers": ["transportation"]
+  },
+  {
+    "id": "london-z10",
+    "file": "london-z10-10-511-340.pbf",
+    "z": 10,
+    "x": 511,
+    "y": 340,
+    "layers": ["water", "transportation"]
+  },
+  {
+    "id": "dover-z10",
+    "file": "dover-z10-10-515-342.pbf",
+    "z": 10,
+    "x": 515,
+    "y": 342,
+    "layers": ["water", "transportation"]
+  },
+  {
+    "id": "london-z14-8185-5447",
+    "file": "london-z14-14-8185-5447.pbf",
+    "z": 14,
+    "x": 8185,
+    "y": 5447,
+    "layers": ["transportation"]
+  },
+  {
+    "id": "london-z14-8185-5448",
+    "file": "london-z14-14-8185-5448.pbf",
+    "z": 14,
+    "x": 8185,
+    "y": 5448,
+    "layers": ["transportation"]
+  },
+  {
+    "id": "london-z14-8186-5447",
+    "file": "london-z14-14-8186-5447.pbf",
+    "z": 14,
+    "x": 8186,
+    "y": 5447,
+    "layers": ["transportation"]
+  },
+  {
+    "id": "london-z14-8186-5448",
+    "file": "london-z14-14-8186-5448.pbf",
+    "z": 14,
+    "x": 8186,
+    "y": 5448,
+    "layers": ["transportation"]
+  }
+]

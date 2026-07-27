@@ -1,9 +1,14 @@
 import {
+  DEMO_REGIONS,
+  regionCenter,
+} from "@/lib/demo-regions";
+import {
   categoryCruiseMidpointKnots,
   generateRouteEvents,
   mergeGeneratedEvents,
 } from "@/lib/event-generator";
 import { destinationPoint } from "@/lib/position-telemetry";
+import { createSeededRandom, resolveIdFactory } from "@/lib/random";
 import { TARGET_COLOR_OPTIONS } from "@/lib/target-colors";
 import type {
   Affiliation,
@@ -20,12 +25,28 @@ import {
   VEHICLE_CATEGORIES,
 } from "@/types/target";
 
+export type { DemoRegion } from "@/lib/demo-regions";
+export {
+  DEMO_REGIONS,
+  demoRegionById,
+  demoRegionsByIds,
+  regionCenter,
+  regionsSupporting,
+} from "@/lib/demo-regions";
+
 export type DemoVehicleSelection = "random" | readonly VehicleCategory[];
 
 export interface DemoOrigin {
   latitude: number;
   longitude: number;
 }
+
+/**
+ * `"anywhere"` — world sampling (default when unpinned).
+ * A list of region ids — contacts are placed only in compatible selected regions
+ * (relocating within the selection, or falling back to anywhere when none fit).
+ */
+export type DemoRegionSelection = "anywhere" | readonly string[];
 
 export interface CreateDemoScenarioOptions {
   /**
@@ -46,30 +67,83 @@ export interface CreateDemoScenarioOptions {
    */
   endAt?: string;
   /**
-   * Geographic center for start points. When omitted, each travel group gets an
-   * independent random lat/lng (not limited to preset regions).
+   * Geographic pin for start points. **Wins over region selection** when set
+   * (precedence: pin > regions > anywhere).
    */
   origin?: DemoOrigin;
+  /**
+   * Region catalogue selection. Ignored when {@link origin} (pin) is set.
+   * Defaults to `"anywhere"`.
+   */
+  regions?: DemoRegionSelection;
   /** Override travel-group join chance (0–1). Defaults to {@link GROUP_JOIN_PROBABILITY}. */
   groupJoinProbability?: number;
+  /**
+   * When set, replaces the `random` argument with {@link createSeededRandom}
+   * and, unless {@link idFactory} is provided, a seeded id factory — so the
+   * same seed fully reproduces the scenario (including ids).
+   */
+  seed?: number;
+  /**
+   * Optional id factory for targets/events. When omitted and {@link seed} is
+   * set, a seed-derived factory is used automatically.
+   */
+  idFactory?: () => string;
+  /** Abort in-flight geo planning (threaded into tile fetches via cancel messages). */
+  signal?: AbortSignal;
+  /** Called as each target finishes planning (streaming). */
+  onTargetReady?: (update: DemoTargetReady) => void;
+  /** Max concurrent route requests (default 5). */
+  concurrency?: number;
+  /**
+   * Force the synthetic path for every track (tests / offline). Routed planning
+   * is skipped entirely.
+   */
+  forceSynthetic?: boolean;
+  /**
+   * Override the region catalogue (tests). Defaults to {@link DEMO_REGIONS}.
+   */
+  regionCatalog?: readonly import("@/lib/demo-regions").DemoRegion[];
+}
+
+/** Streaming callback payload from {@link createDemoScenario}. */
+export interface DemoTargetReady {
+  target: TargetDefinition;
+  events: SimulationEvent[];
+  index: number;
+  /** True when this track fell back to the synthetic generator. */
+  degraded: boolean;
+  /** Region id used for placement, or null for pin / anywhere. */
+  regionId: string | null;
+  /** True when no selected region supported the category (anywhere-sampled). */
+  anywhereFallback: boolean;
+}
+
+/** Result of async geo-aware demo generation. */
+export interface CreateDemoScenarioResult {
+  scenario: SimulationScenario;
+  /** Tracks that used the synthetic generator after a routing/placement failure. */
+  degradedTrackCount: number;
+  /** Tracks placed via anywhere-sampling because no selected region supported them. */
+  anywhereFallbackCount: number;
+  cancelled: boolean;
 }
 
 export const MIN_DEMO_TARGETS = 2;
 export const MAX_DEMO_TARGETS = 100;
 
-/** Named regions used when randomizing a demo origin. */
-export const DEMO_START_LOCATIONS = [
-  { name: "London", latitude: 51.5074, longitude: -0.1278 },
-  { name: "English Channel", latitude: 50.7, longitude: -1.1 },
-  { name: "North Sea", latitude: 55.0, longitude: 3.0 },
-  { name: "New York Harbor", latitude: 40.68, longitude: -74.02 },
-  { name: "Singapore Strait", latitude: 1.25, longitude: 103.85 },
-  { name: "Tokyo Bay", latitude: 35.45, longitude: 139.75 },
-  { name: "Persian Gulf", latitude: 26.5, longitude: 51.5 },
-  { name: "South China Sea", latitude: 14.5, longitude: 114.0 },
-  { name: "Mediterranean", latitude: 35.5, longitude: 18.0 },
-  { name: "Gulf of Aden", latitude: 12.5, longitude: 45.0 },
-] as const;
+/**
+ * Compatibility shim for scenario-builder until phase 4b switches to
+ * {@link DEMO_REGIONS}. Centers are bbox midpoints of the typed catalogue.
+ */
+export const DEMO_START_LOCATIONS = DEMO_REGIONS.map((region) => {
+  const center = regionCenter(region);
+  return {
+    name: region.name,
+    latitude: center.latitude,
+    longitude: center.longitude,
+  };
+});
 
 const CALLSIGN_PREFIXES = [
   "VIPER",
@@ -111,7 +185,7 @@ export const GROUP_JOIN_PROBABILITY = 0.08;
  */
 export const DEMO_MAX_ABS_LATITUDE = 85;
 
-interface DemoTravelPlan {
+export interface DemoTravelPlan {
   baseLatitude: number;
   baseLongitude: number;
   endLatitude: number;
@@ -120,9 +194,13 @@ interface DemoTravelPlan {
   durationMinutes: number;
   /** Multi-member groups share an A→B corridor; solos wander independently. */
   sharedPath: boolean;
+  /** Placement region id when region-scoped; null for pin / anywhere. */
+  regionId?: string | null;
+  /** True when category had no compatible selected region. */
+  anywhereFallback?: boolean;
 }
 
-function atOffset(base: number, seconds: number) {
+export function atOffsetIso(base: number, seconds: number) {
   return new Date(base + seconds * 1_000).toISOString();
 }
 
@@ -141,20 +219,31 @@ function pickOne<T>(items: readonly T[], random: () => number): T {
 export function pickRandomDemoOrigin(
   random: () => number = Math.random,
 ): DemoOrigin {
-  const location = pickOne(DEMO_START_LOCATIONS, random);
-  return { latitude: location.latitude, longitude: location.longitude };
+  const region = pickOne(DEMO_REGIONS, random);
+  return regionCenter(region);
 }
 
 /** Uniform random point for unpinned demo starts (UI presets are separate). */
-function randomWorldOrigin(random: () => number): DemoOrigin {
+export function randomWorldOrigin(random: () => number): DemoOrigin {
   return {
     latitude: (random() - 0.5) * 2 * DEMO_MAX_ABS_LATITUDE,
     longitude: (random() - 0.5) * 360,
   };
 }
 
-function clampDemoLatitude(latitude: number) {
+export function clampDemoLatitude(latitude: number) {
   return clamp(latitude, -DEMO_MAX_ABS_LATITUDE, DEMO_MAX_ABS_LATITUDE);
+}
+
+export function randomPointInBbox(
+  bbox: readonly [number, number, number, number],
+  random: () => number,
+): DemoOrigin {
+  const [west, south, east, north] = bbox;
+  return {
+    latitude: clampDemoLatitude(south + random() * (north - south)),
+    longitude: west + random() * (east - west),
+  };
 }
 
 function resolveTargetCount(random: () => number, override?: number) {
@@ -180,7 +269,7 @@ export function parseDemoTargetCount(raw: string): number | null {
   return value;
 }
 
-function resolveCategory(
+export function resolveCategory(
   selection: DemoVehicleSelection,
   random: () => number,
 ): VehicleCategory {
@@ -192,25 +281,25 @@ function resolveCategory(
 
 const DEMO_COLORS = TARGET_COLOR_OPTIONS.dark.map((option) => option.value);
 
-function demoColor(index: number) {
+export function demoColor(index: number) {
   return DEMO_COLORS[index % DEMO_COLORS.length]!;
 }
 
-function demoCallsign(index: number, random: () => number) {
+export function demoCallsign(index: number, random: () => number) {
   const prefix = pickOne(CALLSIGN_PREFIXES, random);
   const number = String(index + 1).padStart(2, "0");
   return `${prefix} ${number}`;
 }
 
 /** Aircraft-only starting altitude across low / medium / high bands. */
-function demoAircraftAltitude(random: () => number): number {
+export function demoAircraftAltitude(random: () => number): number {
   const band = random();
   if (band < 0.28) return 1_200 + Math.floor(random() * 6_800);
   if (band < 0.72) return 8_000 + Math.floor(random() * 17_000);
   return 25_000 + Math.floor(random() * 16_000);
 }
 
-function scatterNearOrigin(
+export function scatterNearOrigin(
   origin: DemoOrigin,
   random: () => number,
   spread = 0.35,
@@ -222,7 +311,7 @@ function scatterNearOrigin(
 }
 
 /** Small lateral offset so formation members are near but not stacked. */
-function formationOffset(random: () => number) {
+export function formationOffset(random: () => number) {
   const scale = 0.006 + random() * 0.02;
   return {
     dLat: (random() - 0.5) * 2 * scale,
@@ -230,11 +319,18 @@ function formationOffset(random: () => number) {
   };
 }
 
+export function pickDemoVehicleSubtype(
+  category: VehicleCategory,
+  random: () => number,
+): string {
+  return pickOne(VEHICLE_SUBTYPES[category], random);
+}
+
 /**
  * Assigns each target a travel-group id. Same-category contacts sometimes join
  * an existing group so they share a start pocket and travel corridor.
  */
-function assignTravelGroupIds(
+export function assignTravelGroupIds(
   categories: readonly VehicleCategory[],
   random: () => number,
   joinProbability: number,
@@ -258,7 +354,7 @@ function assignTravelGroupIds(
   return groupIds;
 }
 
-function resolveTrackTiming(
+export function resolveTrackTiming(
   random: () => number,
   windowSeconds: number | null,
 ): { startDelaySeconds: number; durationMinutes: number } {
@@ -281,12 +377,75 @@ function resolveTrackTiming(
   };
 }
 
-function buildTravelPlans(
+export type PlacementResolution = {
+  base: DemoOrigin;
+  regionId: string | null;
+  anywhereFallback: boolean;
+};
+
+/**
+ * Resolve placement for a travel group.
+ * Precedence: pin (`origin`) > selected regions > anywhere.
+ */
+export function resolveGroupPlacement(
+  category: VehicleCategory,
+  origin: DemoOrigin | null,
+  regionSelection: DemoRegionSelection | undefined,
+  random: () => number,
+  sharedPath: boolean,
+  catalog: readonly import("@/lib/demo-regions").DemoRegion[] = DEMO_REGIONS,
+): PlacementResolution {
+  if (origin) {
+    return {
+      base: scatterNearOrigin(origin, random, sharedPath ? 0.3 : 0.35),
+      regionId: null,
+      anywhereFallback: false,
+    };
+  }
+
+  const selection = regionSelection ?? "anywhere";
+  if (selection === "anywhere") {
+    return {
+      base: randomWorldOrigin(random),
+      regionId: null,
+      anywhereFallback: false,
+    };
+  }
+
+  const selectedIds = new Set(selection);
+  const selected = catalog.filter((region) => selectedIds.has(region.id));
+  const compatible = selected.filter((region) =>
+    region.supports.includes(category),
+  );
+  if (compatible.length > 0) {
+    const region = pickOne(compatible, random);
+    return {
+      base: scatterNearOrigin(
+        regionCenter(region),
+        random,
+        sharedPath ? 0.25 : 0.3,
+      ),
+      regionId: region.id,
+      anywhereFallback: false,
+    };
+  }
+
+  // No selected region supports this category → anywhere-sample and report.
+  return {
+    base: randomWorldOrigin(random),
+    regionId: null,
+    anywhereFallback: true,
+  };
+}
+
+export function buildTravelPlans(
   groupIds: readonly number[],
   categories: readonly VehicleCategory[],
   origin: DemoOrigin | null,
   random: () => number,
   windowSeconds: number | null,
+  regionSelection?: DemoRegionSelection,
+  catalog: readonly import("@/lib/demo-regions").DemoRegion[] = DEMO_REGIONS,
 ): Map<number, DemoTravelPlan> {
   const memberCounts = new Map<number, number>();
   const categoryByGroup = new Map<number, VehicleCategory>();
@@ -302,11 +461,14 @@ function buildTravelPlans(
   for (const [groupId, memberCount] of memberCounts) {
     const sharedPath = memberCount > 1;
     const category = categoryByGroup.get(groupId)!;
-    // Pinned origin → scatter nearby. Unpinned → fresh random world point per group
-    // (not the small DEMO_START_LOCATIONS preset list, which looked like clustering).
-    const base = origin
-      ? scatterNearOrigin(origin, random, sharedPath ? 0.3 : 0.35)
-      : randomWorldOrigin(random);
+    const placement = resolveGroupPlacement(
+      category,
+      origin,
+      regionSelection,
+      random,
+      sharedPath,
+      catalog,
+    );
     const timing = resolveTrackTiming(random, windowSeconds);
     const heading = random() * 360;
     const cruise = categoryCruiseMidpointKnots(category);
@@ -315,21 +477,23 @@ function buildTravelPlans(
     const maxNm = Math.max(2, cruise * durationHours * 0.72);
     const minNm = Math.min(4, maxNm * 0.35);
     const distanceNm = minNm + random() * Math.max(0, maxNm - minNm);
-    const end = destinationPoint(base, distanceNm, heading);
+    const end = destinationPoint(placement.base, distanceNm, heading);
     plans.set(groupId, {
-      baseLatitude: clampDemoLatitude(base.latitude),
-      baseLongitude: base.longitude,
+      baseLatitude: clampDemoLatitude(placement.base.latitude),
+      baseLongitude: placement.base.longitude,
       endLatitude: clampDemoLatitude(end.latitude),
       endLongitude: end.longitude,
       startDelaySeconds: timing.startDelaySeconds,
       durationMinutes: timing.durationMinutes,
       sharedPath,
+      regionId: placement.regionId,
+      anywhereFallback: placement.anywhereFallback,
     });
   }
   return plans;
 }
 
-function resolveScenarioWindow(
+export function resolveScenarioWindow(
   now: number,
   options: CreateDemoScenarioOptions,
 ): { startMs: number; endMs: number | null } {
@@ -369,22 +533,141 @@ function demoDescription(selection: DemoVehicleSelection, targetCount: number) {
   return `Generated demonstration with ${targetCount} contacts from ${selection.join(", ")}.`;
 }
 
+export type SynthesizeTargetOptions = {
+  index: number;
+  vehicleCategory: VehicleCategory;
+  vehicleSubtype?: string;
+  plan: DemoTravelPlan;
+  startMs: number;
+  windowSeconds: number | null;
+  random: () => number;
+  idFactory: () => string;
+};
+
+export type SynthesizedTarget = {
+  target: TargetDefinition;
+  events: SimulationEvent[];
+  messages: SimulationEvent[];
+};
+
 /**
- * Builds a fresh demo scenario. Position tracks come from generateRouteEvents
- * so each load is random and speed/distance/time stay physically consistent.
- * Target count defaults to a random value in [2, 100].
+ * Build one synthetic target + track events. Used by the full synthetic scenario
+ * and as the per-track degradation fallback in the geo planner.
  */
-export function createDemoScenario(
+export function synthesizeDemoTarget(
+  options: SynthesizeTargetOptions,
+): SynthesizedTarget {
+  const {
+    index,
+    vehicleCategory,
+    plan,
+    startMs,
+    windowSeconds,
+    random,
+    idFactory,
+  } = options;
+  const vehicleSubtype =
+    options.vehicleSubtype ?? pickDemoVehicleSubtype(vehicleCategory, random);
+  const targetId = idFactory();
+  const pointCount = 10 + Math.floor(random() * 15);
+  const offset = plan.sharedPath
+    ? formationOffset(random)
+    : { dLat: 0, dLng: 0 };
+  const memberStagger =
+    plan.sharedPath && windowSeconds !== null
+      ? Math.floor(
+          random() *
+            Math.min(
+              40,
+              Math.max(0, windowSeconds - plan.startDelaySeconds - 60),
+            ),
+        )
+      : plan.sharedPath
+        ? Math.floor(random() * 40)
+        : 0;
+  const trackStartDelay = plan.startDelaySeconds + memberStagger;
+  const rawEndDelay = trackStartDelay + plan.durationMinutes * 60;
+  const trackEndDelay =
+    windowSeconds !== null
+      ? Math.max(trackStartDelay + 60, Math.min(rawEndDelay, windowSeconds))
+      : rawEndDelay;
+
+  const startPoint: PositionPayload = {
+    latitude: clampDemoLatitude(plan.baseLatitude + offset.dLat),
+    longitude: plan.baseLongitude + offset.dLng,
+    altitude: vehicleCategory === "aircraft" ? demoAircraftAltitude(random) : 0,
+  };
+  const endPoint: PositionPayload | undefined = plan.sharedPath
+    ? {
+        latitude: clampDemoLatitude(plan.endLatitude + offset.dLat),
+        longitude: plan.endLongitude + offset.dLng,
+        altitude: startPoint.altitude,
+      }
+    : undefined;
+
+  const target: TargetDefinition = {
+    id: targetId,
+    callsign: demoCallsign(index, random),
+    revealOnFirstEvent: true,
+    appearOnFirstEvent: false,
+    color: demoColor(index),
+    profile: {
+      vehicleCategory,
+      vehicleSubtype,
+      affiliation: pickOne(AFFILIATIONS, random) as Affiliation,
+      status: pickOne(TARGET_STATUSES, random) as TargetStatus,
+      identifier: `${vehicleCategory.slice(0, 3).toUpperCase()}-${String(100 + index)}`,
+      description: `Demo ${vehicleCategory} contact.`,
+    },
+  };
+
+  const events = generateRouteEvents({
+    targetId,
+    count: pointCount,
+    startAt: atOffsetIso(startMs, trackStartDelay),
+    endAt: atOffsetIso(startMs, trackEndDelay),
+    startPoint,
+    endPoint,
+    vehicleCategory,
+    maxAbsLatitude: DEMO_MAX_ABS_LATITUDE,
+    random,
+    idFactory,
+  });
+
+  const messages: SimulationEvent[] = [];
+  if (random() < 0.35 || index < 2) {
+    const messageAt =
+      trackStartDelay +
+      Math.floor(((trackEndDelay - trackStartDelay) / 60) * 30);
+    messages.push({
+      id: idFactory(),
+      targetId,
+      at: atOffsetIso(startMs, Math.min(messageAt, trackEndDelay)),
+      message: pickOne(DEMO_MESSAGES, random),
+    });
+  }
+
+  return { target, events, messages };
+}
+
+/**
+ * Fast synchronous demo generator (terrain-blind). Used as the degradation
+ * tier when geo routing fails, and by unit tests that must stay offline/fast.
+ */
+export function createSyntheticDemoScenario(
   now = Date.now(),
   random: () => number = Math.random,
   options: CreateDemoScenarioOptions = {},
 ): SimulationScenario {
+  if (options.seed !== undefined) {
+    random = createSeededRandom(options.seed);
+  }
   const vehicleSelection = options.vehicleSelection ?? "random";
   const targetCount = resolveTargetCount(random, options.targetCount);
   const { startMs, endMs } = resolveScenarioWindow(now, options);
   const origin = options.origin ?? null;
   const createdAt = new Date(now).toISOString();
-  const idFactory = () => crypto.randomUUID();
+  const idFactory = resolveIdFactory(options);
   const windowSeconds =
     endMs !== null ? Math.max(60, Math.floor((endMs - startMs) / 1_000)) : null;
 
@@ -402,6 +685,8 @@ export function createDemoScenario(
     origin,
     random,
     windowSeconds,
+    options.regions,
+    options.regionCatalog,
   );
 
   const targets: TargetDefinition[] = [];
@@ -411,91 +696,23 @@ export function createDemoScenario(
   for (let index = 0; index < targetCount; index += 1) {
     const vehicleCategory = categories[index]!;
     const plan = travelPlans.get(groupIds[index]!)!;
-    const targetId = idFactory();
-    const pointCount = 10 + Math.floor(random() * 15);
-    const offset = plan.sharedPath
-      ? formationOffset(random)
-      : { dLat: 0, dLng: 0 };
-    const memberStagger =
-      plan.sharedPath && windowSeconds !== null
-        ? Math.floor(
-            random() *
-              Math.min(
-                40,
-                Math.max(0, windowSeconds - plan.startDelaySeconds - 60),
-              ),
-          )
-        : plan.sharedPath
-          ? Math.floor(random() * 40)
-          : 0;
-    const trackStartDelay = plan.startDelaySeconds + memberStagger;
-    const rawEndDelay = trackStartDelay + plan.durationMinutes * 60;
-    const trackEndDelay =
-      windowSeconds !== null
-        ? Math.max(trackStartDelay + 60, Math.min(rawEndDelay, windowSeconds))
-        : rawEndDelay;
-
-    const startPoint: PositionPayload = {
-      latitude: clampDemoLatitude(plan.baseLatitude + offset.dLat),
-      longitude: plan.baseLongitude + offset.dLng,
-      altitude:
-        vehicleCategory === "aircraft" ? demoAircraftAltitude(random) : 0,
-    };
-    const endPoint: PositionPayload | undefined = plan.sharedPath
-      ? {
-          latitude: clampDemoLatitude(plan.endLatitude + offset.dLat),
-          longitude: plan.endLongitude + offset.dLng,
-          altitude: startPoint.altitude,
-        }
-      : undefined;
-
-    targets.push({
-      id: targetId,
-      callsign: demoCallsign(index, random),
-      revealOnFirstEvent: true,
-      appearOnFirstEvent: false,
-      color: demoColor(index),
-      profile: {
-        vehicleCategory,
-        vehicleSubtype: pickOne(VEHICLE_SUBTYPES[vehicleCategory], random),
-        affiliation: pickOne(AFFILIATIONS, random) as Affiliation,
-        status: pickOne(TARGET_STATUSES, random) as TargetStatus,
-        identifier: `${vehicleCategory.slice(0, 3).toUpperCase()}-${String(100 + index)}`,
-        description: `Demo ${vehicleCategory} contact.`,
-      },
+    const synthesized = synthesizeDemoTarget({
+      index,
+      vehicleCategory,
+      plan,
+      startMs,
+      windowSeconds,
+      random,
+      idFactory,
     });
-
-    trackEvents.push(
-      ...generateRouteEvents({
-        targetId,
-        count: pointCount,
-        startAt: atOffset(startMs, trackStartDelay),
-        endAt: atOffset(startMs, trackEndDelay),
-        startPoint,
-        endPoint,
-        vehicleCategory,
-        maxAbsLatitude: DEMO_MAX_ABS_LATITUDE,
-        random,
-        idFactory,
-      }),
-    );
-
-    if (random() < 0.35 || index < 2) {
-      const messageAt =
-        trackStartDelay +
-        Math.floor(((trackEndDelay - trackStartDelay) / 60) * 30);
-      messages.push({
-        id: idFactory(),
-        targetId,
-        at: atOffset(startMs, Math.min(messageAt, trackEndDelay)),
-        message: pickOne(DEMO_MESSAGES, random),
-      });
-    }
+    targets.push(synthesized.target);
+    trackEvents.push(...synthesized.events);
+    messages.push(...synthesized.messages);
   }
 
   return {
     schemaVersion: 2,
-    id: crypto.randomUUID(),
+    id: idFactory(),
     name: demoName(vehicleSelection, targetCount),
     description: demoDescription(vehicleSelection, targetCount),
     createdAt,
@@ -504,6 +721,23 @@ export function createDemoScenario(
     targets,
     events: mergeGeneratedEvents(trackEvents, messages),
   };
+}
+
+/**
+ * Async streaming geo-aware demo generation. Delegates to
+ * {@link planDemoScenario}. Prefer {@link createSyntheticDemoScenario} in fast
+ * unit tests.
+ *
+ * Phase 4b wires the builder to this API (progress / cancel / region multi-select).
+ * Until then, scenario-builder should call {@link createSyntheticDemoScenario}.
+ */
+export async function createDemoScenario(
+  now = Date.now(),
+  random: () => number = Math.random,
+  options: CreateDemoScenarioOptions = {},
+): Promise<CreateDemoScenarioResult> {
+  const { planDemoScenario } = await import("@/lib/scenario-planner");
+  return planDemoScenario(now, random, options);
 }
 
 export function defaultTargetProfile(): TargetDefinition["profile"] {
