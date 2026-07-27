@@ -106,10 +106,10 @@ const DEMO_MESSAGES = [
 export const GROUP_JOIN_PROBABILITY = 0.08;
 
 /**
- * Keep demo tracks inside a Mercator-friendly band so random routes do not
- * paint along the map's polar clip edge.
+ * Web Mercator practical ceiling (EPSG:3857 ≈ ±85.05°). Demo tracks may use the
+ * full map; soft steering near this edge prevents polar clip-line artifacts.
  */
-export const DEMO_MAX_ABS_LATITUDE = 60;
+export const DEMO_MAX_ABS_LATITUDE = 85;
 
 interface DemoTravelPlan {
   baseLatitude: number;

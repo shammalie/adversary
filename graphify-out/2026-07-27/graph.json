@@ -1011,8 +1011,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_adversary_config",
-      "community": 40,
-      "community_name": "clsx",
+      "community": 4,
+      "community_name": "devDependencies",
       "norm_label": "@adversary/config"
     },
     {
@@ -1022,8 +1022,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "apps_web_package_json_adversary_config",
-      "community": 40,
-      "community_name": "clsx",
+      "community": 4,
+      "community_name": "devDependencies",
       "norm_label": "@adversary/config"
     },
     {
@@ -1209,8 +1209,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_fake_indexeddb",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 189,
+      "community_name": "fake-indexeddb",
       "norm_label": "fake-indexeddb"
     },
     {
@@ -1220,8 +1220,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "fake_indexeddb",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 189,
+      "community_name": "fake-indexeddb",
       "norm_label": "fake-indexeddb"
     },
     {
@@ -1583,8 +1583,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_brand_mark",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 41,
+      "community_name": "attachment.tsx",
       "norm_label": "brand-mark.tsx"
     },
     {
@@ -1594,8 +1594,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "apps_web_src_components_brand_mark_brandmark",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 41,
+      "community_name": "attachment.tsx",
       "norm_label": "brandmark()"
     },
     {
@@ -1748,8 +1748,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 191,
+      "community_name": "generate-route-form.tsx",
       "norm_label": "generate-route-form.tsx"
     },
     {
@@ -1759,8 +1759,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_maplocationpicker",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 191,
+      "community_name": "generate-route-form.tsx",
       "norm_label": "maplocationpicker"
     },
     {
@@ -1781,8 +1781,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_fielderrors",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 191,
+      "community_name": "generate-route-form.tsx",
       "norm_label": "fielderrors"
     },
     {
@@ -1825,8 +1825,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_mappickerfallback",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 191,
+      "community_name": "generate-route-form.tsx",
       "norm_label": "mappickerfallback()"
     },
     {
@@ -1847,8 +1847,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "grouped-timeline-event.tsx"
     },
     {
@@ -1858,8 +1858,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_default_position",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "default_position"
     },
     {
@@ -1869,8 +1869,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_issuesforfield",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "issuesforfield()"
     },
     {
@@ -1880,8 +1880,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_timelineeventshellprops",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "timelineeventshellprops"
     },
     {
@@ -1891,8 +1891,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_timelineeventshell",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "timelineeventshell()"
     },
     {
@@ -1902,8 +1902,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_deleteeventbutton",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "deleteeventbutton()"
     },
     {
@@ -1913,8 +1913,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_viewtimelineeventprops",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "viewtimelineeventprops"
     },
     {
@@ -1924,8 +1924,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_viewtimelineevent",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "viewtimelineevent()"
     },
     {
@@ -1935,8 +1935,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_edittimelineeventprops",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "edittimelineeventprops"
     },
     {
@@ -1946,8 +1946,8 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_event_edittimelineevent",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "edittimelineevent()"
     },
     {
@@ -1957,8 +1957,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "grouped-timeline.tsx"
     },
     {
@@ -1968,8 +1968,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_describeevent",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "describeevent()"
     },
     {
@@ -1979,8 +1979,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_headeritem",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "headeritem"
     },
     {
@@ -1990,8 +1990,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_flatitem",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "flatitem"
     },
     {
@@ -2001,8 +2001,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_targetheaderbar",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "targetheaderbar()"
     },
     {
@@ -2012,8 +2012,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "apps_web_src_components_grouped_timeline_groupedtimeline",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "groupedtimeline()"
     },
     {
@@ -2122,8 +2122,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "apps_web_src_components_map_data_provider_usemapdata",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "usemapdata()"
     },
     {
@@ -2416,7 +2416,7 @@
       "label": "TrackedTargetCard()",
       "file_type": "code",
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L230",
+      "source_location": "L235",
       "_origin": "ast",
       "id": "apps_web_src_components_operations_dashboard_trackedtargetcard",
       "community": 27,
@@ -2427,11 +2427,11 @@
       "label": "OperationsDashboard()",
       "file_type": "code",
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L277",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "apps_web_src_components_operations_dashboard_operationsdashboard",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "operationsdashboard()"
     },
     {
@@ -2650,8 +2650,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "scenario-builder.tsx"
     },
     {
@@ -2661,8 +2661,8 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_focuselementbyid",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "focuselementbyid()"
     },
     {
@@ -2672,8 +2672,8 @@
       "source_location": "L151",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_maplocationpicker",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "maplocationpicker"
     },
     {
@@ -2683,8 +2683,8 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_trackingmap",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "trackingmap"
     },
     {
@@ -2694,8 +2694,8 @@
       "source_location": "L159",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_previeweventgraph",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "previeweventgraph"
     },
     {
@@ -2705,8 +2705,8 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_demomappickerfallback",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "demomappickerfallback()"
     },
     {
@@ -2716,8 +2716,8 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_matchingdemolocationname",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "matchingdemolocationname()"
     },
     {
@@ -2727,8 +2727,8 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_blankscenario",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "blankscenario()"
     },
     {
@@ -2738,8 +2738,8 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_optionselect",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "optionselect()"
     },
     {
@@ -2749,8 +2749,8 @@
       "source_location": "L226",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_targetprofilefields",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "targetprofilefields()"
     },
     {
@@ -2760,8 +2760,8 @@
       "source_location": "L299",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_scenariobuilder",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "scenariobuilder()"
     },
     {
@@ -2859,8 +2859,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "apps_web_src_components_simulation_import_countpayloadstats",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "countpayloadstats()"
     },
     {
@@ -2870,8 +2870,8 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "apps_web_src_components_simulation_import_simulationimport",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "simulationimport()"
     },
     {
@@ -2947,8 +2947,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "apps_web_src_components_simulation_provider_usesimulation",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 5,
+      "community_name": "simulation-storage.ts",
       "norm_label": "usesimulation()"
     },
     {
@@ -3024,8 +3024,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "tracking-map.tsx"
     },
     {
@@ -3035,8 +3035,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_cameramode",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "cameramode"
     },
     {
@@ -3046,8 +3046,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_maptargetdisplay",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "maptargetdisplay"
     },
     {
@@ -3057,8 +3057,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_trackingmapprops",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "trackingmapprops"
     },
     {
@@ -3068,8 +3068,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_trailfeaturecollection",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "trailfeaturecollection"
     },
     {
@@ -3079,8 +3079,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_empty_trail_collection",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "empty_trail_collection"
     },
     {
@@ -3090,8 +3090,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_todisplaytarget",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "todisplaytarget()"
     },
     {
@@ -3101,8 +3101,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_buildbounds",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "buildbounds()"
     },
     {
@@ -3112,8 +3112,8 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_isoutsideviewport",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "isoutsideviewport()"
     },
     {
@@ -3123,8 +3123,8 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_needstrackrefit",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "needstrackrefit()"
     },
     {
@@ -3134,8 +3134,8 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_buildtrailcoordinates",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "buildtrailcoordinates()"
     },
     {
@@ -3145,8 +3145,8 @@
       "source_location": "L191",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_createmarkerelement",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "createmarkerelement()"
     },
     {
@@ -3156,8 +3156,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_trackingmap",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "trackingmap()"
     },
     {
@@ -3508,8 +3508,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_demo_start_locations",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "demo_start_locations"
     },
     {
@@ -3651,8 +3651,8 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_parsedemotargetcount",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "parsedemotargetcount()"
     },
     {
@@ -3970,8 +3970,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_test",
-      "community": 191,
-      "community_name": "generate-route-form.tsx",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "event-generator.test.ts"
     },
     {
@@ -3981,8 +3981,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_test_headingdifference",
-      "community": 191,
-      "community_name": "generate-route-form.tsx",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "headingdifference()"
     },
     {
@@ -4041,32 +4041,10 @@
       "norm_label": "clamp()"
     },
     {
-      "label": "normalizeHeading()",
-      "file_type": "code",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L53",
-      "_origin": "ast",
-      "id": "apps_web_src_lib_event_generator_normalizeheading",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
-      "norm_label": "normalizeheading()"
-    },
-    {
-      "label": "shortestHeadingDelta()",
-      "file_type": "code",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L57",
-      "_origin": "ast",
-      "id": "apps_web_src_lib_event_generator_shortestheadingdelta",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
-      "norm_label": "shortestheadingdelta()"
-    },
-    {
       "label": "clampLatitude()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L61",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_clamplatitude",
       "community": 11,
@@ -4074,21 +4052,10 @@
       "norm_label": "clamplatitude()"
     },
     {
-      "label": "steerHeadingForLatitudeBound()",
-      "file_type": "code",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L74",
-      "_origin": "ast",
-      "id": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
-      "norm_label": "steerheadingforlatitudebound()"
-    },
-    {
       "label": "applyLatitudeBound()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L104",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_applylatitudebound",
       "community": 11,
@@ -4099,7 +4066,7 @@
       "label": "sampleSpeed()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L141",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_samplespeed",
       "community": 11,
@@ -4110,7 +4077,7 @@
       "label": "updateSpeed()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L146",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_updatespeed",
       "community": 11,
@@ -4121,7 +4088,7 @@
       "label": "distributeTimestamps()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L154",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_distributetimestamps",
       "community": 11,
@@ -4132,7 +4099,7 @@
       "label": "categoryCruiseMidpointKnots()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L163",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_categorycruisemidpointknots",
       "community": 191,
@@ -4143,7 +4110,7 @@
       "label": "deriveEndAtFromDistance()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L168",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_deriveendatfromdistance",
       "community": 191,
@@ -4154,7 +4121,7 @@
       "label": "resolveRouteEndAt()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L188",
+      "source_location": "L125",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_resolverouteendat",
       "community": 11,
@@ -4165,7 +4132,7 @@
       "label": "assertFeasibleEndWindow()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L208",
+      "source_location": "L145",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_assertfeasibleendwindow",
       "community": 11,
@@ -4176,7 +4143,7 @@
       "label": "lerpAltitude()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L232",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_lerpaltitude",
       "community": 11,
@@ -4187,7 +4154,7 @@
       "label": "generateWanderEvents()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L242",
+      "source_location": "L179",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_generatewanderevents",
       "community": 11,
@@ -4198,7 +4165,7 @@
       "label": "generatePointToPointEvents()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L310",
+      "source_location": "L234",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_generatepointtopointevents",
       "community": 11,
@@ -4209,7 +4176,7 @@
       "label": "generateRouteEvents()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L474",
+      "source_location": "L381",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_generaterouteevents",
       "community": 11,
@@ -4220,7 +4187,7 @@
       "label": "mergeGeneratedEvents()",
       "file_type": "code",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L523",
+      "source_location": "L430",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_mergegeneratedevents",
       "community": 10,
@@ -4311,8 +4278,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_test",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "geo-longitude.test.ts"
     },
     {
@@ -4322,8 +4289,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "geo-longitude.ts"
     },
     {
@@ -4333,8 +4300,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_normalizelongitude",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "normalizelongitude()"
     },
     {
@@ -4344,8 +4311,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_shortestlongitudedelta",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "shortestlongitudedelta()"
     },
     {
@@ -4355,8 +4322,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_lnglattuple",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "lnglattuple"
     },
     {
@@ -4377,8 +4344,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_lnglatpoint",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "lnglatpoint"
     },
     {
@@ -4388,8 +4355,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_lnglatboundscorners",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "lnglatboundscorners"
     },
     {
@@ -4399,8 +4366,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_longitude_lnglatboundsforpoints",
-      "community": 190,
-      "community_name": "position-telemetry.ts",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "lnglatboundsforpoints()"
     },
     {
@@ -4674,8 +4641,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_test",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "priority-terms.test.ts"
     },
     {
@@ -4685,8 +4652,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "priority-terms.ts"
     },
     {
@@ -4696,8 +4663,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_normalizepriorityterm",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "normalizepriorityterm()"
     },
     {
@@ -4707,8 +4674,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_normalizepriorityterms",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "normalizepriorityterms()"
     },
     {
@@ -4718,8 +4685,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_matchpriorityterms",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "matchpriorityterms()"
     },
     {
@@ -4729,8 +4696,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_isprioritymessage",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "isprioritymessage()"
     },
     {
@@ -4740,8 +4707,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_addpriorityterm",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "addpriorityterm()"
     },
     {
@@ -4751,8 +4718,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_removepriorityterm",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 29,
+      "community_name": "build-event-graph.ts",
       "norm_label": "removepriorityterm()"
     },
     {
@@ -4872,8 +4839,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_test",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "scenario-validation-ui.test.ts"
     },
     {
@@ -4883,8 +4850,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "scenario-validation-ui.ts"
     },
     {
@@ -4894,8 +4861,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_validationissue",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "validationissue"
     },
     {
@@ -4905,8 +4872,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_section_labels",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "section_labels"
     },
     {
@@ -4916,8 +4883,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_issuetovalidationissue",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "issuetovalidationissue()"
     },
     {
@@ -4927,8 +4894,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_getscenariovalidationissues",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "getscenariovalidationissues()"
     },
     {
@@ -4938,8 +4905,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_getissuesfortarget",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "getissuesfortarget()"
     },
     {
@@ -4949,8 +4916,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_getissuesforevent",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "getissuesforevent()"
     },
     {
@@ -4960,8 +4927,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_groupvalidationissues",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "groupvalidationissues()"
     },
     {
@@ -4971,8 +4938,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_fieldhasissue",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "fieldhasissue()"
     },
     {
@@ -4982,8 +4949,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_formatvalidationissuelabel",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "formatvalidationissuelabel()"
     },
     {
@@ -4993,8 +4960,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_validation_ui_getvalidationissuefocusid",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "getvalidationissuefocusid()"
     },
     {
@@ -5466,8 +5433,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_test",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "simulation-schema.test.ts"
     },
     {
@@ -5477,8 +5444,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "simulation-schema.ts"
     },
     {
@@ -5488,8 +5455,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_idschema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "idschema"
     },
     {
@@ -5499,8 +5466,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_isodateschema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "isodateschema"
     },
     {
@@ -5510,8 +5477,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_targetprofileschema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "targetprofileschema"
     },
     {
@@ -5521,8 +5488,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_targetdefinitionschema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "targetdefinitionschema"
     },
     {
@@ -5532,8 +5499,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_positionpayloadschema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "positionpayloadschema"
     },
     {
@@ -5543,8 +5510,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_simulationeventschema",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 0,
+      "community_name": "event-generator.ts",
       "norm_label": "simulationeventschema"
     },
     {
@@ -5576,8 +5543,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_validatescenario",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 42,
+      "community_name": "position-telemetry.ts",
       "norm_label": "validatescenario()"
     },
     {
@@ -6093,8 +6060,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_src_lib_use_builder_preview_preview_speeds",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "preview_speeds"
     },
     {
@@ -6126,8 +6093,8 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "apps_web_src_lib_use_builder_preview_describepreviewevent",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "describepreviewevent()"
     },
     {
@@ -6137,8 +6104,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_utils",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 41,
+      "community_name": "attachment.tsx",
       "norm_label": "web/src/lib/utils.ts"
     },
     {
@@ -6148,8 +6115,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon_test",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "vehicle-icon.test.ts"
     },
     {
@@ -6159,8 +6126,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "vehicle-icon.tsx"
     },
     {
@@ -6170,8 +6137,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon_vehicle_icons",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "vehicle_icons"
     },
     {
@@ -6181,8 +6148,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon_heading_artwork_offset_deg",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "heading_artwork_offset_deg"
     },
     {
@@ -6203,8 +6170,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon_vehiclecategoryheadingoffsetdegrees",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "vehiclecategoryheadingoffsetdegrees()"
     },
     {
@@ -6214,8 +6181,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon_vehiclecategorymarkerrotationdegrees",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "vehiclecategorymarkerrotationdegrees()"
     },
     {
@@ -6225,8 +6192,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "apps_web_src_lib_vehicle_icon_vehiclecategoryiconsvg",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "vehiclecategoryiconsvg()"
     },
     {
@@ -6610,8 +6577,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_types_target",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "target.ts"
     },
     {
@@ -6654,8 +6621,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_web_src_types_target_vehiclecategory",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "vehiclecategory"
     },
     {
@@ -6665,8 +6632,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "apps_web_src_types_target_affiliation",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "affiliation"
     },
     {
@@ -6676,8 +6643,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_web_src_types_target_targetstatus",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "targetstatus"
     },
     {
@@ -6687,8 +6654,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "apps_web_src_types_target_mapmode",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "mapmode"
     },
     {
@@ -6753,8 +6720,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_web_src_types_target_positionsnapshot",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 190,
+      "community_name": "position-telemetry.ts",
       "norm_label": "positionsnapshot"
     },
     {
@@ -6764,8 +6731,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "apps_web_src_types_target_runtimetargetstate",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "runtimetargetstate"
     },
     {
@@ -6775,8 +6742,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "apps_web_src_types_target_runtimestatus",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "runtimestatus"
     },
     {
@@ -6797,8 +6764,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "apps_web_src_types_target_legacy_event_types",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "legacy_event_types"
     },
     {
@@ -6808,8 +6775,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "apps_web_src_types_target_legacyeventtype",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "legacyeventtype"
     },
     {
@@ -6819,8 +6786,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "apps_web_src_types_target_legacypriority",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "legacypriority"
     },
     {
@@ -9074,8 +9041,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "accordion.tsx"
     },
     {
@@ -9085,8 +9052,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordion",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "accordion()"
     },
     {
@@ -9096,8 +9063,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordionitem",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "accordionitem()"
     },
     {
@@ -9107,8 +9074,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordiontrigger",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "accordiontrigger()"
     },
     {
@@ -9118,8 +9085,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordioncontent",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "accordioncontent()"
     },
     {
@@ -9404,8 +9371,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_badge",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "badge.tsx"
     },
     {
@@ -9415,8 +9382,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "packages_ui_src_components_badge_badgevariants",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "badgevariants"
     },
     {
@@ -9426,8 +9393,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "packages_ui_src_components_badge_badge",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "badge()"
     },
     {
@@ -9514,8 +9481,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "button-group.tsx"
     },
     {
@@ -9525,8 +9492,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongroupvariants",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "buttongroupvariants"
     },
     {
@@ -9536,8 +9503,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongroup",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "buttongroup()"
     },
     {
@@ -9547,8 +9514,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongrouptext",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "buttongrouptext()"
     },
     {
@@ -9558,8 +9525,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongroupseparator",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "buttongroupseparator()"
     },
     {
@@ -9569,7 +9536,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_button",
-      "community": 17,
+      "community": 199,
       "community_name": "button.tsx",
       "norm_label": "button.tsx"
     },
@@ -9580,7 +9547,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_buttonvariants",
-      "community": 17,
+      "community": 199,
       "community_name": "button.tsx",
       "norm_label": "buttonvariants"
     },
@@ -9591,7 +9558,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_button",
-      "community": 17,
+      "community": 199,
       "community_name": "button.tsx",
       "norm_label": "button()"
     },
@@ -9602,7 +9569,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_calendar",
-      "community": 17,
+      "community": 199,
       "community_name": "button.tsx",
       "norm_label": "calendar.tsx"
     },
@@ -9613,7 +9580,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_ui_src_components_calendar_calendar",
-      "community": 17,
+      "community": 199,
       "community_name": "button.tsx",
       "norm_label": "calendar()"
     },
@@ -9624,7 +9591,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "packages_ui_src_components_calendar_calendardaybutton",
-      "community": 17,
+      "community": 199,
       "community_name": "button.tsx",
       "norm_label": "calendardaybutton()"
     },
@@ -9635,8 +9602,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_card",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "card.tsx"
     },
     {
@@ -9646,8 +9613,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_card",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "card()"
     },
     {
@@ -9657,8 +9624,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardheader",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "cardheader()"
     },
     {
@@ -9668,8 +9635,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardtitle",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "cardtitle()"
     },
     {
@@ -9679,8 +9646,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_carddescription",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "carddescription()"
     },
     {
@@ -9690,8 +9657,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardaction",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "cardaction()"
     },
     {
@@ -9701,8 +9668,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardcontent",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "cardcontent()"
     },
     {
@@ -9712,8 +9679,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardfooter",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "cardfooter()"
     },
     {
@@ -9723,8 +9690,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_checkbox",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "checkbox.tsx"
     },
     {
@@ -9734,8 +9701,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "packages_ui_src_components_checkbox_checkbox",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "checkbox()"
     },
     {
@@ -9987,8 +9954,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "packages_ui_src_components_dialog_dialogfooter",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 40,
+      "community_name": "clsx",
       "norm_label": "dialogfooter()"
     },
     {
@@ -10416,8 +10383,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "input-group.tsx"
     },
     {
@@ -10438,8 +10405,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgroupaddonvariants",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgroupaddonvariants"
     },
     {
@@ -10449,8 +10416,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgroupaddon",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgroupaddon()"
     },
     {
@@ -10460,8 +10427,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgroupbuttonvariants",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgroupbuttonvariants"
     },
     {
@@ -10471,8 +10438,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgroupbutton",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgroupbutton()"
     },
     {
@@ -10482,8 +10449,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgrouptext",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgrouptext()"
     },
     {
@@ -10493,8 +10460,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgroupinput",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgroupinput()"
     },
     {
@@ -10504,8 +10471,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_group_inputgrouptextarea",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 185,
+      "community_name": "toggle-group.tsx",
       "norm_label": "inputgrouptextarea()"
     },
     {
@@ -10559,8 +10526,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_marker",
-      "community": 7,
-      "community_name": "cn",
+      "community": 56,
+      "community_name": "GenerateRouteForm",
       "norm_label": "marker.tsx"
     },
     {
@@ -10570,8 +10537,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_ui_src_components_marker_markervariants",
-      "community": 7,
-      "community_name": "cn",
+      "community": 56,
+      "community_name": "GenerateRouteForm",
       "norm_label": "markervariants"
     },
     {
@@ -10581,8 +10548,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "packages_ui_src_components_marker_marker",
-      "community": 7,
-      "community_name": "cn",
+      "community": 56,
+      "community_name": "GenerateRouteForm",
       "norm_label": "marker()"
     },
     {
@@ -10592,8 +10559,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "packages_ui_src_components_marker_markericon",
-      "community": 7,
-      "community_name": "cn",
+      "community": 56,
+      "community_name": "GenerateRouteForm",
       "norm_label": "markericon()"
     },
     {
@@ -10603,8 +10570,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "packages_ui_src_components_marker_markercontent",
-      "community": 7,
-      "community_name": "cn",
+      "community": 56,
+      "community_name": "GenerateRouteForm",
       "norm_label": "markercontent()"
     },
     {
@@ -10988,8 +10955,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_separator",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "separator.tsx"
     },
     {
@@ -10999,8 +10966,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "packages_ui_src_components_separator_separator",
-      "community": 31,
-      "community_name": "bubble.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "separator()"
     },
     {
@@ -11131,8 +11098,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_skeleton",
-      "community": 7,
-      "community_name": "cn",
+      "community": 41,
+      "community_name": "attachment.tsx",
       "norm_label": "skeleton.tsx"
     },
     {
@@ -11142,8 +11109,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "packages_ui_src_components_skeleton_skeleton",
-      "community": 7,
-      "community_name": "cn",
+      "community": 41,
+      "community_name": "attachment.tsx",
       "norm_label": "skeleton()"
     },
     {
@@ -11175,8 +11142,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_switch",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "switch.tsx"
     },
     {
@@ -11186,8 +11153,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "packages_ui_src_components_switch_switch",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "switch()"
     },
     {
@@ -11516,8 +11483,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_lib_utils",
-      "community": 185,
-      "community_name": "toggle-group.tsx",
+      "community": 41,
+      "community_name": "attachment.tsx",
       "norm_label": "ui/src/lib/utils.ts"
     },
     {
@@ -23019,7 +22986,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L277",
+      "source_location": "L282",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard",
@@ -23052,7 +23019,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L230",
+      "source_location": "L235",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard",
@@ -23724,7 +23691,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L162",
+      "source_location": "L167",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_targetroster",
@@ -23736,7 +23703,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L171",
+      "source_location": "L176",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_targetroster",
@@ -23748,7 +23715,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L231",
+      "source_location": "L236",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_trackedtargetcard",
@@ -23760,7 +23727,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L279",
+      "source_location": "L284",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_operationsdashboard",
@@ -23772,7 +23739,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L308",
+      "source_location": "L313",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_operationsdashboard",
@@ -23784,7 +23751,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L485",
+      "source_location": "L490",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_operationsdashboard",
@@ -23796,7 +23763,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/operations-dashboard.tsx",
-      "source_location": "L412",
+      "source_location": "L417",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_operations_dashboard_operationsdashboard",
@@ -30655,7 +30622,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L104",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30666,7 +30633,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L208",
+      "source_location": "L145",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30688,7 +30655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L163",
+      "source_location": "L100",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30710,7 +30677,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L61",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30721,7 +30688,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L168",
+      "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30732,7 +30699,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L154",
+      "source_location": "L91",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30743,7 +30710,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L310",
+      "source_location": "L234",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30754,7 +30721,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L474",
+      "source_location": "L381",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30776,7 +30743,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L242",
+      "source_location": "L179",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30787,7 +30754,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L232",
+      "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30798,7 +30765,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L523",
+      "source_location": "L430",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30820,18 +30787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L53",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator",
-      "target": "apps_web_src_lib_event_generator_normalizeheading",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L188",
+      "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30842,7 +30798,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L141",
+      "source_location": "L78",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -30853,29 +30809,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L57",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator",
-      "target": "apps_web_src_lib_event_generator_shortestheadingdelta",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L74",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator",
-      "target": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L146",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator",
@@ -31032,7 +30966,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L358",
+      "source_location": "L282",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31068,7 +31002,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L254",
+      "source_location": "L191",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31079,7 +31013,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L127",
+      "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_applylatitudebound",
@@ -31091,7 +31025,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L64",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_clamplatitude",
@@ -31103,7 +31037,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L345",
+      "source_location": "L269",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31115,7 +31049,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L477",
+      "source_location": "L384",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generaterouteevents",
@@ -31127,19 +31061,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L90",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "target": "apps_web_src_lib_event_generator_clamp",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L151",
+      "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_updatespeed",
@@ -31151,55 +31073,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L421",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
-      "target": "apps_web_src_lib_event_generator_normalizeheading",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L270",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_generatewanderevents",
-      "target": "apps_web_src_lib_event_generator_normalizeheading",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L101",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "target": "apps_web_src_lib_event_generator_normalizeheading",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L99",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "target": "apps_web_src_lib_event_generator_shortestheadingdelta",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L324",
+      "source_location": "L248",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31211,7 +31085,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L258",
+      "source_location": "L195",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31223,43 +31097,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L117",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_applylatitudebound",
-      "target": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L424",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
-      "target": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L273",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_lib_event_generator_generatewanderevents",
-      "target": "apps_web_src_lib_event_generator_steerheadingforlatitudebound",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L440",
+      "source_location": "L352",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31271,7 +31109,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L280",
+      "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31283,7 +31121,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L255",
+      "source_location": "L192",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31295,7 +31133,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L267",
+      "source_location": "L204",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31307,7 +31145,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L339",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31319,7 +31157,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L253",
+      "source_location": "L190",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31331,7 +31169,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L182",
+      "source_location": "L119",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_deriveendatfromdistance",
@@ -31344,7 +31182,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L178",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_deriveendatfromdistance",
@@ -31355,7 +31193,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L200",
+      "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_resolverouteendat",
@@ -31367,7 +31205,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L483",
+      "source_location": "L390",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generaterouteevents",
@@ -31379,7 +31217,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L218",
+      "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_assertfeasibleendwindow",
@@ -31391,7 +31229,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L331",
+      "source_location": "L255",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31403,7 +31241,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L354",
+      "source_location": "L278",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31415,7 +31253,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L510",
+      "source_location": "L417",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generaterouteevents",
@@ -31427,7 +31265,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L279",
+      "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatewanderevents",
@@ -31439,7 +31277,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L430",
+      "source_location": "L347",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31451,7 +31289,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L342",
+      "source_location": "L266",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31463,7 +31301,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L420",
+      "source_location": "L344",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generatepointtopointevents",
@@ -31475,7 +31313,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/lib/event-generator.ts",
-      "source_location": "L496",
+      "source_location": "L403",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_lib_event_generator_generaterouteevents",
@@ -49801,5 +49639,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f29f6ccc0af19d0c43b35ecd33455942c59b406f"
+  "built_at_commit": "2ef1553d0cc464097660db87fae6c16c093f639e"
 }

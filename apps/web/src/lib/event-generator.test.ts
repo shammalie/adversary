@@ -266,4 +266,44 @@ describe("event generator", () => {
       }),
     ).toThrow(/end time/i);
   });
+
+  it("stays within maxAbsLatitude and turns gradually near the bound", () => {
+    let seed = 7;
+    const random = () => {
+      seed = (seed * 1_664_525 + 1_013_904_223) % 4_294_967_296;
+      return seed / 4_294_967_296;
+    };
+    const maxAbsLatitude = 85;
+    const events = generateRouteEvents({
+      targetId: "target-bound",
+      count: 80,
+      startAt: "2026-07-24T12:00:00.000Z",
+      endAt: "2026-07-24T18:00:00.000Z",
+      startPoint: { latitude: 82, longitude: -20, altitude: 30_000 },
+      vehicleCategory: "aircraft",
+      maxAbsLatitude,
+      random,
+      idFactory: () => crypto.randomUUID(),
+    });
+
+    for (const event of events) {
+      expect(Math.abs(event.position?.latitude ?? 999)).toBeLessThanOrEqual(maxAbsLatitude + 1e-6);
+    }
+
+    const bearings = events
+      .slice(1)
+      .map((event, index) =>
+        initialBearingDegrees(
+          events[index]?.position ?? { latitude: 0, longitude: 0 },
+          event.position ?? { latitude: 0, longitude: 0 },
+        ),
+      );
+    const turnDeltas = bearings
+      .slice(1)
+      .map((bearing, index) => headingDifference(bearings[index] ?? bearing, bearing));
+
+    // Soft steer near the clip — never a hard 180° bounce spike.
+    expect(Math.max(...turnDeltas)).toBeLessThanOrEqual(12);
+    expect(events.some((event) => Math.abs(event.position?.latitude ?? 0) > 78)).toBe(true);
+  });
 });

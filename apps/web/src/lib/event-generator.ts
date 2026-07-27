@@ -39,7 +39,7 @@ export interface GenerateRouteOptions {
   vehicleCategory: VehicleCategory;
   /**
    * When set, every track point is clamped to ±this latitude. Near the bound,
-   * wander headings reflect so contacts do not stick to the Mercator clip edge.
+   * headings curve inland gradually so contacts arc parallel instead of spiking.
    */
   maxAbsLatitude?: number;
   random?: () => number;
@@ -50,28 +50,91 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function normalizeHeading(heading: number) {
+  return ((heading % 360) + 360) % 360;
+}
+
+function shortestHeadingDelta(from: number, to: number) {
+  return ((to - from + 540) % 360) - 180;
+}
+
 function clampLatitude(latitude: number, maxAbsLatitude?: number) {
   if (maxAbsLatitude === undefined) return latitude;
   const bound = Math.min(Math.abs(maxAbsLatitude), 90);
   return clamp(latitude, -bound, bound);
 }
 
+/** Soft band (degrees of latitude) where tracks start curving away from the clip. */
+const LATITUDE_TURN_BUFFER_DEG = 5;
+
+/**
+ * Gradual equatorward steer near ±maxAbsLatitude so contacts arc parallel to the
+ * bound instead of bouncing with a hard heading flip.
+ */
+function steerHeadingForLatitudeBound(
+  latitude: number,
+  heading: number,
+  maxAbsLatitude: number | undefined,
+  maxHeadingChange: number,
+): number {
+  if (maxAbsLatitude === undefined) return heading;
+  const bound = Math.min(Math.abs(maxAbsLatitude), 90);
+  const absLat = Math.abs(latitude);
+  const bufferStart = bound - LATITUDE_TURN_BUFFER_DEG;
+  if (absLat < bufferStart) return heading;
+
+  const northComponent = Math.cos((heading * Math.PI) / 180);
+  const headingTowardPole = latitude >= 0 ? northComponent > 0.02 : northComponent < -0.02;
+  if (!headingTowardPole && absLat < bound) return heading;
+
+  const urgency = clamp((absLat - bufferStart) / LATITUDE_TURN_BUFFER_DEG, 0, 1);
+  // Prefer the nearer E/W parallel, then a bit equatorward for a rounded turn.
+  const eastish = Math.sin((heading * Math.PI) / 180) >= 0;
+  let target: number;
+  if (latitude >= 0) {
+    target = eastish ? 90 + 45 * urgency : 270 - 45 * urgency;
+  } else {
+    target = eastish ? 90 - 45 * urgency : 270 + 45 * urgency;
+  }
+  const delta = shortestHeadingDelta(heading, target);
+  const maxTurn = maxHeadingChange * (0.75 + urgency * 1.25);
+  return normalizeHeading(heading + clamp(delta, -maxTurn, maxTurn));
+}
+
 function applyLatitudeBound(
   point: Pick<PositionPayload, "latitude" | "longitude">,
   heading: number,
-  maxAbsLatitude?: number,
+  maxAbsLatitude: number | undefined,
+  maxHeadingChange: number,
 ): { point: Pick<PositionPayload, "latitude" | "longitude">; heading: number } {
   if (maxAbsLatitude === undefined) {
     return { point, heading };
   }
   const bound = Math.min(Math.abs(maxAbsLatitude), 90);
   if (Math.abs(point.latitude) <= bound) {
-    return { point, heading };
+    return {
+      point,
+      heading: steerHeadingForLatitudeBound(
+        point.latitude,
+        heading,
+        maxAbsLatitude,
+        maxHeadingChange,
+      ),
+    };
   }
+  // Overshot: clamp and continue a limited turn inland (no instantaneous 180° flip).
+  const clamped = {
+    latitude: clamp(point.latitude, -bound, bound),
+    longitude: point.longitude,
+  };
   return {
-    point: { latitude: clamp(point.latitude, -bound, bound), longitude: point.longitude },
-    // Reflect north/south component so the next legs turn inland.
-    heading: (180 - heading + 360) % 360,
+    point: clamped,
+    heading: steerHeadingForLatitudeBound(
+      clamped.latitude,
+      heading,
+      maxAbsLatitude,
+      maxHeadingChange,
+    ),
   };
 }
 
@@ -204,9 +267,22 @@ function generateWanderEvents(options: {
       speed = updateSpeed(options.vehicleCategory, speed, options.random);
       const distanceNm = speed * elapsedHours;
       const smoothing = CATEGORY_MOVEMENT_SMOOTHING[options.vehicleCategory];
-      heading = (heading + (options.random() * 2 - 1) * smoothing.maxHeadingChange + 360) % 360;
+      heading = normalizeHeading(
+        heading + (options.random() * 2 - 1) * smoothing.maxHeadingChange,
+      );
+      heading = steerHeadingForLatitudeBound(
+        current.latitude,
+        heading,
+        options.maxAbsLatitude,
+        smoothing.maxHeadingChange,
+      );
       const nextPoint = destinationPoint(current, distanceNm, heading);
-      const bounded = applyLatitudeBound(nextPoint, heading, options.maxAbsLatitude);
+      const bounded = applyLatitudeBound(
+        nextPoint,
+        heading,
+        options.maxAbsLatitude,
+        smoothing.maxHeadingChange,
+      );
       heading = bounded.heading;
       current = {
         latitude: bounded.point.latitude,
@@ -342,14 +418,31 @@ function generatePointToPointEvents(options: {
     distanceNm = Math.min(speed * elapsedHours, maxStepNm);
 
     const desiredBearing = initialBearingDegrees(current, endPoint);
-    let heading =
-      (desiredBearing + (options.random() * 2 - 1) * smoothing.maxHeadingChange + 360) % 360;
+    let heading = normalizeHeading(
+      desiredBearing + (options.random() * 2 - 1) * smoothing.maxHeadingChange,
+    );
+    heading = steerHeadingForLatitudeBound(
+      current.latitude,
+      heading,
+      options.maxAbsLatitude,
+      smoothing.maxHeadingChange,
+    );
     let nextPoint = destinationPoint(current, distanceNm, heading);
     if (remainingNm - haversineDistanceNm(nextPoint, endPoint) < distanceNm * 0.5) {
-      heading = desiredBearing;
+      heading = steerHeadingForLatitudeBound(
+        current.latitude,
+        desiredBearing,
+        options.maxAbsLatitude,
+        smoothing.maxHeadingChange,
+      );
       nextPoint = destinationPoint(current, distanceNm, heading);
     }
-    const bounded = applyLatitudeBound(nextPoint, heading, options.maxAbsLatitude);
+    const bounded = applyLatitudeBound(
+      nextPoint,
+      heading,
+      options.maxAbsLatitude,
+      smoothing.maxHeadingChange,
+    );
     speed = clamp(haversineDistanceNm(current, bounded.point) / elapsedHours, 0, range.maxKnots);
     current = {
       latitude: bounded.point.latitude,

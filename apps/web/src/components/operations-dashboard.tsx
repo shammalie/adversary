@@ -97,7 +97,7 @@ function TargetRoster({
   const trackedSet = new Set(trackedIds);
   const itemRefs = useRef(new Map<string, HTMLElement>());
   const targetsRef = useRef(targets);
-  const searchScrollKeyRef = useRef<string | null>(null);
+  const lastScrolledIdRef = useRef<string | undefined>(undefined);
   targetsRef.current = targets;
 
   const filteredTargets = useMemo(() => {
@@ -118,21 +118,16 @@ function TargetRoster({
     });
   }, [selectedId]);
 
-  // Scroll selected into view only while searching — not on roster scroll or live target updates.
+  // Scroll on selection change (map pick / command focus), not on live target updates.
   useEffect(() => {
-    const needle = deferredQuery.trim().toLowerCase();
-    if (!selectedId || !needle) {
-      searchScrollKeyRef.current = null;
-      return;
-    }
-    const key = `${selectedId}:${needle}`;
-    if (searchScrollKeyRef.current === key) return;
+    if (!selectedId) return;
+    if (lastScrolledIdRef.current === selectedId) return;
     const node = itemRefs.current.get(selectedId);
     if (!node) return;
-    searchScrollKeyRef.current = key;
+    lastScrolledIdRef.current = selectedId;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     node.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
-  }, [deferredQuery, filteredTargets, selectedId]);
+  }, [filteredTargets, selectedId]);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-2">

@@ -80,8 +80,8 @@
     "semantic_hash": "72b4c42569685952b9c20525a49cacfd"
   },
   "apps/web/src/components/operations-dashboard.tsx": {
-    "mtime": 1785178526.1603856,
-    "ast_hash": "b76039b40acfb1b1b1cbe338482df459",
+    "mtime": 1785081182.2715285,
+    "ast_hash": "6b61f92dbb4014c81cbbd06e4e2614de",
     "semantic_hash": ""
   },
   "apps/web/src/components/router-devtools-gate.tsx": {
@@ -120,13 +120,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/demo-scenario.test.ts": {
-    "mtime": 1785178695.6708896,
-    "ast_hash": "e5a6a8dd983b06d415f8d987b2fd7107",
+    "mtime": 1785082952.2728136,
+    "ast_hash": "5e67363d747e06d12ec37bd401cf31f4",
     "semantic_hash": ""
   },
   "apps/web/src/lib/demo-scenario.ts": {
-    "mtime": 1785178686.1509326,
-    "ast_hash": "43766b3ec617e5ecffd883288f350442",
+    "mtime": 1785082961.370014,
+    "ast_hash": "5964fd591840c71e2850a5b91b44cb65",
     "semantic_hash": ""
   },
   "apps/web/src/lib/event-draft.test.ts": {
@@ -140,13 +140,13 @@
     "semantic_hash": "fc39af8dc1dc323bfe78a20fc8c88a7a"
   },
   "apps/web/src/lib/event-generator.test.ts": {
-    "mtime": 1785178696.25731,
-    "ast_hash": "570bb49d59f0b9575b133908afd1d104",
+    "mtime": 1785076096.6462638,
+    "ast_hash": "384b3632376c1200f8802764711975cc",
     "semantic_hash": ""
   },
   "apps/web/src/lib/event-generator.ts": {
-    "mtime": 1785178536.6487684,
-    "ast_hash": "569fc787eb5105ac151069506ee62cb7",
+    "mtime": 1785082939.9981117,
+    "ast_hash": "8b73a118be56b5a0c5fbb7722542afba",
     "semantic_hash": ""
   },
   "apps/web/src/lib/map-styles.ts": {

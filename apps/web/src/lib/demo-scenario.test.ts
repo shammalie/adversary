@@ -202,7 +202,7 @@ describe("demo scenario", () => {
     });
     for (const event of scenario.events) {
       if (!event.position) continue;
-      expect(Math.abs(event.position.latitude)).toBeLessThanOrEqual(60);
+      expect(Math.abs(event.position.latitude)).toBeLessThanOrEqual(85);
     }
   });
 
