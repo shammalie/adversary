@@ -90,8 +90,8 @@
     "semantic_hash": "f0ea3f014305e2494f49b1ca1e06c639"
   },
   "apps/web/src/components/scenario-builder.tsx": {
-    "mtime": 1785184274.0747871,
-    "ast_hash": "5994e02510fbbfebb4be2b9cdd0aa77d",
+    "mtime": 1785187544.8392985,
+    "ast_hash": "5390466c2190f6a4427fdb5614596f80",
     "semantic_hash": ""
   },
   "apps/web/src/components/simulation-import.tsx": {
@@ -1210,8 +1210,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785066596.8408172,
-    "ast_hash": "11d8bfdccc4a3d4813e147983dbe9093",
+    "mtime": 1785186042.9751413,
+    "ast_hash": "68d9cfcee2d2b0a7548fedfb25785d2c",
     "semantic_hash": ""
   },
   "apps/web/index.html": {
@@ -1625,13 +1625,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/path-to-events.test.ts": {
-    "mtime": 1785182678.8749568,
-    "ast_hash": "26ad1cb48f83bff2b0e892c53686b165",
+    "mtime": 1785187519.4776857,
+    "ast_hash": "b3133e77e4be665229fc1b8c2cdf547e",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/path-to-events.ts": {
-    "mtime": 1785182762.049278,
-    "ast_hash": "d3b9746a47be84f9ba6f1248863670cf",
+    "mtime": 1785187417.107572,
+    "ast_hash": "6705d7f62cd402b7a0e12fadb2be05d0",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/vehicle-profiles.test.ts": {
@@ -1645,13 +1645,13 @@
     "semantic_hash": ""
   },
   "apps/web/public/geo-seeds.json": {
-    "mtime": 1785182987.8644977,
-    "ast_hash": "2d9b7056fe4f6837eae4b3f9838626a3",
+    "mtime": 1785187479.30855,
+    "ast_hash": "59b79ef56f767f0afdc6e9977846fef8",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/fixtures/tiles/manifest.json": {
-    "mtime": 1785183148.1896715,
-    "ast_hash": "47dc365dddac023041c23b1a53810449",
+    "mtime": 1785187536.8245895,
+    "ast_hash": "e8fd6b13bd6f1aa6d031afc6621bebc0",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/terrain.test.ts": {
@@ -1727,6 +1727,31 @@
   "apps/web/src/lib/simulation-storage.test.ts": {
     "mtime": 1785184545.7332072,
     "ast_hash": "776bc24a50440c903e7c620c544d766c",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/demo-region-select.tsx": {
+    "mtime": 1785187381.7117858,
+    "ast_hash": "0e81e1123cdfaba4a5a1492d72c78663",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/generate-random-route-form.tsx": {
+    "mtime": 1785187484.7292225,
+    "ast_hash": "86f8066f4416ec9bafda5f3e3b083b78",
+    "semantic_hash": ""
+  },
+  "apps/web/src/lib/plan-target-events.ts": {
+    "mtime": 1785187550.4343672,
+    "ast_hash": "fa499693cc5e0472701bc61a6971cb45",
+    "semantic_hash": ""
+  },
+  "docs/authentic-geo-routes.md": {
+    "mtime": 1785186028.0712752,
+    "ast_hash": "868988ea7109c5cfc109515a445a9c5f",
+    "semantic_hash": ""
+  },
+  "docs/geo-seeds.md": {
+    "mtime": 1785186022.884028,
+    "ast_hash": "0864a1ad6262b4e6de7ab2c1f14121b4",
     "semantic_hash": ""
   }
 }

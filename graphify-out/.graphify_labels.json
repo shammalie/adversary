@@ -214,13 +214,10 @@
   "224": "tile-source.ts",
   "232": "geo-router.worker.ts",
   "240": "map-styles.ts",
-  "247": "map-data-provider.tsx",
   "252": "s",
   "254": "LruCache",
-  "262": "router-devtools-gate.tsx",
   "279": "@mapbox/vector-tile",
   "284": "@tanstack/react-virtual",
   "344": "@types/react-dom",
-  "345": "bubble.tsx",
-  "346": "cmdk"
+  "345": "bubble.tsx"
 }

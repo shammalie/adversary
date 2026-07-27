@@ -4,6 +4,7 @@ import {
   initialBearingDegrees,
 } from "@/lib/position-telemetry";
 import { CATEGORY_TOP_SPEED_KNOTS } from "@/lib/vehicle-speed";
+import { MAX_GENERATED_EVENTS } from "@/lib/event-generator";
 import {
   profileCruiseMidpointKnots,
   resolveVehicleProfile,
@@ -40,6 +41,11 @@ export interface PathToEventsOptions {
   /** Override cruise; defaults to profile cruise midpoint. */
   cruiseKnots?: number;
   idFactory?: () => string;
+  /**
+   * When set, clamp to `1..MAX_GENERATED_EVENTS` and use as the simplify/densify
+   * target instead of the default 60–150 band.
+   */
+  eventCount?: number;
   /**
    * When true and the authored window is longer than the kinematic walk,
    * stretch timestamps to fill the window. Default true.
@@ -480,11 +486,17 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
   });
 
   const walked = walkPath({ path, profile, cruiseKnots, ceilingKnots });
-  let simplified = simplifyToEventBudget(walked);
+  const requestedCount =
+    options.eventCount !== undefined
+      ? clamp(Math.floor(options.eventCount), 1, MAX_GENERATED_EVENTS)
+      : null;
+  const budgetMin = requestedCount ?? PATH_EVENT_BUDGET_MIN;
+  const budgetMax = requestedCount ?? PATH_EVENT_BUDGET_MAX;
+  let simplified = simplifyToEventBudget(walked, budgetMin, budgetMax);
   // Collinear legs (typical air great-circles) collapse under DP; densify so
   // climb/cruise/descent and the budget floor remain representable.
-  if (simplified.length < PATH_EVENT_BUDGET_MIN && walked.length >= 2) {
-    const densified = densifyAlongPath(simplified, PATH_EVENT_BUDGET_MIN);
+  if (simplified.length < budgetMin && walked.length >= 2) {
+    const densified = densifyAlongPath(simplified, budgetMin);
     // Re-walk speeds onto densified vertices from nearest walked sample.
     simplified = densified.map((point) => {
       let best = walked[0]!;
@@ -503,6 +515,19 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
         altitude: point.altitude ?? 0,
       };
     });
+  }
+  // When the caller asked for an exact count and we still have more vertices
+  // than needed, keep endpoints and evenly sample intermediate indices.
+  if (requestedCount !== null && simplified.length > requestedCount && simplified.length > 2) {
+    const sampled: typeof simplified = [];
+    for (let i = 0; i < requestedCount; i += 1) {
+      const index =
+        i === requestedCount - 1
+          ? simplified.length - 1
+          : Math.round((i * (simplified.length - 1)) / (requestedCount - 1));
+      sampled.push(simplified[index]!);
+    }
+    simplified = sampled;
   }
 
   // Rebuild cumulative distances on the simplified polyline and assign times so

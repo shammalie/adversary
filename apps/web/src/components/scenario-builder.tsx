@@ -21,7 +21,6 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
   FieldSet,
 } from "@adversary/ui/components/field";
 import { Input } from "@adversary/ui/components/input";
@@ -84,6 +83,8 @@ import { BrandMark } from "@/components/brand-mark";
 import Loader from "@/components/loader";
 
 import { DateTimePicker } from "@/components/date-time-picker";
+import { DemoRegionSelect } from "@/components/demo-region-select";
+import { GenerateRandomRouteForm } from "@/components/generate-random-route-form";
 import { GenerateRouteForm } from "@/components/generate-route-form";
 import { GroupedTimeline } from "@/components/grouped-timeline";
 import { useSimulation } from "@/components/simulation-provider";
@@ -188,10 +189,6 @@ function matchingDemoLocationName(origin: DemoOrigin) {
       );
     })?.name ?? null
   );
-}
-
-function formatRegionSupports(supports: readonly VehicleCategory[]): string {
-  return supports.join(", ");
 }
 
 function demoGeneratingShell(nowIso: string): SimulationScenario {
@@ -338,7 +335,7 @@ export function ScenarioBuilder() {
   const [scenario, setScenario] = useState<SimulationScenario>(() => blankScenario());
   const [draft, setDraft] = useState(() => createEventDraft());
   const [priorityInput, setPriorityInput] = useState("");
-  const [eventMode, setEventMode] = useState<"manual" | "automatic">("manual");
+  const [eventMode, setEventMode] = useState<"manual" | "automatic" | "random">("manual");
   const [timelineMode, setTimelineMode] = useState<"view" | "edit">("view");
   const [previewViewMode, setPreviewViewMode] = useState<"map" | "graph">("map");
   const [cameraMode, setCameraMode] = useState<"overview" | "pan">("overview");
@@ -382,21 +379,6 @@ export function ScenarioBuilder() {
     ? "anywhere"
     : demoRegionIds;
   const demoPinOverridesRegions = demoOrigin !== null;
-  const demoIncompatibleCategories = useMemo(() => {
-    if (demoPinOverridesRegions || demoRegionAnywhere || demoVehicleRandom) {
-      return [] as VehicleCategory[];
-    }
-    const selected = DEMO_REGIONS.filter((region) => demoRegionIds.includes(region.id));
-    return demoVehicleCategories.filter(
-      (category) => !selected.some((region) => region.supports.includes(category)),
-    );
-  }, [
-    demoPinOverridesRegions,
-    demoRegionAnywhere,
-    demoRegionIds,
-    demoVehicleCategories,
-    demoVehicleRandom,
-  ]);
 
   useEffect(() => {
     if (demoVehicleCategories.length === 0 && !demoVehicleRandom) {
@@ -737,19 +719,6 @@ export function ScenarioBuilder() {
         return current.includes(category) ? current : [...current, category];
       }
       return current.filter((entry) => entry !== category);
-    });
-  }
-
-  function selectDemoRegionsAnywhere() {
-    setDemoRegionIds([]);
-  }
-
-  function toggleDemoRegion(regionId: string, checked: boolean) {
-    setDemoRegionIds((current) => {
-      if (checked) {
-        return current.includes(regionId) ? current : [...current, regionId];
-      }
-      return current.filter((id) => id !== regionId);
     });
   }
 
@@ -1164,86 +1133,14 @@ export function ScenarioBuilder() {
                     </Field>
                   </div>
 
-                  <FieldSet>
-                    <FieldLegend>Regions</FieldLegend>
-                    <FieldDescription id="demo-regions-hint">
-                      {demoPinOverridesRegions
-                        ? "A map pin is set — it overrides region selection until cleared."
-                        : "Select one or more regions, or Anywhere for world sampling. Each region lists the vehicle categories it can host."}
-                    </FieldDescription>
-                    <div
-                      data-slot="checkbox-group"
-                      aria-disabled={
-                        isDemoPending || demoPinOverridesRegions ? true : undefined
-                      }
-                      aria-describedby={
-                        demoIncompatibleCategories.length > 0
-                          ? "demo-regions-hint demo-regions-mismatch"
-                          : "demo-regions-hint"
-                      }
-                      className="mt-2 flex max-h-48 flex-col gap-2 overflow-y-auto rounded-md border p-3"
-                    >
-                      <label className="flex items-start gap-2 text-sm">
-                        <Checkbox
-                          checked={demoRegionAnywhere}
-                          disabled={isDemoPending || demoPinOverridesRegions}
-                          onCheckedChange={(checked) => {
-                            if (checked) selectDemoRegionsAnywhere();
-                          }}
-                          aria-describedby="demo-region-anywhere-desc"
-                        />
-                        <span>
-                          <span className="font-medium">Anywhere</span>
-                          <span
-                            id="demo-region-anywhere-desc"
-                            className="mt-0.5 block text-xs text-muted-foreground"
-                          >
-                            World sampling (default when no regions are selected)
-                          </span>
-                        </span>
-                      </label>
-                      {DEMO_REGIONS.map((region) => {
-                        const supportsLabel = formatRegionSupports(region.supports);
-                        const descriptionId = `demo-region-${region.id}-supports`;
-                        return (
-                          <label key={region.id} className="flex items-start gap-2 text-sm">
-                            <Checkbox
-                              checked={demoRegionIds.includes(region.id)}
-                              disabled={isDemoPending || demoPinOverridesRegions}
-                              onCheckedChange={(checked) => {
-                                toggleDemoRegion(region.id, checked === true);
-                              }}
-                              aria-describedby={descriptionId}
-                            />
-                            <span>
-                              <span className="font-medium">{region.name}</span>
-                              <span
-                                id={descriptionId}
-                                className="mt-0.5 block text-xs capitalize text-muted-foreground"
-                              >
-                                Supports: {supportsLabel}
-                              </span>
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                    {demoIncompatibleCategories.length > 0 ? (
-                      <FieldDescription
-                        id="demo-regions-mismatch"
-                        className="flex items-start gap-1.5 text-amber-700 dark:text-amber-400"
-                      >
-                        <CircleAlertIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-                        <span>
-                          Selected regions do not support{" "}
-                          <span className="capitalize">
-                            {demoIncompatibleCategories.join(", ")}
-                          </span>
-                          . Those contacts will relocate (anywhere-sample) when generating.
-                        </span>
-                      </FieldDescription>
-                    ) : null}
-                  </FieldSet>
+                  <DemoRegionSelect
+                    regionIds={demoRegionIds}
+                    onRegionIdsChange={setDemoRegionIds}
+                    vehicleCategories={demoVehicleRandom ? [] : demoVehicleCategories}
+                    disabled={isDemoPending || demoPinOverridesRegions}
+                    pinOverrides={demoPinOverridesRegions}
+                    idPrefix="demo-region"
+                  />
 
                   <Field>
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1941,7 +1838,9 @@ export function ScenarioBuilder() {
             <Tabs
               value={eventMode}
               onValueChange={(value) => {
-                if (value === "manual" || value === "automatic") setEventMode(value);
+                if (value === "manual" || value === "automatic" || value === "random") {
+                  setEventMode(value);
+                }
               }}
               className="gap-3"
             >
@@ -1951,6 +1850,9 @@ export function ScenarioBuilder() {
                 </TabsTrigger>
                 <TabsTrigger value="automatic" className="flex-1">
                   Automatic
+                </TabsTrigger>
+                <TabsTrigger value="random" className="flex-1">
+                  Random
                 </TabsTrigger>
               </TabsList>
 
@@ -2053,6 +1955,23 @@ export function ScenarioBuilder() {
                 ) : (
                   <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
                     Choose a target to generate a route automatically.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="random" keepMounted className="outline-none">
+                {selectedDraftTarget ? (
+                  <GenerateRandomRouteForm
+                    key={`random-${selectedDraftTarget.id}`}
+                    target={selectedDraftTarget}
+                    onGenerate={(events, summary) => {
+                      updateScenario({ events: [...scenario.events, ...events] });
+                      toast.success(summary);
+                    }}
+                  />
+                ) : (
+                  <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+                    Choose a target to generate a random region-based route.
                   </p>
                 )}
               </TabsContent>

@@ -8,19 +8,19 @@
     "layers": ["water"]
   },
   {
-    "id": "london-z10-511-339",
-    "file": "london-z10-10-511-339.pbf",
-    "z": 10,
-    "x": 511,
-    "y": 339,
-    "layers": ["transportation"]
-  },
-  {
     "id": "london-z10",
     "file": "london-z10-10-511-340.pbf",
     "z": 10,
     "x": 511,
     "y": 340,
+    "layers": ["water", "transportation"]
+  },
+  {
+    "id": "london-z10-511-339",
+    "file": "london-z10-10-511-339.pbf",
+    "z": 10,
+    "x": 511,
+    "y": 339,
     "layers": ["water", "transportation"]
   },
   {

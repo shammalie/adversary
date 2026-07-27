@@ -1,16 +1,16 @@
 # Graph Report - adversary  (2026-07-27)
 
 ## Corpus Check
-- 293 files · ~212,788 words
+- 298 files · ~216,715 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2002 nodes · 3764 edges · 224 communities (121 shown, 103 thin omitted)
+- 2041 nodes · 3896 edges · 221 communities (118 shown, 103 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.6)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0f254b51`
+- Built from commit: `4ab0e3ae`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -205,27 +205,24 @@
 - tile-source.ts
 - geo-router.worker.ts
 - map-styles.ts
-- map-data-provider.tsx
 - s
 - LruCache
-- router-devtools-gate.tsx
 - @mapbox/vector-tile
 - @tanstack/react-virtual
 - @types/react-dom
 - bubble.tsx
-- cmdk
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 208 edges
-2. `ScenarioBuilder()` - 30 edges
+1. `cn()` - 210 edges
+2. `ScenarioBuilder()` - 29 edges
 3. `haversineDistanceNm()` - 29 edges
-4. `iterateDemoTargets()` - 24 edges
-5. `SimulationEvent` - 23 edges
-6. `Button()` - 23 edges
-7. `VehicleCategory` - 22 edges
-8. `destinationPoint()` - 21 edges
-9. `sortEvents()` - 20 edges
-10. `initialBearingDegrees()` - 19 edges
+4. `SimulationEvent` - 26 edges
+5. `VehicleCategory` - 25 edges
+6. `iterateDemoTargets()` - 24 edges
+7. `Button()` - 24 edges
+8. `destinationPoint()` - 23 edges
+9. `planTargetRouteEvents()` - 20 edges
+10. `sortEvents()` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `MapPickerFallback()` --calls--> `cn()`  [EXTRACTED]
@@ -242,11 +239,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (224 total, 103 thin omitted)
+## Communities (221 total, 103 thin omitted)
 
 ### Community 0 - "event-generator.ts"
-Cohesion: 0.23
-Nodes (13): PathToEventsOptions, categoryFallbackProfile(), profile(), profileCruiseMidpointKnots(), resolveVehicleProfile(), EXPECTED_SUBTYPES, VEHICLE_SUBTYPE_PROFILES, VehicleProfile (+5 more)
+Cohesion: 0.20
+Nodes (13): DemoRegionSelectProps, kinematicsForSubtype(), PathToEventsOptions, categoryFallbackProfile(), profile(), profileCruiseMidpointKnots(), resolveVehicleProfile(), EXPECTED_SUBTYPES (+5 more)
 
 ### Community 1 - "scenario-builder.tsx"
 Cohesion: 0.08
@@ -254,15 +251,15 @@ Nodes (24): MapDataContext, MapDataContextValue, MapDataProvider(), resolveColor
 
 ### Community 2 - "operations-dashboard.tsx"
 Cohesion: 0.08
-Nodes (48): ARTERIAL_CLASSES, astarRoad(), BLOCKED_ACCESS, buildRoadGraph(), CLASS_SPEED_MPS, classPreferenceMultiplier(), cumulativeDistances(), DRIVABLE_CLASSES (+40 more)
+Nodes (46): ARTERIAL_CLASSES, astarRoad(), BLOCKED_ACCESS, buildRoadGraph(), CLASS_SPEED_MPS, classPreferenceMultiplier(), cumulativeDistances(), DRIVABLE_CLASSES (+38 more)
 
 ### Community 3 - "map-data-provider.tsx"
-Cohesion: 0.18
-Nodes (20): CreateDemoScenarioOptions, kinematicsFromProfile(), clamp(), demoDescription(), demoName(), formatCategoryLabel(), greatCirclePath(), iterateDemoTargets() (+12 more)
+Cohesion: 0.16
+Nodes (20): CreateDemoScenarioOptions, CreateDemoScenarioResult, DemoTravelPlan, mergeGeneratedEvents(), buildSyntheticReady(), clamp(), demoName(), formatCategoryLabel() (+12 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.15
-Nodes (13): devDependencies, @axe-core/playwright, tailwindcss, @tanstack/router-plugin, to-ico, @types/node, @types/react, tailwindcss (+5 more)
+Nodes (13): devDependencies, @adversary/config, tailwindcss, @tanstack/router-plugin, to-ico, @types/node, @types/react, @adversary/config (+5 more)
 
 ### Community 5 - "simulation-storage.ts"
 Cohesion: 0.13
@@ -274,31 +271,31 @@ Nodes (44): dependencies, @adversary/env, dotenv, zod, devDependencies, @adversa
 
 ### Community 7 - "cn"
 Cohesion: 0.05
-Nodes (59): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogMedia(), AlertDialogOverlay() (+51 more)
+Nodes (50): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogMedia(), AlertDialogOverlay() (+42 more)
 
 ### Community 8 - "simulation-import.tsx"
-Cohesion: 0.08
-Nodes (32): defaultEndPoint(), FieldErrors, GenerateRouteForm(), isValidCoordinate(), MapLocationPicker, MapPickerFallback(), validateRouteForm(), MapLocationPicker (+24 more)
+Cohesion: 0.09
+Nodes (30): matchesTargetSearch(), TargetRoster(), targetSearchFields(), TrackedTargetCard(), TrackingMap, MapLocationPicker, PreviewEventGraph, TrackingMap (+22 more)
 
 ### Community 9 - "dependencies"
 Cohesion: 0.05
 Nodes (43): @adversary/ui, dependencies, @adversary/env, @adversary/ui, date-fns, dotenv, @hookform/resolvers, idb (+35 more)
 
 ### Community 10 - "position-telemetry.ts"
-Cohesion: 0.10
-Nodes (31): assignTravelGroupIds(), buildTravelPlans(), CALLSIGN_PREFIXES, clamp(), clampDemoLatitude(), CreateDemoScenarioResult, createSyntheticDemoScenario(), defaultTargetProfile() (+23 more)
+Cohesion: 0.12
+Nodes (28): assignTravelGroupIds(), buildTravelPlans(), CALLSIGN_PREFIXES, clamp(), clampDemoLatitude(), createSyntheticDemoScenario(), defaultTargetProfile(), DEMO_COLORS (+20 more)
 
 ### Community 11 - "simulation-engine.ts"
-Cohesion: 0.18
-Nodes (23): MapLocationPickerProps, EventDraft, applyLatitudeBound(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING, categoryCruiseMidpointKnots(), clamp(), clampLatitude() (+15 more)
+Cohesion: 0.27
+Nodes (18): applyLatitudeBound(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING, clamp(), clampLatitude(), distributeTimestamps(), generatePointToPointEvents(), generateRouteEvents() (+10 more)
 
 ### Community 12 - "web/components.json"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 13 - "target.ts"
-Cohesion: 0.15
-Nodes (15): DEFAULT_POSITION, EditTimelineEvent(), EditTimelineEventProps, issuesForField(), TimelineEventShell(), TimelineEventShellProps, ViewTimelineEvent(), ViewTimelineEventProps (+7 more)
+Cohesion: 0.21
+Nodes (11): describeEvent(), ViewTimelineEvent(), FlatItem, GroupedTimeline(), HeaderItem, TargetHeaderBar(), ValidationIssue, Button() (+3 more)
 
 ### Community 14 - "compilerOptions"
 Cohesion: 0.09
@@ -313,8 +310,8 @@ Cohesion: 0.09
 Nodes (22): dependencies, dotenv, @t3-oss/env-core, zod, devDependencies, @adversary/config, @types/node, typescript (+14 more)
 
 ### Community 17 - "button.tsx"
-Cohesion: 0.18
-Nodes (15): DateTimePicker(), DateTimePickerProps, parseValue(), PRESETS, toLocalInputValue(), Button(), buttonVariants, Calendar() (+7 more)
+Cohesion: 0.08
+Nodes (40): DateTimePicker(), DateTimePickerProps, parseValue(), PRESETS, toLocalInputValue(), DemoRegionSelect(), formatRegionSupports(), incompatibleRegionCategories() (+32 more)
 
 ### Community 18 - "loader.tsx"
 Cohesion: 0.13
@@ -325,12 +322,12 @@ Cohesion: 0.11
 Nodes (17): compilerOptions, jsx, lib, paths, types, exclude, extends, include (+9 more)
 
 ### Community 20 - "@base-ui/react"
-Cohesion: 0.15
-Nodes (15): DemoRegion, createDemoScenario(), parseDemoTargetCount(), FIXTURE_DIR, loadFixtureSource(), ManifestEntry, seededRandom(), createFixtureFeatureSource() (+7 more)
+Cohesion: 0.16
+Nodes (15): createDemoScenario(), parseDemoTargetCount(), FIXTURE_DIR, ManifestEntry, seededRandom(), createSeededIdFactory(), createSeededRandom(), resolveIdFactory() (+7 more)
 
 ### Community 21 - "dependencies"
 Cohesion: 0.12
-Nodes (17): @base-ui/react, class-variance-authority, @fontsource-variable/inter, dependencies, @base-ui/react, class-variance-authority, date-fns, @fontsource-variable/inter (+9 more)
+Nodes (17): class-variance-authority, cmdk, @fontsource-variable/inter, dependencies, class-variance-authority, cmdk, date-fns, @fontsource-variable/inter (+9 more)
 
 ### Community 22 - "compilerOptions"
 Cohesion: 0.12
@@ -349,12 +346,12 @@ Cohesion: 0.15
 Nodes (13): devDependencies, @adversary/config, tailwindcss, @tailwindcss/postcss, @types/react, @types/react-dom, typescript, @adversary/config (+5 more)
 
 ### Community 26 - "attachment.tsx"
-Cohesion: 0.15
-Nodes (17): createDraftForTargetChange(), createEventDraft(), createFollowOnDraft(), DEFAULT_EVENT_POSITION, draftFromEvent(), eventFromDraft(), lastPositionForTarget(), replaceEvent() (+9 more)
+Cohesion: 0.23
+Nodes (15): demoRegionById(), kinematicsFromProfile(), unpackGeoSeedsAerodromes(), PathPoint, clamp(), loadDefaultAerodromes(), planTargetRouteEvents(), PlanTargetRouteEventsOptions (+7 more)
 
 ### Community 27 - "input-group.tsx"
-Cohesion: 0.07
-Nodes (41): matchesTargetSearch(), TargetRoster(), targetSearchFields(), TrackedTargetCard(), TrackingMap, countPayloadStats(), getTocItemOffset(), SCHEMA_TOC_ITEMS (+33 more)
+Cohesion: 0.08
+Nodes (33): getTocItemOffset(), SCHEMA_TOC_ITEMS, SchemaBreakdown(), SchemaDialog(), schemaFieldId(), SchemaTocItem, slugifySchemaHeading(), UploadState (+25 more)
 
 ### Community 28 - "a11y.helpers.ts"
 Cohesion: 0.25
@@ -362,15 +359,15 @@ Nodes (9): assertNoWcag21AaViolations(), ColorScheme, FormattedViolation, format
 
 ### Community 29 - "build-event-graph.ts"
 Cohesion: 0.08
-Nodes (39): TimedEventEdgeView(), EventGraphNodeView(), KIND_BADGE, KIND_COLOR, KIND_LABEL, GenerateRouteFormProps, describeEvent(), GroupedTimeline() (+31 more)
+Nodes (38): TimedEventEdgeView(), EventGraphNodeView(), KIND_BADGE, KIND_COLOR, KIND_LABEL, GenerateRandomRouteFormProps, GenerateRouteFormProps, edgeTypes (+30 more)
 
 ### Community 30 - "ui/package.json"
 Cohesion: 0.29
 Nodes (6): name, private, scripts, check-types, type, version
 
 ### Community 31 - "bubble.tsx"
-Cohesion: 0.19
-Nodes (14): mergeProfile(), migrateRetiredVehicleCategories(), migrateScenarioV1ToV2(), migrateVehicleCategory(), legacy, VEHICLE_CATEGORY_SET, LEGACY_EVENT_TYPES, LegacyEventType (+6 more)
+Cohesion: 0.18
+Nodes (11): SCHEMA_CONSTRAINTS, SCHEMA_DOC_SECTIONS, SchemaDocSection, LEGACY_EVENT_TYPES, LegacyEventType, LegacyPriority, PositionSnapshot, RuntimeStatus (+3 more)
 
 ### Community 32 - "exports"
 Cohesion: 0.33
@@ -389,48 +386,44 @@ Cohesion: 0.29
 Nodes (6): compilerOptions, types, extends, @adversary/config/tsconfig.base.json, node, vite/client
 
 ### Community 39 - "tracking-map.tsx"
-Cohesion: 0.07
-Nodes (53): useMapData(), buildNeighborCollection(), buildTrailCollection(), CompanionMapPoint, createCompanionPointElement(), createEventPointElement(), EMPTY_TRAIL, ensureLineLayer() (+45 more)
+Cohesion: 0.09
+Nodes (39): useMapData(), buildNeighborCollection(), buildTrailCollection(), createCompanionPointElement(), createEventPointElement(), ensureLineLayer(), ensureOverlayLayers(), findTimeNeighbors() (+31 more)
 
 ### Community 40 - "clsx"
-Cohesion: 0.21
-Nodes (14): SimulationContext, SimulationContextValue, appearTarget(), applyEvent(), buildPreviewTargetStates(), createInitialTargetStates(), createRuntime(), getNextEvent() (+6 more)
+Cohesion: 0.06
+Nodes (66): SimulationContext, SimulationContextValue, SimulationProvider(), clampPreviewTimeMs(), computePreviewRevision(), getPreviewRangeMs(), getPreviewStartMs(), isLegacyScenario() (+58 more)
 
 ### Community 41 - "attachment.tsx"
-Cohesion: 0.38
-Nodes (10): clampPreviewTimeMs(), computePreviewRevision(), getPreviewRangeMs(), getPreviewStartMs(), buildInterpolatedPreviewTargetStates(), buildPositionEventsByTarget(), getEventsDueByTime(), sortEvents() (+2 more)
+Cohesion: 0.26
+Nodes (9): formatSpeedInUnit(), fromKnots(), parseSpeedInput(), roundSpeed(), SPEED_UNITS, SpeedUnit, TO_KNOTS, toKnots() (+1 more)
 
 ### Community 42 - "grouped-timeline.tsx"
-Cohesion: 0.24
-Nodes (13): atOffsetIso(), demoAircraftAltitude(), demoCallsign(), demoColor(), formationOffset(), pickDemoVehicleSubtype(), pickIndex(), pickOne() (+5 more)
+Cohesion: 0.29
+Nodes (11): atOffsetIso(), demoAircraftAltitude(), demoCallsign(), demoColor(), formationOffset(), pickDemoVehicleSubtype(), pickIndex(), pickOne() (+3 more)
 
 ### Community 50 - "marker.tsx"
 Cohesion: 0.09
-Nodes (46): Aerodrome, aerodromeInBbox(), AerodromeRunway, AirLoiterPattern, AirPathPoint, AirRouteErr, AirRouteFailureReason, AirRouteOk (+38 more)
+Nodes (48): Aerodrome, aerodromeInBbox(), AerodromeRunway, AirLoiterPattern, AirPathPoint, AirRouteErr, AirRouteFailureReason, AirRouteOk (+40 more)
 
 ### Community 56 - "fake-indexeddb"
-Cohesion: 0.10
-Nodes (39): blankScenario(), focusElementById(), formatRegionSupports(), ScenarioBuilder(), AFFILIATION_COLORS, AFFILIATION_SET, isAccessibleAffiliationColor(), resolveAffiliationColor() (+31 more)
+Cohesion: 0.06
+Nodes (58): MapLocationPickerProps, blankScenario(), focusElementById(), ScenarioBuilder(), countPayloadStats(), SimulationImport(), AFFILIATION_COLORS, AFFILIATION_SET (+50 more)
 
 ### Community 57 - "@axe-core/playwright"
-Cohesion: 0.21
-Nodes (10): InputGroup(), InputGroupAddon(), inputGroupAddonVariants, InputGroupButton(), inputGroupButtonVariants, InputGroupInput(), InputGroupText(), InputGroupTextarea() (+2 more)
+Cohesion: 0.11
+Nodes (23): CompanionMapPoint, EMPTY_TRAIL, ExistingMapPoint, FALLBACK_CENTER, TrailFeatureCollection, InputGroup(), InputGroupAddon(), inputGroupAddonVariants (+15 more)
 
 ### Community 58 - "@base-ui/react"
 Cohesion: 0.24
-Nodes (11): matchingDemoLocationName(), CATEGORY_SET, DEMO_REGIONS, demoRegionById(), demoRegionsByIds(), parseRegions(), parseSupports(), regionCenter() (+3 more)
+Nodes (10): matchingDemoLocationName(), CATEGORY_SET, DEMO_REGIONS, DemoRegion, demoRegionsByIds(), parseRegions(), parseSupports(), regionCenter() (+2 more)
 
 ### Community 59 - "shadcn/ui"
 Cohesion: 0.11
 Nodes (19): Chat & Messaging → [chat.md](./rules/chat.md), CLI, Component Docs, Examples, and Usage, Component Selection, Component Structure → [composition.md](./rules/composition.md), Critical Rules, Current Project Context, Detailed References (+11 more)
 
 ### Community 60 - "ui/src/lib/utils.ts"
-Cohesion: 0.29
-Nodes (10): handleCancel(), handlePing(), handleRoute(), inflight, post(), readRoadOptions(), readSeaOptions(), RoadVehicleKind (+2 more)
-
-### Community 62 - "next-themes"
-Cohesion: 0.29
-Nodes (6): SchemaDialog(), getExampleScenarioJson(), SCHEMA_CONSTRAINTS, SCHEMA_DOC_SECTIONS, SchemaDocSection, TARGET_STATUSES
+Cohesion: 0.24
+Nodes (12): handleCancel(), handlePing(), handleRoute(), inflight, post(), readRoadOptions(), readSeaOptions(), RoadVehicleKind (+4 more)
 
 ### Community 63 - "Commands"
 Cohesion: 0.17
@@ -441,8 +434,8 @@ Cohesion: 0.12
 Nodes (16): 1.1 Avoid Boolean Prop Proliferation, 1.2 Use Compound Components, 1. Component Architecture, 2.1 Decouple State Management from UI, 2.2 Define Generic Context Interfaces for Dependency Injection, 2.3 Lift State into Provider Components, 2. State Management, 3.1 Create Explicit Component Variants (+8 more)
 
 ### Community 65 - "Adversary"
-Cohesion: 0.11
-Nodes (18): 1. Start a simulation, 2. Run the operations console, 3. Author or import scenarios, 4. Map styles & environment, Adversary, Available scripts, Capabilities, Collect map tiles (+10 more)
+Cohesion: 0.05
+Nodes (35): Authentic geo routes, Cancellation, Environment, Goal and constraints, Graceful degradation, Locked gate parameters (road graph), Pipeline, Placement precedence (+27 more)
 
 ### Community 66 - "5. Re-render Optimization"
 Cohesion: 0.12
@@ -578,27 +571,27 @@ Nodes (3): File-System Paths, Import Paths, Prefer Statically Analyzable Paths
 
 ### Community 183 - "cmdk"
 Cohesion: 0.12
-Nodes (25): acceptsCategory(), classifyPoint(), ClassifyPointOptions, closestPointOnSegment(), DRIVABLE_ROAD, NAVIGABLE_WATER_CLASSES, NavigableWaterClass, NearestRoad (+17 more)
+Nodes (26): acceptsCategory(), classifyPoint(), ClassifyPointOptions, closestPointOnSegment(), DRIVABLE_ROAD, haversineMeters(), NAVIGABLE_WATER_CLASSES, NavigableWaterClass (+18 more)
 
 ### Community 190 - "position-telemetry.ts"
 Cohesion: 0.40
 Nodes (4): 1. Root README (`README.md`), 2. Guide: `docs/authentic-geo-routes.md`, 3. Guide: `docs/geo-seeds.md`, 4. Cross-links
 
 ### Community 200 - "clsx"
-Cohesion: 0.15
-Nodes (21): altitudeAlongPath(), assertFeasiblePathWindow(), categoryCeilingKnots(), clamp(), dedupePath(), densifyAlongPath(), deriveEndMsFromPath(), douglasPeuckerSimplify() (+13 more)
+Cohesion: 0.16
+Nodes (20): altitudeAlongPath(), assertFeasiblePathWindow(), categoryCeilingKnots(), clamp(), dedupePath(), densifyAlongPath(), deriveEndMsFromPath(), douglasPeuckerSimplify() (+12 more)
 
 ### Community 205 - "map-location-picker.tsx"
-Cohesion: 0.24
-Nodes (9): SeaSeeds, doverSeedsNearFerry(), FIXTURE_DIR, loadFixtureSource(), loadManifest(), ManifestEntry, SEEDS_PATH, unpackSeaSeeds() (+1 more)
+Cohesion: 0.17
+Nodes (14): loadFixtureSource(), loadFixtureSource(), loadManifest(), loadZ14LondonFeatures(), SeaSeeds, FIXTURE_DIR, loadFixtureSource(), loadManifest() (+6 more)
 
 ### Community 218 - "simulation-idb-storage.ts"
-Cohesion: 0.18
-Nodes (10): ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, Separator(), ToggleGroup(), ToggleGroupContext, ToggleGroupItem() (+2 more)
+Cohesion: 0.31
+Nodes (5): ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, Separator()
 
 ### Community 224 - "tile-source.ts"
-Cohesion: 0.13
-Nodes (20): waterFeaturesFor(), buildTileUrl(), CacheEntry, clearTileSourceCache(), fetchTileBytes(), isGzipFramed(), maybeGunzip(), pickTileTemplate() (+12 more)
+Cohesion: 0.14
+Nodes (17): buildTileUrl(), CacheEntry, clearTileSourceCache(), fetchTileBytes(), isGzipFramed(), maybeGunzip(), pickTileTemplate(), resolveTileUrlTemplate() (+9 more)
 
 ### Community 232 - "geo-router.worker.ts"
 Cohesion: 0.27
@@ -606,47 +599,39 @@ Nodes (10): createGeoRouterClient(), GeoRouterClient, GeoRouteRequest, Pending, 
 
 ### Community 240 - "map-styles.ts"
 Cohesion: 0.12
-Nodes (37): allFeatures(), astarWaterGrid(), buildNavigableGrid(), cellCenter(), cellKey(), checkAborted(), closestPointOnSegment(), expandBbox() (+29 more)
-
-### Community 247 - "map-data-provider.tsx"
-Cohesion: 0.23
-Nodes (15): SimulationProvider(), isLegacyScenario(), coerceEditableScenario(), StoredScenarioRecord, canUseStorage(), downloadScenario(), exportScenario(), isQuotaExceededError() (+7 more)
+Nodes (36): allFeatures(), astarWaterGrid(), buildNavigableGrid(), cellCenter(), cellKey(), checkAborted(), closestPointOnSegment(), expandBbox() (+28 more)
 
 ### Community 252 - "s"
 Cohesion: 0.16
 Nodes (20): OperationsDashboard(), EventIngestTable(), eventPayloadBadges(), eventSummary(), IntelligenceMessagesTable(), VirtualizedTableShell(), addPriorityTerm(), isPriorityMessage() (+12 more)
 
-### Community 262 - "router-devtools-gate.tsx"
-Cohesion: 0.24
-Nodes (17): clearLegacyScenarios(), deleteScenario(), ensureMigrated(), extractId(), extractName(), extractUpdatedAt(), getDb(), getScenario() (+9 more)
-
 ### Community 279 - "@mapbox/vector-tile"
-Cohesion: 0.44
-Nodes (11): arrivalBearingDeg(), departureBearingDeg(), sampleGreatCircle(), derivePositionSnapshot(), destinationPoint(), haversineDistanceNm(), initialBearingDegrees(), interpolatePositionSnapshot() (+3 more)
+Cohesion: 0.24
+Nodes (14): defaultEndPoint(), GenerateRouteForm(), isValidCoordinate(), validateRouteForm(), categoryCruiseMidpointKnots(), deriveEndAtFromDistance(), derivePositionSnapshot(), haversineDistanceNm() (+6 more)
 
 ### Community 345 - "bubble.tsx"
 Cohesion: 0.38
 Nodes (6): Bubble(), BubbleContent(), BubbleGroup(), BubbleReactions(), bubbleReactionsVariants, bubbleVariants
 
 ## Knowledge Gaps
-- **769 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+764 more)
+- **786 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+781 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **103 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `simulation-storage.ts`, `tracking-map.tsx`, `simulation-import.tsx`, `target.ts`, `button.tsx`, `fake-indexeddb`, `bubble.tsx`, `simulation-idb-storage.ts`, `input-group.tsx`, `s`, `build-event-graph.ts`, `@axe-core/playwright`?**
-  _High betweenness centrality (0.073) - this node is a cross-community bridge._
-- **Why does `Loader()` connect `loader.tsx` to `simulation-import.tsx`?**
+- **Why does `cn()` connect `cn` to `simulation-storage.ts`, `tracking-map.tsx`, `simulation-import.tsx`, `bubble.tsx`, `target.ts`, `button.tsx`, `@mapbox/vector-tile`, `fake-indexeddb`, `@axe-core/playwright`, `simulation-idb-storage.ts`, `input-group.tsx`, `s`, `build-event-graph.ts`?**
+  _High betweenness centrality (0.068) - this node is a cross-community bridge._
+- **Why does `SimulationEvent` connect `build-event-graph.ts` to `map-data-provider.tsx`, `simulation-import.tsx`, `clsx`, `position-telemetry.ts`, `simulation-engine.ts`, `clsx`, `target.ts`, `button.tsx`, `fake-indexeddb`, `attachment.tsx`, `s`, `bubble.tsx`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `VehicleCategory` connect `event-generator.ts` to `map-data-provider.tsx`, `tracking-map.tsx`, `simulation-import.tsx`, `clsx`, `position-telemetry.ts`, `simulation-engine.ts`, `target.ts`, `marker.tsx`, `@base-ui/react`, `@mapbox/vector-tile`, `@base-ui/react`, `bubble.tsx`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `VehicleCategory` connect `event-generator.ts` to `attachment.tsx`, `map-data-provider.tsx`, `tracking-map.tsx`, `simulation-import.tsx`, `clsx`, `position-telemetry.ts`, `simulation-engine.ts`, `clsx`, `target.ts`, `button.tsx`, `marker.tsx`, `@mapbox/vector-tile`, `@base-ui/react`, `bubble.tsx`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `ScenarioBuilder()` (e.g. with `event()` and `profile()`) actually correct?**
   _`ScenarioBuilder()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _769 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _786 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `scenario-builder.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.08392603129445235 - nodes in this community are weakly interconnected._
 - **Should `operations-dashboard.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.07966457023060797 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.083710407239819 - nodes in this community are weakly interconnected._

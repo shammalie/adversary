@@ -252,6 +252,21 @@ describe("pathToEvents", () => {
       expect(Math.abs(implied - curr.position!.speed!)).toBeLessThan(0.6);
     }
   });
+
+  it("honors an explicit eventCount", () => {
+    const path = zigzagPolyline(80);
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt: "2026-07-27T12:00:00.000Z",
+      endAt: "2026-07-28T12:00:00.000Z",
+      vehicleCategory: "car",
+      vehicleSubtype: "Sedan",
+      eventCount: 40,
+      idFactory: idFactory(),
+    });
+    expect(events).toHaveLength(40);
+  });
 });
 
 function profileMid(profile: ReturnType<typeof resolveVehicleProfile>) {
