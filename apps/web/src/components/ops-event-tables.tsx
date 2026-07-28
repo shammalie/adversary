@@ -12,6 +12,7 @@ import { MapPinIcon, MessageSquareIcon } from "lucide-react";
 import { useMemo, useRef, type ReactNode } from "react";
 
 import { isPriorityMessage, matchPriorityTerms } from "@/lib/priority-terms";
+import { effectiveEventAtMs } from "@/lib/simulation-engine";
 import type { RuntimeTargetState, SimulationEvent } from "@/types/target";
 
 const TABLE_MAX_HEIGHT = "max-h-[24rem]";
@@ -116,10 +117,12 @@ export function EventIngestTable({
   events,
   priorityTerms,
   targetStates,
+  delaySeconds = 0,
 }: {
   events: SimulationEvent[];
   priorityTerms: string[];
   targetStates: Record<string, RuntimeTargetState>;
+  delaySeconds?: number;
 }) {
   const rows = useMemo(() => events.toReversed(), [events]);
 
@@ -153,7 +156,7 @@ export function EventIngestTable({
         return (
           <TableRow key={event.id} className={cn(critical && "bg-destructive/10")}>
             <TableCell className="whitespace-nowrap font-mono text-xs">
-              {new Date(event.at).toLocaleTimeString()}
+              {new Date(effectiveEventAtMs(event.at, delaySeconds)).toLocaleTimeString()}
             </TableCell>
             <TableCell className="font-medium">{target?.callsign}</TableCell>
             <TableCell>{eventPayloadBadges(event)}</TableCell>
@@ -171,10 +174,12 @@ export function IntelligenceMessagesTable({
   events,
   priorityTerms,
   targetStates,
+  delaySeconds = 0,
 }: {
   events: SimulationEvent[];
   priorityTerms: string[];
   targetStates: Record<string, RuntimeTargetState>;
+  delaySeconds?: number;
 }) {
   const rows = useMemo(() => events.toReversed(), [events]);
 
@@ -208,7 +213,7 @@ export function IntelligenceMessagesTable({
             className={cn(matches.length > 0 && "bg-destructive/10 font-medium")}
           >
             <TableCell className="whitespace-nowrap font-mono text-xs">
-              {new Date(event.at).toLocaleTimeString()}
+              {new Date(effectiveEventAtMs(event.at, delaySeconds)).toLocaleTimeString()}
             </TableCell>
             <TableCell>{targetStates[event.targetId]?.callsign}</TableCell>
             <TableCell>

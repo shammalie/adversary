@@ -49,6 +49,8 @@ export interface SimulationScenario {
   description?: string;
   createdAt: string;
   updatedAt: string;
+  /** Seconds added to every event.at for scheduling. Omit or 0 = no delay. */
+  delaySeconds?: number;
   priorityTerms: string[];
   targets: TargetDefinition[];
   events: SimulationEvent[];

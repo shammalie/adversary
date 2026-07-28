@@ -209,6 +209,12 @@ export function coerceEditableScenario(payload: unknown, recordId: string): Simu
     description: typeof candidate.description === "string" ? candidate.description : blank.description,
     createdAt: typeof candidate.createdAt === "string" ? candidate.createdAt : blank.createdAt,
     updatedAt: now,
+    delaySeconds:
+      typeof candidate.delaySeconds === "number" &&
+      Number.isFinite(candidate.delaySeconds) &&
+      candidate.delaySeconds >= 0
+        ? candidate.delaySeconds
+        : undefined,
     priorityTerms: Array.isArray(candidate.priorityTerms)
       ? candidate.priorityTerms.filter((term): term is string => typeof term === "string")
       : [],

@@ -8,6 +8,7 @@ import {
 } from "@/lib/preview-revision";
 import {
   buildInterpolatedPreviewTargetStates,
+  effectiveEventAtMs,
   getEventsDueByTime,
   sortEvents,
 } from "@/lib/simulation-engine";
@@ -80,8 +81,8 @@ export function useBuilderPreview(scenario: SimulationScenario) {
   );
   const firstEventMs = useMemo(() => {
     const first = sortEvents(scenario.events)[0];
-    return first ? Date.parse(first.at) : null;
-  }, [scenario.events]);
+    return first ? effectiveEventAtMs(first.at, scenario.delaySeconds ?? 0) : null;
+  }, [scenario.delaySeconds, scenario.events]);
 
   const reset = useCallback(() => {
     if (previewRange) {

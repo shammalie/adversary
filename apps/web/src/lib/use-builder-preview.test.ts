@@ -82,6 +82,27 @@ describe("builder preview helpers", () => {
     });
   });
 
+  it("shifts preview range and due events by delaySeconds without rewriting at", () => {
+    const scenario = baseScenario({ delaySeconds: 60 });
+    expect(getPreviewRangeMs(scenario)).toEqual({
+      startMs: Date.parse("2026-07-24T12:01:00.000Z"),
+      endMs: Date.parse("2026-07-24T12:11:00.000Z"),
+    });
+    expect(scenario.events[0]?.at).toBe("2026-07-24T12:00:00.000Z");
+
+    const dueAtAuthored = getEventsDueByTime(scenario, Date.parse("2026-07-24T12:00:00.000Z"));
+    expect(dueAtAuthored).toEqual([]);
+
+    const dueAfterDelay = getEventsDueByTime(scenario, Date.parse("2026-07-24T12:01:00.000Z"));
+    expect(dueAfterDelay.map((event) => event.id)).toEqual(["e1"]);
+  });
+
+  it("changes preview revision when delaySeconds changes", () => {
+    const initial = baseScenario();
+    const delayed = baseScenario({ delaySeconds: 30 });
+    expect(computePreviewRevision(delayed)).not.toBe(computePreviewRevision(initial));
+  });
+
   it("changes preview revision when a target is added", () => {
     const initial = baseScenario();
     const revised = baseScenario({

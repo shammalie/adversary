@@ -34,6 +34,7 @@ import {
   vehicleCategoryIconSvg,
   vehicleCategoryMarkerRotationDegrees,
 } from "@/lib/vehicle-icon";
+import type { TrackingMapEventPoint } from "@/lib/tracking-map-event-points";
 import type {
   Affiliation,
   MapMode,
@@ -42,6 +43,8 @@ import type {
 } from "@/types/target";
 
 export type CameraMode = "track" | "overview" | "pan";
+
+export type { TrackingMapEventPoint };
 
 export interface MapTargetDisplay {
   targetId: string;
@@ -60,7 +63,11 @@ interface TrackingMapProps {
   trackedTargetIds?: string[];
   /** When true, only tracked contacts are drawn on the map. */
   showTrackedOnly?: boolean;
+  /** Authored event positions as clickable circles (Review map). */
+  eventPoints?: TrackingMapEventPoint[];
+  /** Highlight ring for a selected event point; clears with caller timeout. */
   highlightedEventId?: string;
+  onEventPointClick?: (eventId: string) => void;
   mode?: MapMode;
   cameraMode?: CameraMode;
   onCameraModeChange?: (mode: CameraMode) => void;
@@ -92,6 +99,8 @@ const EMPTY_TRAIL_COLLECTION: TrailFeatureCollection = {
   features: [],
 };
 
+const EMPTY_EVENT_POINTS: TrackingMapEventPoint[] = [];
+
 const VIEWPORT_PADDING = 56;
 
 function toDisplayTarget(target: MapTargetDisplay | RuntimeTargetState): MapTargetDisplay {
@@ -115,8 +124,17 @@ function toDisplayTarget(target: MapTargetDisplay | RuntimeTargetState): MapTarg
   return target;
 }
 
-function buildBounds(targets: MapTargetDisplay[]): LngLatBoundsLike | null {
-  const points = targets.flatMap((target) => (target.position ? [target.position] : []));
+function buildBounds(
+  targets: MapTargetDisplay[],
+  eventPoints: TrackingMapEventPoint[] = [],
+): LngLatBoundsLike | null {
+  const points = [
+    ...targets.flatMap((target) => (target.position ? [target.position] : [])),
+    ...eventPoints.map((point) => ({
+      latitude: point.latitude,
+      longitude: point.longitude,
+    })),
+  ];
   return lngLatBoundsForPoints(points);
 }
 
@@ -207,12 +225,35 @@ function createMarkerElement(
   return element;
 }
 
+function createEventPointElement(
+  point: TrackingMapEventPoint,
+  onClick?: (eventId: string) => void,
+) {
+  const element = document.createElement("button");
+  element.type = "button";
+  element.className = "tracking-event-point";
+  element.style.setProperty("--event-point-color", point.color);
+  element.setAttribute("aria-label", `Select event at ${point.latitude.toFixed(4)}, ${point.longitude.toFixed(4)}`);
+  element.dataset.eventId = point.id;
+  if (onClick) {
+    element.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onClick(point.id);
+    });
+  } else {
+    element.disabled = true;
+  }
+  return element;
+}
+
 export function TrackingMap({
   targets,
   selectedTargetId,
   trackedTargetIds = [],
   showTrackedOnly = false,
+  eventPoints = EMPTY_EVENT_POINTS,
   highlightedEventId,
+  onEventPointClick,
   mode = "2d",
   cameraMode = "overview",
   onCameraModeChange,
@@ -227,14 +268,17 @@ export function TrackingMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef(new Map<string, Marker>());
+  const eventMarkersRef = useRef(new Map<string, Marker>());
   const markerAnimationsRef = useRef(new Map<string, number>());
   const selectHandlerRef = useRef(onSelectTarget);
+  const eventPointClickRef = useRef(onEventPointClick);
   const fittedKeyRef = useRef<string | null>(null);
   const overviewVisibleKeyRef = useRef<string>("");
   const trailCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL_COLLECTION);
   const cameraModeRef = useRef(cameraMode);
   const [mapReady, setMapReady] = useState(false);
   selectHandlerRef.current = onSelectTarget;
+  eventPointClickRef.current = onEventPointClick;
   cameraModeRef.current = cameraMode;
 
   const displayTargets = useMemo(() => targets.map(toDisplayTarget), [targets]);
@@ -298,6 +342,10 @@ export function TrackingMap({
       }
       markerAnimationsRef.current.clear();
       markersRef.current.clear();
+      for (const marker of eventMarkersRef.current.values()) {
+        marker.remove();
+      }
+      eventMarkersRef.current.clear();
       map.remove();
       mapRef.current = null;
       setMapReady(false);
@@ -473,7 +521,6 @@ export function TrackingMap({
       element.style.setProperty("--marker-rotate", `${markerRotate}deg`);
       element.dataset.selected = String(target.targetId === selectedTargetId);
       element.dataset.tracked = String(trackedSet.has(target.targetId));
-      element.dataset.highlighted = String(Boolean(highlightedEventId));
       element.setAttribute("aria-pressed", String(target.targetId === selectedTargetId));
       element.title = target.callsign;
     }
@@ -501,7 +548,6 @@ export function TrackingMap({
   }, [
     affiliationTheme,
     continuousMotion,
-    highlightedEventId,
     mapReady,
     onSelectTarget,
     selectedTargetId,
@@ -509,6 +555,39 @@ export function TrackingMap({
     trackedSet,
     visibleTargets,
   ]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const activeIds = new Set(eventPoints.map((point) => point.id));
+    for (const [eventId, marker] of eventMarkersRef.current) {
+      if (!activeIds.has(eventId)) {
+        marker.remove();
+        eventMarkersRef.current.delete(eventId);
+      }
+    }
+
+    for (const point of eventPoints) {
+      let marker = eventMarkersRef.current.get(point.id);
+      if (!marker) {
+        const element = createEventPointElement(point, (eventId) =>
+          eventPointClickRef.current?.(eventId),
+        );
+        marker = new Marker({ element, anchor: "center" })
+          .setLngLat([point.longitude, point.latitude])
+          .addTo(map);
+        eventMarkersRef.current.set(point.id, marker);
+      } else {
+        marker.setLngLat([point.longitude, point.latitude]);
+        const element = marker.getElement();
+        element.style.setProperty("--event-point-color", point.color);
+      }
+      const element = marker.getElement();
+      element.dataset.highlighted = String(point.id === highlightedEventId);
+      element.setAttribute("aria-pressed", String(point.id === highlightedEventId));
+    }
+  }, [eventPoints, highlightedEventId, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -535,20 +614,24 @@ export function TrackingMap({
     }
 
     const positioned = visibleTargets.filter((target) => target.position);
-    if (positioned.length === 0) return;
-    const visibleKey = positioned
-      .map((target) => target.targetId)
+    if (positioned.length === 0 && eventPoints.length === 0) return;
+    const visibleKey = [
+      ...positioned.map((target) => target.targetId),
+      ...eventPoints.map((point) => point.id),
+    ]
       .toSorted()
       .join("|");
     const visibilityChanged = overviewVisibleKeyRef.current !== visibleKey;
     overviewVisibleKeyRef.current = visibleKey;
-    const anyOutside = positioned.some(
-      (target) =>
-        target.position &&
-        isOutsideViewport(map, target.position.latitude, target.position.longitude),
-    );
+    const anyOutside =
+      positioned.some(
+        (target) =>
+          target.position &&
+          isOutsideViewport(map, target.position.latitude, target.position.longitude),
+      ) ||
+      eventPoints.some((point) => isOutsideViewport(map, point.latitude, point.longitude));
     if (!anyOutside && !visibilityChanged && fittedKeyRef.current) return;
-    const bounds = buildBounds(positioned);
+    const bounds = buildBounds(positioned, eventPoints);
     if (!bounds) return;
     if (fitTargetsKey) fittedKeyRef.current = fitTargetsKey;
     map.fitBounds(bounds, { padding: FIT_PADDING, duration, maxZoom: OVERVIEW_MAX_ZOOM });
@@ -556,6 +639,7 @@ export function TrackingMap({
     cameraMode,
     continuousMotion,
     displayTargets,
+    eventPoints,
     fitTargetsKey,
     mapReady,
     trackedSet,
@@ -566,7 +650,7 @@ export function TrackingMap({
     const map = mapRef.current;
     if (!map || !mapReady || !fitTargetsKey || cameraMode !== "overview") return;
     if (fittedKeyRef.current === fitTargetsKey) return;
-    const bounds = buildBounds(visibleTargets);
+    const bounds = buildBounds(visibleTargets, eventPoints);
     if (!bounds) return;
     fittedKeyRef.current = fitTargetsKey;
     map.fitBounds(bounds, {
@@ -574,7 +658,7 @@ export function TrackingMap({
       duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
       maxZoom: OVERVIEW_MAX_ZOOM,
     });
-  }, [cameraMode, fitTargetsKey, mapReady, visibleTargets]);
+  }, [cameraMode, eventPoints, fitTargetsKey, mapReady, visibleTargets]);
 
   function zoomBy(delta: number) {
     const map = mapRef.current;

@@ -1,4 +1,4 @@
-import { sortEvents } from "@/lib/simulation-engine";
+import { effectiveEventAtMs, sortEvents } from "@/lib/simulation-engine";
 import type { SimulationScenario } from "@/types/target";
 
 /** Stable revision key for preview reset when targets or events change. */
@@ -18,18 +18,19 @@ export function computePreviewRevision(scenario: SimulationScenario): string {
     )
     .join("|");
 
-  return `${targetPart}::${eventPart}`;
+  return `${targetPart}::${eventPart}::d${scenario.delaySeconds ?? 0}`;
 }
 
-/** Preview range spans from the first to the last scheduled event. */
+/** Preview range spans from the first to the last scheduled event (effective times). */
 export function getPreviewRangeMs(
   scenario: SimulationScenario,
 ): { startMs: number; endMs: number } | null {
   const sorted = sortEvents(scenario.events);
   if (sorted.length === 0) return null;
 
-  const startMs = Date.parse(sorted[0]!.at);
-  const endMs = Date.parse(sorted[sorted.length - 1]!.at);
+  const delaySeconds = scenario.delaySeconds ?? 0;
+  const startMs = effectiveEventAtMs(sorted[0]!.at, delaySeconds);
+  const endMs = effectiveEventAtMs(sorted[sorted.length - 1]!.at, delaySeconds);
   return { startMs, endMs: endMs > startMs ? endMs : startMs + 1_000 };
 }
 

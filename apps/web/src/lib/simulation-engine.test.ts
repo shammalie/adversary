@@ -98,4 +98,29 @@ describe("simulation engine", () => {
 
     expect(second.ingestedEvents.map((event) => event.id)).toEqual(["event-a"]);
   });
+
+  it("applies delaySeconds so events are due only after at + delay", () => {
+    const delayed = { ...scenario(), delaySeconds: 30 };
+    const runtime = createRuntime(delayed, new Date("2026-07-24T12:00:00.000Z"));
+
+    const beforeDelay = reconcileRuntime(runtime, new Date("2026-07-24T12:00:20.000Z"));
+    expect(beforeDelay.processedEventIds).toEqual([]);
+
+    const afterFirstEffective = reconcileRuntime(
+      beforeDelay,
+      new Date("2026-07-24T12:00:31.000Z"),
+    );
+    expect(afterFirstEffective.processedEventIds).toEqual(["event-a"]);
+    expect(afterFirstEffective.ingestedEvents[0]?.at).toBe("2026-07-24T12:00:01.000Z");
+
+    const afterAll = reconcileRuntime(afterFirstEffective, new Date("2026-07-24T12:00:35.000Z"));
+    expect(afterAll.processedEventIds).toEqual(["event-a", "event-b", "event-c"]);
+  });
+
+  it("treats omitted or zero delaySeconds as no delay", () => {
+    const withZero = { ...scenario(), delaySeconds: 0 };
+    const runtime = createRuntime(withZero, new Date("2026-07-24T12:00:00.000Z"));
+    const reconciled = reconcileRuntime(runtime, new Date("2026-07-24T12:00:01.500Z"));
+    expect(reconciled.processedEventIds).toEqual(["event-a"]);
+  });
 });

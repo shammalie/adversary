@@ -84,6 +84,7 @@ import Loader from "@/components/loader";
 
 import { DateTimePicker } from "@/components/date-time-picker";
 import { DemoRegionSelect } from "@/components/demo-region-select";
+import { EventMessageExportDialog } from "@/components/event-message-export-dialog";
 import { GenerateRandomRouteForm } from "@/components/generate-random-route-form";
 import { GenerateRouteForm } from "@/components/generate-route-form";
 import { GroupedTimeline } from "@/components/grouped-timeline";
@@ -108,7 +109,8 @@ import {
   eventFromDraft,
 } from "@/lib/event-draft";
 import { addPriorityTerm, matchPriorityTerms, removePriorityTerm } from "@/lib/priority-terms";
-import { sortEvents } from "@/lib/simulation-engine";
+import { getEventsDueByTime, sortEvents } from "@/lib/simulation-engine";
+import { buildTrackingMapEventPoints } from "@/lib/tracking-map-event-points";
 import {
   coerceEditableScenario,
   deleteScenario,
@@ -344,6 +346,7 @@ export function ScenarioBuilder() {
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [previewGraphTargetId, setPreviewGraphTargetId] = useState<string | null>(null);
   const [openTimelineIds, setOpenTimelineIds] = useState<Record<string, boolean>>({});
+  const [showReviewEventPoints, setShowReviewEventPoints] = useState(false);
   const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [storedScenariosOpen, setStoredScenariosOpen] = useState(false);
@@ -433,6 +436,15 @@ export function ScenarioBuilder() {
     }
     return grouped;
   }, [scenario.events, scenario.targets]);
+
+  const reviewEventPoints = useMemo(
+    () =>
+      buildTrackingMapEventPoints(
+        getEventsDueByTime(scenario, preview.previewTimeMs),
+        scenario.targets,
+      ),
+    [preview.previewTimeMs, scenario],
+  );
 
   const graphCurrentEventId = useMemo(() => {
     if (!previewGraphTarget) return null;
@@ -1417,6 +1429,40 @@ export function ScenarioBuilder() {
                 placeholder="Purpose, location, and operator notes"
               />
             </Field>
+            <Field data-invalid={fieldHasIssue(validationIssues, "delaySeconds") || undefined}>
+              <FieldLabel htmlFor="scenario-delay-seconds">Delay (seconds)</FieldLabel>
+              <Input
+                id="scenario-delay-seconds"
+                type="number"
+                inputMode="numeric"
+                min={0}
+                step={1}
+                value={scenario.delaySeconds ?? ""}
+                onChange={(event) => {
+                  const raw = event.target.value;
+                  if (raw === "") {
+                    updateScenario({ delaySeconds: undefined });
+                    return;
+                  }
+                  const next = Number(raw);
+                  if (!Number.isFinite(next) || next < 0) return;
+                  updateScenario({ delaySeconds: next === 0 ? undefined : next });
+                }}
+                aria-invalid={fieldHasIssue(validationIssues, "delaySeconds")}
+                aria-describedby="scenario-delay-seconds-hint"
+              />
+              {fieldHasIssue(validationIssues, "delaySeconds") ? (
+                <FieldError>
+                  {validationIssues.find((issue) => issue.path === "delaySeconds")?.message ??
+                    "Delay cannot be negative."}
+                </FieldError>
+              ) : (
+                <FieldDescription id="scenario-delay-seconds-hint">
+                  Offsets when events fire. Authored timeline times stay unchanged. Empty or 0 =
+                  none.
+                </FieldDescription>
+              )}
+            </Field>
           </FieldGroup>
           <Field>
             <FieldLabel htmlFor="priority-term-input">Priority terms</FieldLabel>
@@ -2075,6 +2121,7 @@ export function ScenarioBuilder() {
                 <DownloadIcon data-icon="inline-start" />
                 Export
               </Button>
+              <EventMessageExportDialog scenario={scenario} disabled={!validationSuccess} />
             </div>
           </div>
 
@@ -2089,6 +2136,18 @@ export function ScenarioBuilder() {
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
+                {previewViewMode === "map" ? (
+                  <Field orientation="horizontal" className="mr-1 w-auto gap-2">
+                    <Switch
+                      id="show-review-event-points"
+                      checked={showReviewEventPoints}
+                      onCheckedChange={setShowReviewEventPoints}
+                    />
+                    <FieldLabel htmlFor="show-review-event-points" className="text-xs font-normal">
+                      Event dots
+                    </FieldLabel>
+                  </Field>
+                ) : null}
                 <ToggleGroup
                   value={[previewViewMode]}
                   onValueChange={(values) => {
@@ -2226,7 +2285,23 @@ export function ScenarioBuilder() {
                 >
                   <TrackingMap
                     targets={preview.mapTargets}
-                    highlightedEventId={preview.currentEvent?.id}
+                    eventPoints={showReviewEventPoints ? reviewEventPoints : []}
+                    highlightedEventId={
+                      showReviewEventPoints ? (highlightEventId ?? undefined) : undefined
+                    }
+                    onEventPointClick={
+                      showReviewEventPoints
+                        ? (eventId) => {
+                            const event = scenario.events.find((item) => item.id === eventId);
+                            if (!event) return;
+                            setOpenTimelineIds((current) => ({
+                              ...current,
+                              [event.targetId]: true,
+                            }));
+                            setHighlightEventId(eventId);
+                          }
+                        : undefined
+                    }
                     mode="2d"
                     cameraMode={cameraMode}
                     continuousMotion

@@ -15,6 +15,16 @@ export function sortEvents(events: SimulationEvent[]) {
   });
 }
 
+/** Wall-clock ms when an event becomes due: authored at + scenario delay. */
+export function effectiveEventAtMs(at: string, delaySeconds = 0): number {
+  const delayMs = Math.max(0, delaySeconds) * 1000;
+  return Date.parse(at) + delayMs;
+}
+
+function scenarioDelaySeconds(scenario: SimulationScenario): number {
+  return Math.max(0, scenario.delaySeconds ?? 0);
+}
+
 function maskedProfile(target: TargetDefinition): Partial<RuntimeTargetState["profile"]> {
   if (!target.revealOnFirstEvent) return { ...target.profile };
   return {};
@@ -113,9 +123,10 @@ export function reconcileRuntime(runtime: SimulationRuntime, now = new Date()): 
   if (runtime.status !== "running") return runtime;
 
   const nowTime = now.getTime();
+  const delaySeconds = scenarioDelaySeconds(runtime.scenario);
   const processed = new Set(runtime.processedEventIds);
   const dueEvents = sortEvents(runtime.scenario.events).filter(
-    (event) => !processed.has(event.id) && Date.parse(event.at) <= nowTime,
+    (event) => !processed.has(event.id) && effectiveEventAtMs(event.at, delaySeconds) <= nowTime,
   );
 
   let nextRuntime = dueEvents.reduce(applyEvent, runtime);
@@ -155,7 +166,10 @@ export function buildPreviewTargetStates(
 }
 
 export function getEventsDueByTime(scenario: SimulationScenario, previewTimeMs: number) {
-  return sortEvents(scenario.events).filter((event) => Date.parse(event.at) <= previewTimeMs);
+  const delaySeconds = scenarioDelaySeconds(scenario);
+  return sortEvents(scenario.events).filter(
+    (event) => effectiveEventAtMs(event.at, delaySeconds) <= previewTimeMs,
+  );
 }
 
 /** Sort once, then bucket position events per target (preserves sort order). */
@@ -176,6 +190,7 @@ export function buildInterpolatedPreviewTargetStates(
   scenario: SimulationScenario,
   previewTimeMs: number,
 ) {
+  const delaySeconds = scenarioDelaySeconds(scenario);
   const dueEvents = getEventsDueByTime(scenario, previewTimeMs);
   const baseStates = buildPreviewTargetStates(
     scenario,
@@ -193,7 +208,7 @@ export function buildInterpolatedPreviewTargetStates(
 
     let lastAppliedIndex = -1;
     for (let index = 0; index < positionEvents.length; index += 1) {
-      if (Date.parse(positionEvents[index]!.at) <= previewTimeMs) {
+      if (effectiveEventAtMs(positionEvents[index]!.at, delaySeconds) <= previewTimeMs) {
         lastAppliedIndex = index;
       }
     }
@@ -211,8 +226,8 @@ export function buildInterpolatedPreviewTargetStates(
         undefined,
         vehicleCategory,
       );
-    const fromMs = Date.parse(fromSnapshot.at);
-    const toMs = Date.parse(nextPositionEvent.at);
+    const fromMs = effectiveEventAtMs(positionEvents[lastAppliedIndex]!.at, delaySeconds);
+    const toMs = effectiveEventAtMs(nextPositionEvent.at, delaySeconds);
     if (previewTimeMs >= toMs) continue;
 
     const interpolated = interpolatePositionSnapshot(

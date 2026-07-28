@@ -1055,8 +1055,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_adversary_config",
-      "community": 42,
-      "community_name": "grouped-timeline.tsx",
+      "community": 4,
+      "community_name": "devDependencies",
       "norm_label": "@adversary/config"
     },
     {
@@ -1066,8 +1066,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_package_json_adversary_config",
-      "community": 42,
-      "community_name": "grouped-timeline.tsx",
+      "community": 4,
+      "community_name": "devDependencies",
       "norm_label": "@adversary/config"
     },
     {
@@ -1253,8 +1253,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "apps_web_package_devdependencies_fake_indexeddb",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "Icons",
       "norm_label": "fake-indexeddb"
     },
     {
@@ -1264,8 +1264,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "fake_indexeddb",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 95,
+      "community_name": "Icons",
       "norm_label": "fake-indexeddb"
     },
     {
@@ -1726,8 +1726,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "apps_web_src_components_demo_region_select_demoregionselectprops",
-      "community": 17,
-      "community_name": "button.tsx",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "demoregionselectprops"
     },
     {
@@ -1852,25 +1852,14 @@
       "norm_label": "event-message-export-dialog.tsx"
     },
     {
-      "label": "VirtualizedMessagePreview()",
-      "file_type": "code",
-      "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "apps_web_src_components_event_message_export_dialog_virtualizedmessagepreview",
-      "community": 27,
-      "community_name": "input-group.tsx",
-      "norm_label": "virtualizedmessagepreview()"
-    },
-    {
       "label": "EventMessageExportDialog()",
       "file_type": "code",
       "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
-      "source_location": "L76",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "apps_web_src_components_event_message_export_dialog_eventmessageexportdialog",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "eventmessageexportdialog()"
     },
     {
@@ -1935,8 +1924,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "generate-route-form.tsx"
     },
     {
@@ -1946,8 +1935,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_maplocationpicker",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "maplocationpicker"
     },
     {
@@ -1968,8 +1957,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_fielderrors",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "fielderrors"
     },
     {
@@ -1979,8 +1968,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_defaultendpoint",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "defaultendpoint()"
     },
     {
@@ -1990,8 +1979,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_isvalidcoordinate",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "isvalidcoordinate()"
     },
     {
@@ -2001,8 +1990,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_validaterouteform",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "validaterouteform()"
     },
     {
@@ -2012,8 +2001,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_mappickerfallback",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "mappickerfallback()"
     },
     {
@@ -2023,8 +2012,8 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "apps_web_src_components_generate_route_form_generaterouteform",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "generaterouteform()"
     },
     {
@@ -2331,8 +2320,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_map_location_picker",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "map-location-picker.tsx"
     },
     {
@@ -2342,8 +2331,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "apps_web_src_components_map_location_picker_fallback_center",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "fallback_center"
     },
     {
@@ -2375,8 +2364,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "apps_web_src_components_map_location_picker_existingmappoint",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "existingmappoint"
     },
     {
@@ -2386,8 +2375,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "apps_web_src_components_map_location_picker_companionmappoint",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "companionmappoint"
     },
     {
@@ -2408,8 +2397,8 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "apps_web_src_components_map_location_picker_trailfeaturecollection",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "trailfeaturecollection"
     },
     {
@@ -2419,8 +2408,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "apps_web_src_components_map_location_picker_empty_trail",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "empty_trail"
     },
     {
@@ -2617,8 +2606,8 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "apps_web_src_components_operations_dashboard_operationsdashboard",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "operationsdashboard()"
     },
     {
@@ -2628,8 +2617,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_ops_event_tables",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "ops-event-tables.tsx"
     },
     {
@@ -2639,8 +2628,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_src_components_ops_event_tables_eventsummary",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "eventsummary()"
     },
     {
@@ -2650,8 +2639,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "apps_web_src_components_ops_event_tables_eventpayloadbadges",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "eventpayloadbadges()"
     },
     {
@@ -2661,8 +2650,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "apps_web_src_components_ops_event_tables_virtualizedtableshell",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "virtualizedtableshell()"
     },
     {
@@ -2672,8 +2661,8 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "apps_web_src_components_ops_event_tables_eventingesttable",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "eventingesttable()"
     },
     {
@@ -2683,8 +2672,8 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "apps_web_src_components_ops_event_tables_intelligencemessagestable",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "intelligencemessagestable()"
     },
     {
@@ -2837,8 +2826,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "scenario-builder.tsx"
     },
     {
@@ -2859,8 +2848,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_maplocationpicker",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "maplocationpicker"
     },
     {
@@ -2870,8 +2859,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_trackingmap",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "trackingmap"
     },
     {
@@ -2881,8 +2870,8 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_previeweventgraph",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "previeweventgraph"
     },
     {
@@ -2892,8 +2881,8 @@
       "source_location": "L177",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_demomappickerfallback",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "demomappickerfallback()"
     },
     {
@@ -2903,8 +2892,8 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_matchingdemolocationname",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "matchingdemolocationname()"
     },
     {
@@ -2914,8 +2903,8 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_demogeneratingshell",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "demogeneratingshell()"
     },
     {
@@ -2936,8 +2925,8 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_optionselect",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "optionselect()"
     },
     {
@@ -2947,8 +2936,8 @@
       "source_location": "L254",
       "_origin": "ast",
       "id": "apps_web_src_components_scenario_builder_targetprofilefields",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "targetprofilefields()"
     },
     {
@@ -3255,8 +3244,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "apps_web_src_components_tracking_map_maptargetdisplay",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "maptargetdisplay"
     },
     {
@@ -3398,8 +3387,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_test",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "affiliation-colors.test.ts"
     },
     {
@@ -3409,8 +3398,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_test_hextorgb",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "hextorgb()"
     },
     {
@@ -3420,8 +3409,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "affiliation-colors.ts"
     },
     {
@@ -3431,8 +3420,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_affiliation_set",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "affiliation_set"
     },
     {
@@ -3442,8 +3431,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_affiliation_colors",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "affiliation_colors"
     },
     {
@@ -3453,8 +3442,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_isaccessibleaffiliationcolor",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "isaccessibleaffiliationcolor()"
     },
     {
@@ -3464,8 +3453,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_resolveaffiliationcolortheme",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "resolveaffiliationcolortheme()"
     },
     {
@@ -3475,8 +3464,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "apps_web_src_lib_affiliation_colors_resolveaffiliationcolor",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "resolveaffiliationcolor()"
     },
     {
@@ -3673,8 +3662,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "demo-regions.ts"
     },
     {
@@ -3684,8 +3673,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_demoregion",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "demoregion"
     },
     {
@@ -3695,8 +3684,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_category_set",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "category_set"
     },
     {
@@ -3706,8 +3695,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_parsesupports",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "parsesupports()"
     },
     {
@@ -3717,8 +3706,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_parseregions",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "parseregions()"
     },
     {
@@ -3728,8 +3717,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_demo_regions",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "demo_regions"
     },
     {
@@ -3750,8 +3739,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_demoregionsbyids",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "demoregionsbyids()"
     },
     {
@@ -3772,8 +3761,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_regions_regionssupporting",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "regionssupporting()"
     },
     {
@@ -3783,8 +3772,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_test",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "demo-scenario.test.ts"
     },
     {
@@ -3794,8 +3783,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_test_seededrandom",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "seededrandom()"
     },
     {
@@ -3805,8 +3794,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_test_fixture_dir",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "fixture_dir"
     },
     {
@@ -3816,8 +3805,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_test_manifestentry",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "manifestentry"
     },
     {
@@ -3827,8 +3816,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_test_loadfixturesource",
-      "community": 183,
-      "community_name": "cmdk",
+      "community": 2,
+      "community_name": "operations-dashboard.tsx",
       "norm_label": "loadfixturesource()"
     },
     {
@@ -3860,8 +3849,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_demoorigin",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 10,
+      "community_name": "position-telemetry.ts",
       "norm_label": "demoorigin"
     },
     {
@@ -3882,8 +3871,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_createdemoscenariooptions",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "createdemoscenariooptions"
     },
     {
@@ -3904,8 +3893,8 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_createdemoscenarioresult",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "createdemoscenarioresult"
     },
     {
@@ -3959,8 +3948,8 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_demotravelplan",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "demotravelplan"
     },
     {
@@ -3970,8 +3959,8 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_atoffsetiso",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "atoffsetiso()"
     },
     {
@@ -3992,8 +3981,8 @@
       "source_location": "L211",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_pickindex",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "pickindex()"
     },
     {
@@ -4003,8 +3992,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_pickone",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "pickone()"
     },
     {
@@ -4069,8 +4058,8 @@
       "source_location": "L263",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_parsedemotargetcount",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "parsedemotargetcount()"
     },
     {
@@ -4080,8 +4069,8 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_resolvecategory",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "resolvecategory()"
     },
     {
@@ -4102,8 +4091,8 @@
       "source_location": "L284",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_democolor",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "democolor()"
     },
     {
@@ -4113,8 +4102,8 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_democallsign",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "democallsign()"
     },
     {
@@ -4124,8 +4113,8 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_demoaircraftaltitude",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "demoaircraftaltitude()"
     },
     {
@@ -4146,8 +4135,8 @@
       "source_location": "L314",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_formationoffset",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "formationoffset()"
     },
     {
@@ -4157,8 +4146,8 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_pickdemovehiclesubtype",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "pickdemovehiclesubtype()"
     },
     {
@@ -4289,8 +4278,8 @@
       "source_location": "L557",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_synthesizedemotarget",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "synthesizedemotarget()"
     },
     {
@@ -4311,8 +4300,8 @@
       "source_location": "L734",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_createdemoscenario",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "createdemoscenario()"
     },
     {
@@ -4322,8 +4311,8 @@
       "source_location": "L743",
       "_origin": "ast",
       "id": "apps_web_src_lib_demo_scenario_defaulttargetprofile",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 10,
+      "community_name": "position-telemetry.ts",
       "norm_label": "defaulttargetprofile()"
     },
     {
@@ -4465,8 +4454,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_test",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "event-generator.test.ts"
     },
     {
@@ -4476,8 +4465,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_test_headingdifference",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "headingdifference()"
     },
     {
@@ -4630,8 +4619,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_categorycruisemidpointknots",
-      "community": 26,
-      "community_name": "attachment.tsx",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "categorycruisemidpointknots()"
     },
     {
@@ -4641,8 +4630,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_deriveendatfromdistance",
-      "community": 11,
-      "community_name": "simulation-engine.ts",
+      "community": 279,
+      "community_name": "@mapbox/vector-tile",
       "norm_label": "deriveendatfromdistance()"
     },
     {
@@ -4718,8 +4707,8 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_generator_mergegeneratedevents",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "mergegeneratedevents()"
     },
     {
@@ -4729,8 +4718,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_test",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "event-message-export.test.ts"
     },
     {
@@ -4740,8 +4729,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_test_basetarget",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "basetarget()"
     },
     {
@@ -4751,8 +4740,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_test_scenario",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "scenario()"
     },
     {
@@ -4762,8 +4751,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_test_alpha",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "alpha"
     },
     {
@@ -4773,8 +4762,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_test_bravo",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "bravo"
     },
     {
@@ -4795,8 +4784,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "event-message-export.ts"
     },
     {
@@ -4806,8 +4795,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_eventmessageexportoptions",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "eventmessageexportoptions"
     },
     {
@@ -4817,8 +4806,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_default_event_message_export_options",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "default_event_message_export_options"
     },
     {
@@ -4828,8 +4817,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_formatlatitude",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "formatlatitude()"
     },
     {
@@ -4839,8 +4828,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_formatlongitude",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "formatlongitude()"
     },
     {
@@ -4850,8 +4839,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_messagefacevalue",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "messagefacevalue()"
     },
     {
@@ -4861,8 +4850,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_targetsbyid",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "targetsbyid()"
     },
     {
@@ -4872,8 +4861,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_formatordinal",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "formatordinal()"
     },
     {
@@ -4883,8 +4872,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_formateventmessages",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "formateventmessages()"
     },
     {
@@ -4894,8 +4883,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_formatpositionedeventline",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "formatpositionedeventline()"
     },
     {
@@ -4905,8 +4894,8 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "apps_web_src_lib_event_message_export_downloadeventmessages",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 100,
+      "community_name": "@tanstack/react-router",
       "norm_label": "downloadeventmessages()"
     },
     {
@@ -5092,8 +5081,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "air-router.test.ts"
     },
     {
@@ -5103,8 +5092,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_seeds_path",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "seeds_path"
     },
     {
@@ -5114,8 +5103,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_fixturefield",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "fixturefield()"
     },
     {
@@ -5125,8 +5114,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_origin",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "origin"
     },
     {
@@ -5136,8 +5125,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_dest",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "dest"
     },
     {
@@ -5147,8 +5136,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_fighter",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "fighter"
     },
     {
@@ -5158,8 +5147,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_uav",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "uav"
     },
     {
@@ -5169,8 +5158,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_test_transport",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "transport"
     },
     {
@@ -5202,8 +5191,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_aerodrome",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "aerodrome"
     },
     {
@@ -5224,8 +5213,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_geoseedsbundle",
-      "community": 50,
-      "community_name": "marker.tsx",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "geoseedsbundle"
     },
     {
@@ -5400,8 +5389,8 @@
       "source_location": "L198",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_kinematicsfromprofile",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "kinematicsfromprofile()"
     },
     {
@@ -5411,8 +5400,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_kinematicsforsubtype",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "kinematicsforsubtype()"
     },
     {
@@ -5488,8 +5477,8 @@
       "source_location": "L302",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_air_router_samplegreatcircle",
-      "community": 279,
-      "community_name": "@mapbox/vector-tile",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "samplegreatcircle()"
     },
     {
@@ -6016,8 +6005,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_path_to_events_pathtoeventsoptions",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 200,
+      "community_name": "clsx",
       "norm_label": "pathtoeventsoptions"
     },
     {
@@ -7666,8 +7655,8 @@
       "source_location": "L278",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_terrain_createfixturefeaturesource",
-      "community": 183,
-      "community_name": "cmdk",
+      "community": 2,
+      "community_name": "operations-dashboard.tsx",
       "norm_label": "createfixturefeaturesource()"
     },
     {
@@ -7853,8 +7842,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_decodedtilefeature",
-      "community": 2,
-      "community_name": "operations-dashboard.tsx",
+      "community": 205,
+      "community_name": "map-location-picker.tsx",
       "norm_label": "decodedtilefeature"
     },
     {
@@ -7875,8 +7864,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_lrucache",
-      "community": 205,
-      "community_name": "map-location-picker.tsx",
+      "community": 254,
+      "community_name": "LruCache",
       "norm_label": "lrucache"
     },
     {
@@ -7886,8 +7875,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_lrucache_constructor",
-      "community": 205,
-      "community_name": "map-location-picker.tsx",
+      "community": 254,
+      "community_name": "LruCache",
       "norm_label": ".constructor()"
     },
     {
@@ -7897,8 +7886,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_lrucache_get",
-      "community": 205,
-      "community_name": "map-location-picker.tsx",
+      "community": 254,
+      "community_name": "LruCache",
       "norm_label": ".get()"
     },
     {
@@ -7908,8 +7897,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_lrucache_set",
-      "community": 205,
-      "community_name": "map-location-picker.tsx",
+      "community": 254,
+      "community_name": "LruCache",
       "norm_label": ".set()"
     },
     {
@@ -7919,8 +7908,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_lrucache_clear",
-      "community": 205,
-      "community_name": "map-location-picker.tsx",
+      "community": 254,
+      "community_name": "LruCache",
       "norm_label": ".clear()"
     },
     {
@@ -7930,8 +7919,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "apps_web_src_lib_geo_vector_tile_client_lrucache_size",
-      "community": 205,
-      "community_name": "map-location-picker.tsx",
+      "community": 254,
+      "community_name": "LruCache",
       "norm_label": ".size()"
     },
     {
@@ -8436,8 +8425,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "apps_web_src_lib_position_telemetry_destinationpoint",
-      "community": 279,
-      "community_name": "@mapbox/vector-tile",
+      "community": 50,
+      "community_name": "marker.tsx",
       "norm_label": "destinationpoint()"
     },
     {
@@ -8535,8 +8524,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_test",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "priority-terms.test.ts"
     },
     {
@@ -8546,8 +8535,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "priority-terms.ts"
     },
     {
@@ -8557,8 +8546,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_normalizepriorityterm",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "normalizepriorityterm()"
     },
     {
@@ -8568,8 +8557,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_normalizepriorityterms",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "normalizepriorityterms()"
     },
     {
@@ -8579,8 +8568,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_matchpriorityterms",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "matchpriorityterms()"
     },
     {
@@ -8590,8 +8579,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_isprioritymessage",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "isprioritymessage()"
     },
     {
@@ -8601,8 +8590,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_addpriorityterm",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "addpriorityterm()"
     },
     {
@@ -8612,8 +8601,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "apps_web_src_lib_priority_terms_removepriorityterm",
-      "community": 13,
-      "community_name": "target.ts",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "removepriorityterm()"
     },
     {
@@ -8634,8 +8623,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_random_test",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "random.test.ts"
     },
     {
@@ -8645,8 +8634,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_random",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "random.ts"
     },
     {
@@ -8656,8 +8645,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_web_src_lib_random_createseededrandom",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "createseededrandom()"
     },
     {
@@ -8667,8 +8656,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "apps_web_src_lib_random_createseededidfactory",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "createseededidfactory()"
     },
     {
@@ -8678,8 +8667,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "apps_web_src_lib_random_resolveidfactory",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "resolveidfactory()"
     },
     {
@@ -8777,8 +8766,8 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_migration_islegacyscenario",
-      "community": 213,
-      "community_name": "target.ts",
+      "community": 60,
+      "community_name": "ui/src/lib/utils.ts",
       "norm_label": "islegacyscenario()"
     },
     {
@@ -8788,8 +8777,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_test",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "scenario-planner.test.ts"
     },
     {
@@ -8799,8 +8788,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_test_seededrandom",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "seededrandom()"
     },
     {
@@ -8810,8 +8799,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_test_maritime_only",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "maritime_only"
     },
     {
@@ -8821,8 +8810,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_test_land_only",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "land_only"
     },
     {
@@ -8832,8 +8821,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_test_sequentialids",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "sequentialids()"
     },
     {
@@ -8843,8 +8832,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "scenario-planner.ts"
     },
     {
@@ -8854,8 +8843,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_routefn",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "routefn"
     },
     {
@@ -8865,8 +8854,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_plandemoscenariodeps",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "plandemoscenariodeps"
     },
     {
@@ -8876,8 +8865,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_trackjob",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "trackjob"
     },
     {
@@ -8887,8 +8876,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_sharedcorridor",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "sharedcorridor"
     },
     {
@@ -8898,8 +8887,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_clamp",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "clamp()"
     },
     {
@@ -8909,8 +8898,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_pickone",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "pickone()"
     },
     {
@@ -8920,8 +8909,8 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_resolvetargetcount",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "resolvetargetcount()"
     },
     {
@@ -8931,8 +8920,8 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_formatcategorylabel",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "formatcategorylabel()"
     },
     {
@@ -8942,8 +8931,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_demoname",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "demoname()"
     },
     {
@@ -8953,8 +8942,8 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_demodescription",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "demodescription()"
     },
     {
@@ -8964,8 +8953,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_throwifaborted",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "throwifaborted()"
     },
     {
@@ -8975,8 +8964,8 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_withtimeout",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "withtimeout()"
     },
     {
@@ -8997,8 +8986,8 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_greatcirclepath",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "greatcirclepath()"
     },
     {
@@ -9008,8 +8997,8 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_resolveroutemode",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "resolveroutemode()"
     },
     {
@@ -9019,8 +9008,8 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_resolveotherroutemode",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "resolveotherroutemode()"
     },
     {
@@ -9030,8 +9019,8 @@
       "source_location": "L235",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_loaddefaultaerodromes",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "loaddefaultaerodromes()"
     },
     {
@@ -9041,8 +9030,8 @@
       "source_location": "L240",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_sortaircraftfirst",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "sortaircraftfirst()"
     },
     {
@@ -9052,8 +9041,8 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_planairpath",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 26,
+      "community_name": "attachment.tsx",
       "norm_label": "planairpath()"
     },
     {
@@ -9063,8 +9052,8 @@
       "source_location": "L271",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_plansurfacepath",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "plansurfacepath()"
     },
     {
@@ -9074,8 +9063,8 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_buildroutedtarget",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 42,
+      "community_name": "grouped-timeline.tsx",
       "norm_label": "buildroutedtarget()"
     },
     {
@@ -9085,8 +9074,8 @@
       "source_location": "L417",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_buildsyntheticready",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "buildsyntheticready()"
     },
     {
@@ -9096,8 +9085,8 @@
       "source_location": "L448",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_iteratedemotargets",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "iteratedemotargets()"
     },
     {
@@ -9107,8 +9096,8 @@
       "source_location": "L711",
       "_origin": "ast",
       "id": "apps_web_src_lib_scenario_planner_plandemoscenario",
-      "community": 10,
-      "community_name": "position-telemetry.ts",
+      "community": 20,
+      "community_name": "@base-ui/react",
       "norm_label": "plandemoscenario()"
     },
     {
@@ -9646,8 +9635,8 @@
       "source_location": "L177",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_idb_storage_upsertvalidscenario",
-      "community": 60,
-      "community_name": "ui/src/lib/utils.ts",
+      "community": 211,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "upsertvalidscenario()"
     },
     {
@@ -9833,8 +9822,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_schema_parsescenario",
-      "community": 60,
-      "community_name": "ui/src/lib/utils.ts",
+      "community": 211,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "parsescenario()"
     },
     {
@@ -9855,8 +9844,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_storage_test",
-      "community": 40,
-      "community_name": "clsx",
+      "community": 60,
+      "community_name": "ui/src/lib/utils.ts",
       "norm_label": "simulation-storage.test.ts"
     },
     {
@@ -9932,8 +9921,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_storage_rewriteretiredcategories",
-      "community": 213,
-      "community_name": "target.ts",
+      "community": 60,
+      "community_name": "ui/src/lib/utils.ts",
       "norm_label": "rewriteretiredcategories()"
     },
     {
@@ -9943,8 +9932,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "apps_web_src_lib_simulation_storage_normalizescenario",
-      "community": 213,
-      "community_name": "target.ts",
+      "community": 60,
+      "community_name": "ui/src/lib/utils.ts",
       "norm_label": "normalizescenario()"
     },
     {
@@ -9998,8 +9987,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_test",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "speed-units.test.ts"
     },
     {
@@ -10009,8 +9998,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "speed-units.ts"
     },
     {
@@ -10020,8 +10009,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_speed_units",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "speed_units"
     },
     {
@@ -10031,8 +10020,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_speedunit",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "speedunit"
     },
     {
@@ -10042,8 +10031,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_to_knots",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "to_knots"
     },
     {
@@ -10053,8 +10042,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_unit_aliases",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "unit_aliases"
     },
     {
@@ -10064,8 +10053,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_isspeedunit",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "isspeedunit()"
     },
     {
@@ -10075,8 +10064,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_toknots",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "toknots()"
     },
     {
@@ -10086,8 +10075,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_fromknots",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "fromknots()"
     },
     {
@@ -10097,8 +10086,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_roundspeed",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "roundspeed()"
     },
     {
@@ -10108,8 +10097,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_formatspeedinunit",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "formatspeedinunit()"
     },
     {
@@ -10119,8 +10108,8 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_parsespeedinput",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "parsespeedinput()"
     },
     {
@@ -10130,8 +10119,8 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "apps_web_src_lib_speed_units_speedunitlabel",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 61,
+      "community_name": "maplibre-gl",
       "norm_label": "speedunitlabel()"
     },
     {
@@ -10141,8 +10130,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_test",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "target-colors.test.ts"
     },
     {
@@ -10152,8 +10141,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "target-colors.ts"
     },
     {
@@ -10163,8 +10152,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_target_color_surfaces",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "target_color_surfaces"
     },
     {
@@ -10174,8 +10163,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_targetcolortheme",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "targetcolortheme"
     },
     {
@@ -10185,8 +10174,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_targetcoloroption",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "targetcoloroption"
     },
     {
@@ -10196,8 +10185,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_target_color_options",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "target_color_options"
     },
     {
@@ -10207,8 +10196,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_normalizehex",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "normalizehex()"
     },
     {
@@ -10218,8 +10207,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_hextorgb",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "hextorgb()"
     },
     {
@@ -10229,8 +10218,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_channelluminance",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "channelluminance()"
     },
     {
@@ -10240,8 +10229,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_relativeluminance",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "relativeluminance()"
     },
     {
@@ -10251,8 +10240,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_contrastratio",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "contrastratio()"
     },
     {
@@ -10262,8 +10251,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_isaccessibletargetcolor",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "isaccessibletargetcolor()"
     },
     {
@@ -10273,8 +10262,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_resolvetargetcolortheme",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "resolvetargetcolortheme()"
     },
     {
@@ -10284,8 +10273,8 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_gettargetcoloroptions",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "gettargetcoloroptions()"
     },
     {
@@ -10295,8 +10284,8 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_usedcolorset",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "usedcolorset()"
     },
     {
@@ -10306,8 +10295,8 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_randomunusedtargetcolor",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "randomunusedtargetcolor()"
     },
     {
@@ -10317,8 +10306,8 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_nexttargetcolor",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "nexttargetcolor()"
     },
     {
@@ -10328,8 +10317,8 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_targetcoloroptionlist",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "targetcoloroptionlist()"
     },
     {
@@ -10339,8 +10328,8 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "apps_web_src_lib_target_colors_findtargetcolorlabel",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "findtargetcolorlabel()"
     },
     {
@@ -10471,8 +10460,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_lib_utils",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "web/src/lib/utils.ts"
     },
     {
@@ -10944,8 +10933,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_types_target",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 213,
+      "community_name": "target.ts",
       "norm_label": "target.ts"
     },
     {
@@ -10955,8 +10944,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "apps_web_src_types_target_vehicle_categories",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 31,
+      "community_name": "bubble.tsx",
       "norm_label": "vehicle_categories"
     },
     {
@@ -10966,8 +10955,8 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "apps_web_src_types_target_affiliations",
-      "community": 3,
-      "community_name": "map-data-provider.tsx",
+      "community": 39,
+      "community_name": "tracking-map.tsx",
       "norm_label": "affiliations"
     },
     {
@@ -10988,8 +10977,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "apps_web_src_types_target_vehiclecategory",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "vehiclecategory"
     },
     {
@@ -10999,8 +10988,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "apps_web_src_types_target_affiliation",
-      "community": 39,
-      "community_name": "tracking-map.tsx",
+      "community": 58,
+      "community_name": "@base-ui/react",
       "norm_label": "affiliation"
     },
     {
@@ -11010,8 +10999,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "apps_web_src_types_target_targetstatus",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 3,
+      "community_name": "map-data-provider.tsx",
       "norm_label": "targetstatus"
     },
     {
@@ -11076,8 +11065,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "apps_web_src_types_target_simulationscenario",
-      "community": 40,
-      "community_name": "clsx",
+      "community": 60,
+      "community_name": "ui/src/lib/utils.ts",
       "norm_label": "simulationscenario"
     },
     {
@@ -11087,8 +11076,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "apps_web_src_types_target_positionsnapshot",
-      "community": 29,
-      "community_name": "build-event-graph.ts",
+      "community": 213,
+      "community_name": "target.ts",
       "norm_label": "positionsnapshot"
     },
     {
@@ -11109,8 +11098,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "apps_web_src_types_target_runtimestatus",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 213,
+      "community_name": "target.ts",
       "norm_label": "runtimestatus"
     },
     {
@@ -11131,8 +11120,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "apps_web_src_types_target_legacy_event_types",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 213,
+      "community_name": "target.ts",
       "norm_label": "legacy_event_types"
     },
     {
@@ -11142,8 +11131,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "apps_web_src_types_target_legacyeventtype",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 213,
+      "community_name": "target.ts",
       "norm_label": "legacyeventtype"
     },
     {
@@ -11153,8 +11142,8 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "apps_web_src_types_target_legacypriority",
-      "community": 0,
-      "community_name": "event-generator.ts",
+      "community": 213,
+      "community_name": "target.ts",
       "norm_label": "legacypriority"
     },
     {
@@ -13430,8 +13419,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "accordion.tsx"
     },
     {
@@ -13441,8 +13430,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordion",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "accordion()"
     },
     {
@@ -13452,8 +13441,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordionitem",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "accordionitem()"
     },
     {
@@ -13463,8 +13452,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordiontrigger",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "accordiontrigger()"
     },
     {
@@ -13474,8 +13463,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "packages_ui_src_components_accordion_accordioncontent",
-      "community": 41,
-      "community_name": "attachment.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "accordioncontent()"
     },
     {
@@ -13793,8 +13782,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubble.tsx"
     },
     {
@@ -13804,8 +13793,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble_bubblegroup",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubblegroup()"
     },
     {
@@ -13815,8 +13804,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble_bubblevariants",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubblevariants"
     },
     {
@@ -13826,8 +13815,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble_bubble",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubble()"
     },
     {
@@ -13837,8 +13826,8 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble_bubblecontent",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubblecontent()"
     },
     {
@@ -13848,8 +13837,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble_bubblereactionsvariants",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubblereactionsvariants"
     },
     {
@@ -13859,8 +13848,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "packages_ui_src_components_bubble_bubblereactions",
-      "community": 20,
-      "community_name": "@base-ui/react",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "bubblereactions()"
     },
     {
@@ -13870,8 +13859,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "button-group.tsx"
     },
     {
@@ -13881,8 +13870,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongroupvariants",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "buttongroupvariants"
     },
     {
@@ -13892,8 +13881,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongroup",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "buttongroup()"
     },
     {
@@ -13903,8 +13892,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongrouptext",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "buttongrouptext()"
     },
     {
@@ -13914,8 +13903,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "packages_ui_src_components_button_group_buttongroupseparator",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "buttongroupseparator()"
     },
     {
@@ -13991,8 +13980,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_card",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "card.tsx"
     },
     {
@@ -14002,8 +13991,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_card",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "card()"
     },
     {
@@ -14013,8 +14002,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardheader",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "cardheader()"
     },
     {
@@ -14024,8 +14013,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardtitle",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "cardtitle()"
     },
     {
@@ -14035,8 +14024,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_carddescription",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "carddescription()"
     },
     {
@@ -14046,8 +14035,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardaction",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "cardaction()"
     },
     {
@@ -14057,8 +14046,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardcontent",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "cardcontent()"
     },
     {
@@ -14068,8 +14057,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "packages_ui_src_components_card_cardfooter",
-      "community": 27,
-      "community_name": "input-group.tsx",
+      "community": 8,
+      "community_name": "simulation-import.tsx",
       "norm_label": "cardfooter()"
     },
     {
@@ -14871,8 +14860,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_input",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "input.tsx"
     },
     {
@@ -14882,8 +14871,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "packages_ui_src_components_input_input",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 17,
+      "community_name": "button.tsx",
       "norm_label": "input()"
     },
     {
@@ -15201,8 +15190,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_scroll_area",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "scroll-area.tsx"
     },
     {
@@ -15212,8 +15201,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "packages_ui_src_components_scroll_area_scrollarea",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "scrollarea()"
     },
     {
@@ -15223,8 +15212,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "packages_ui_src_components_scroll_area_scrollbar",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 27,
+      "community_name": "input-group.tsx",
       "norm_label": "scrollbar()"
     },
     {
@@ -15234,8 +15223,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_select",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "select.tsx"
     },
     {
@@ -15245,8 +15234,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectgroup",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectgroup()"
     },
     {
@@ -15256,8 +15245,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectvalue",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectvalue()"
     },
     {
@@ -15267,8 +15256,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selecttrigger",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selecttrigger()"
     },
     {
@@ -15278,8 +15267,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectcontent",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectcontent()"
     },
     {
@@ -15289,8 +15278,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectlabel",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectlabel()"
     },
     {
@@ -15300,8 +15289,8 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectitem",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectitem()"
     },
     {
@@ -15311,8 +15300,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectseparator",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectseparator()"
     },
     {
@@ -15322,8 +15311,8 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectscrollupbutton",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectscrollupbutton()"
     },
     {
@@ -15333,8 +15322,8 @@
       "source_location": "L159",
       "_origin": "ast",
       "id": "packages_ui_src_components_select_selectscrolldownbutton",
-      "community": 7,
-      "community_name": "cn",
+      "community": 57,
+      "community_name": "@axe-core/playwright",
       "norm_label": "selectscrolldownbutton()"
     },
     {
@@ -15344,8 +15333,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_separator",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "separator.tsx"
     },
     {
@@ -15355,8 +15344,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "packages_ui_src_components_separator_separator",
-      "community": 5,
-      "community_name": "simulation-storage.ts",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "separator()"
     },
     {
@@ -15366,8 +15355,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheet.tsx"
     },
     {
@@ -15377,8 +15366,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheet",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheet()"
     },
     {
@@ -15388,8 +15377,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheettrigger",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheettrigger()"
     },
     {
@@ -15399,8 +15388,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetclose",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetclose()"
     },
     {
@@ -15410,8 +15399,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetportal",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetportal()"
     },
     {
@@ -15421,8 +15410,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetoverlay",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetoverlay()"
     },
     {
@@ -15432,8 +15421,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetcontent",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetcontent()"
     },
     {
@@ -15443,8 +15432,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetheader",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetheader()"
     },
     {
@@ -15454,8 +15443,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetfooter",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetfooter()"
     },
     {
@@ -15465,8 +15454,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheettitle",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheettitle()"
     },
     {
@@ -15476,8 +15465,8 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "packages_ui_src_components_sheet_sheetdescription",
-      "community": 56,
-      "community_name": "fake-indexeddb",
+      "community": 7,
+      "community_name": "cn",
       "norm_label": "sheetdescription()"
     },
     {
@@ -15553,8 +15542,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_table",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "table.tsx"
     },
     {
@@ -15564,8 +15553,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_table",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "table()"
     },
     {
@@ -15575,8 +15564,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tableheader",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tableheader()"
     },
     {
@@ -15586,8 +15575,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tablebody",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tablebody()"
     },
     {
@@ -15597,8 +15586,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tablefooter",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tablefooter()"
     },
     {
@@ -15608,8 +15597,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tablerow",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tablerow()"
     },
     {
@@ -15619,8 +15608,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tablehead",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tablehead()"
     },
     {
@@ -15630,8 +15619,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tablecell",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tablecell()"
     },
     {
@@ -15641,8 +15630,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "packages_ui_src_components_table_tablecaption",
-      "community": 7,
-      "community_name": "cn",
+      "community": 252,
+      "community_name": "s",
       "norm_label": "tablecaption()"
     },
     {
@@ -15740,8 +15729,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle_group",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "toggle-group.tsx"
     },
     {
@@ -15751,8 +15740,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle_group_togglegroupcontext",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "togglegroupcontext"
     },
     {
@@ -15762,8 +15751,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle_group_togglegroup",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "togglegroup()"
     },
     {
@@ -15773,8 +15762,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle_group_togglegroupitem",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "togglegroupitem()"
     },
     {
@@ -15784,8 +15773,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "toggle.tsx"
     },
     {
@@ -15795,8 +15784,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle_togglevariants",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "togglevariants"
     },
     {
@@ -15806,8 +15795,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "packages_ui_src_components_toggle_toggle",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "toggle()"
     },
     {
@@ -15872,8 +15861,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "packages_ui_src_lib_utils",
-      "community": 8,
-      "community_name": "simulation-import.tsx",
+      "community": 218,
+      "community_name": "simulation-idb-storage.ts",
       "norm_label": "ui/src/lib/utils.ts"
     },
     {
@@ -25658,22 +25647,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
-      "source_location": "L76",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_event_message_export_dialog",
       "target": "apps_web_src_components_event_message_export_dialog_eventmessageexportdialog",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
-      "source_location": "L29",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "apps_web_src_components_event_message_export_dialog",
-      "target": "apps_web_src_components_event_message_export_dialog_virtualizedmessagepreview",
       "confidence_score": 1.0
     },
     {
@@ -25944,6 +25922,30 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_web_src_components_event_message_export_dialog",
+      "target": "packages_ui_src_components_scroll_area",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_web_src_components_event_message_export_dialog",
+      "target": "packages_ui_src_components_scroll_area_scrollarea",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "apps/web/src/components/scenario-builder.tsx",
       "source_location": "L87",
       "weight": 1.0,
@@ -25958,7 +25960,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "apps/web/src/components/event-message-export-dialog.tsx",
-      "source_location": "L89",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "apps_web_src_components_event_message_export_dialog_eventmessageexportdialog",

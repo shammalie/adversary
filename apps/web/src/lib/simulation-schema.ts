@@ -96,6 +96,10 @@ export const simulationScenarioSchema = z
     description: z.string().trim().max(1_000, "Briefs must be 1,000 characters or fewer.").optional(),
     createdAt: isoDateSchema,
     updatedAt: isoDateSchema,
+    delaySeconds: z
+      .number()
+      .nonnegative("Delay cannot be negative.")
+      .optional(),
     priorityTerms: z.array(z.string().trim().min(1).max(80)),
     targets: z
       .array(targetDefinitionSchema)

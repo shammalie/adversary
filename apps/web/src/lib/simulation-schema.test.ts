@@ -192,4 +192,82 @@ describe("simulation schema", () => {
       ),
     ).toBe(true);
   });
+
+  it("accepts optional non-negative delaySeconds", () => {
+    const result = validateScenario({
+      schemaVersion: 2,
+      id: "s1",
+      name: "Test",
+      createdAt: "2026-07-24T12:00:00.000Z",
+      updatedAt: "2026-07-24T12:00:00.000Z",
+      delaySeconds: 45,
+      priorityTerms: [],
+      targets: [
+        {
+          id: "target-1",
+          callsign: "ALPHA",
+          revealOnFirstEvent: true,
+          color: "#22d3ee",
+          profile: {
+            vehicleCategory: "aircraft",
+            affiliation: "unknown",
+            status: "active",
+          },
+        },
+      ],
+      events: [
+        {
+          id: "event-1",
+          targetId: "target-1",
+          at: "2026-07-24T12:00:00.000Z",
+          message: "Ping",
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.delaySeconds).toBe(45);
+  });
+
+  it("rejects negative delaySeconds", () => {
+    const result = validateScenario({
+      schemaVersion: 2,
+      id: "s1",
+      name: "Test",
+      createdAt: "2026-07-24T12:00:00.000Z",
+      updatedAt: "2026-07-24T12:00:00.000Z",
+      delaySeconds: -1,
+      priorityTerms: [],
+      targets: [
+        {
+          id: "target-1",
+          callsign: "ALPHA",
+          revealOnFirstEvent: true,
+          color: "#22d3ee",
+          profile: {
+            vehicleCategory: "aircraft",
+            affiliation: "unknown",
+            status: "active",
+          },
+        },
+      ],
+      events: [
+        {
+          id: "event-1",
+          targetId: "target-1",
+          at: "2026-07-24T12:00:00.000Z",
+          message: "Ping",
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(
+      result.error.issues.some(
+        (issue) =>
+          issue.path.join(".") === "delaySeconds" &&
+          /negative/i.test(issue.message),
+      ),
+    ).toBe(true);
+  });
 });

@@ -607,6 +607,7 @@ export function OperationsDashboard() {
               events={runtime.ingestedEvents}
               priorityTerms={priorityTerms}
               targetStates={runtime.targetStates}
+              delaySeconds={runtime.scenario.delaySeconds}
             />
           </CardContent>
         </Card>
@@ -621,6 +622,7 @@ export function OperationsDashboard() {
               events={messageEvents}
               priorityTerms={priorityTerms}
               targetStates={runtime.targetStates}
+              delaySeconds={runtime.scenario.delaySeconds}
             />
           </CardContent>
         </Card>

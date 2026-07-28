@@ -38,6 +38,12 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
         notes: "Must include timezone offset.",
       },
       {
+        name: "delaySeconds",
+        type: "number",
+        required: false,
+        notes: "Non-negative seconds added to every event.at for scheduling. Omit or 0 = no delay. Does not rewrite authored event times.",
+      },
+      {
         name: "priorityTerms",
         type: "string[]",
         required: true,
@@ -119,6 +125,7 @@ export const SCHEMA_CONSTRAINTS = [
   "Each scenario must include at least one target.",
   "Each target must have at least one event.",
   "Datetimes must be ISO 8601 with an explicit offset.",
+  "Optional delaySeconds must be >= 0; omit or 0 means no delay.",
   "Colors must match #RRGGBB.",
   "Optional position speed is stored in knots (builder accepts mph, km/h, m/s, ft/s, mach).",
   "Generated routes set distance from category speed × elapsed time and always author position.speed.",
