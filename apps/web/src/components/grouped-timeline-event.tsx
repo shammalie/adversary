@@ -17,6 +17,7 @@ import type { ReactNode } from "react";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { matchPriorityTerms } from "@/lib/priority-terms";
 import type { ValidationIssue } from "@/lib/scenario-validation-ui";
+import { formatSimOffsetFromAnchor } from "@/lib/scenario-timing";
 import type { PositionPayload, SimulationEvent } from "@/types/target";
 
 const DEFAULT_POSITION: PositionPayload = {
@@ -91,7 +92,17 @@ interface ViewTimelineEventProps {
   summary: string;
   issues: ValidationIssue[];
   highlighted: boolean;
+  /** Earliest scenario event.at ms; used to label multiplicative sim offset. */
+  scheduleAnchorMs?: number | null;
   onDelete: () => void;
+}
+
+function firesAtLabel(event: SimulationEvent, scheduleAnchorMs?: number | null) {
+  if (!event.firesAt) return null;
+  const absolute = new Date(event.firesAt).toLocaleString();
+  if (scheduleAnchorMs == null) return `Fires at ${absolute}`;
+  const offset = formatSimOffsetFromAnchor(event.firesAt, scheduleAnchorMs);
+  return offset ? `Fires at ${absolute} (${offset})` : `Fires at ${absolute}`;
 }
 
 export function ViewTimelineEvent({
@@ -100,6 +111,7 @@ export function ViewTimelineEvent({
   summary,
   issues,
   highlighted,
+  scheduleAnchorMs,
   onDelete,
 }: ViewTimelineEventProps) {
   return (
@@ -114,7 +126,7 @@ export function ViewTimelineEvent({
       </div>
       {event.firesAt ? (
         <div className="font-mono text-xs text-muted-foreground">
-          Fires at {new Date(event.firesAt).toLocaleString()}
+          {firesAtLabel(event, scheduleAnchorMs)}
         </div>
       ) : null}
       <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -145,6 +157,8 @@ interface EditTimelineEventProps {
   priorityTerms: string[];
   issues: ValidationIssue[];
   highlighted: boolean;
+  /** Earliest scenario event.at ms; used to label multiplicative sim offset. */
+  scheduleAnchorMs?: number | null;
   onChange: (next: SimulationEvent) => void;
   onDelete: () => void;
 }
@@ -155,6 +169,7 @@ export function EditTimelineEvent({
   priorityTerms,
   issues,
   highlighted,
+  scheduleAnchorMs,
   onChange,
   onDelete,
 }: EditTimelineEventProps) {
@@ -215,7 +230,7 @@ export function EditTimelineEvent({
           ))}
           {event.firesAt ? (
             <FieldDescription>
-              Fires at {new Date(event.firesAt).toLocaleString()}
+              {firesAtLabel(event, scheduleAnchorMs)}
             </FieldDescription>
           ) : null}
         </Field>

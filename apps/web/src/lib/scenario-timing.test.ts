@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { applyFastForwardTimes, isFastForwardActive } from "@/lib/scenario-timing";
+import { applyFastForwardTimes, formatSimOffsetFromAnchor, isFastForwardActive } from "@/lib/scenario-timing";
 import type { SimulationScenario } from "@/types/target";
 
 function baseScenario(overrides: Partial<SimulationScenario> = {}): SimulationScenario {
@@ -63,6 +63,41 @@ describe("scenario timing / fast-forward", () => {
     expect(applied.events[0]?.firesAt).toBe("2026-07-24T12:00:00.000Z");
     // 10 min / 2 = 5 min after anchor
     expect(applied.events[1]?.firesAt).toBe("2026-07-24T12:05:00.000Z");
+  });
+
+  it("compresses multiplicatively: 1 hour at 10× fires 6 minutes after start", () => {
+    const applied = applyFastForwardTimes(
+      baseScenario({
+        fastForwardMultiplier: 10,
+        events: [
+          {
+            id: "event-a",
+            targetId: "target-1",
+            at: "2026-07-24T12:00:00.000Z",
+            message: "Start",
+          },
+          {
+            id: "event-b",
+            targetId: "target-1",
+            at: "2026-07-24T13:00:00.000Z",
+            message: "One hour later authored",
+          },
+        ],
+      }),
+    );
+
+    expect(applied.events[0]?.at).toBe("2026-07-24T12:00:00.000Z");
+    expect(applied.events[1]?.at).toBe("2026-07-24T13:00:00.000Z");
+    expect(applied.events[0]?.firesAt).toBe("2026-07-24T12:00:00.000Z");
+    // 60 min / 10 = 6 min of simulation time from the start event
+    expect(applied.events[1]?.firesAt).toBe("2026-07-24T12:06:00.000Z");
+  });
+
+  it("formats sim offset from the schedule anchor", () => {
+    const anchor = Date.parse("2026-07-24T12:00:00.000Z");
+    expect(formatSimOffsetFromAnchor("2026-07-24T12:00:00.000Z", anchor)).toBe("sim +0s");
+    expect(formatSimOffsetFromAnchor("2026-07-24T12:06:00.000Z", anchor)).toBe("sim +6m");
+    expect(formatSimOffsetFromAnchor("2026-07-24T13:00:00.000Z", anchor)).toBe("sim +1h");
   });
 
   it("recomputes all firesAt when multiplier changes", () => {

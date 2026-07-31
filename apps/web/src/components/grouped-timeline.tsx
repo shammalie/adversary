@@ -11,6 +11,7 @@ import {
 } from "@/components/grouped-timeline-event";
 import { derivePositionSnapshot } from "@/lib/position-telemetry";
 import { sortEvents } from "@/lib/simulation-engine";
+import { scenarioScheduleAnchorMs } from "@/lib/scenario-timing";
 import {
   getIssuesForEvent,
   type ValidationIssue,
@@ -178,6 +179,10 @@ export function GroupedTimeline({
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const eventGapPx = mode === "edit" ? EVENT_GAP_EDIT_PX : EVENT_GAP_VIEW_PX;
+  const scheduleAnchorMs = useMemo(
+    () => scenarioScheduleAnchorMs(scenario.events),
+    [scenario.events],
+  );
 
   const flatItems = useMemo(() => {
     const items: FlatItem[] = [];
@@ -430,6 +435,7 @@ export function GroupedTimeline({
                         priorityTerms={scenario.priorityTerms}
                         issues={item.issues}
                         highlighted={highlightEventId === item.event.id}
+                        scheduleAnchorMs={scheduleAnchorMs}
                         onChange={onUpdateEvent}
                         onDelete={() => onDeleteEvent(item.event.id)}
                       />
@@ -440,6 +446,7 @@ export function GroupedTimeline({
                         summary={item.summary}
                         issues={item.issues}
                         highlighted={highlightEventId === item.event.id}
+                        scheduleAnchorMs={scheduleAnchorMs}
                         onDelete={() => onDeleteEvent(item.event.id)}
                       />
                     )}

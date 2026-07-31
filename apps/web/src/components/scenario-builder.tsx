@@ -110,7 +110,7 @@ import {
 } from "@/lib/event-draft";
 import { addPriorityTerm, matchPriorityTerms, removePriorityTerm } from "@/lib/priority-terms";
 import { applyFastForwardTimes } from "@/lib/scenario-timing";
-import { getEventsDueByTime, sortEvents } from "@/lib/simulation-engine";
+import { effectiveEventAtMs, getEventsDueByTime, sortEvents } from "@/lib/simulation-engine";
 import { buildTrackingMapEventPoints } from "@/lib/tracking-map-event-points";
 import {
   coerceEditableScenario,
@@ -222,6 +222,9 @@ function blankScenario(): SimulationScenario {
     events: [],
   };
 }
+
+/** Operation profile fast-forward choices: 1× = off, 2×–10× compress schedule. */
+const FAST_FORWARD_MULTIPLIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 function OptionSelect({
   value,
@@ -449,12 +452,18 @@ export function ScenarioBuilder() {
 
   const graphCurrentEventId = useMemo(() => {
     if (!previewGraphTarget) return null;
+    const delaySeconds = scenario.delaySeconds ?? 0;
     const targetEvents = eventsByTarget.get(previewGraphTarget.id) ?? [];
     const due = targetEvents.filter(
-      (event) => Date.parse(event.at) <= preview.previewTimeMs,
+      (event) => effectiveEventAtMs(event, delaySeconds) <= preview.previewTimeMs,
     );
     return sortEvents(due).at(-1)?.id ?? null;
-  }, [eventsByTarget, preview.previewTimeMs, previewGraphTarget]);
+  }, [
+    eventsByTarget,
+    preview.previewTimeMs,
+    previewGraphTarget,
+    scenario.delaySeconds,
+  ]);
 
   const draftTargetPositionPoints = useMemo(() => {
     if (!draft.targetId) return [];
@@ -1477,33 +1486,49 @@ export function ScenarioBuilder() {
                 }
               >
                 <FieldLabel htmlFor="scenario-fast-forward">Fast-forward</FieldLabel>
-                <Input
-                  id="scenario-fast-forward"
-                  type="number"
-                  inputMode="decimal"
-                  min={1.01}
-                  max={10}
-                  step={0.1}
-                  value={scenario.fastForwardMultiplier ?? ""}
-                  onChange={(event) => {
-                    const raw = event.target.value;
-                    if (raw === "") {
+                <Select
+                  value={String(
+                    Math.min(
+                      10,
+                      Math.max(
+                        1,
+                        Math.round(
+                          scenario.fastForwardMultiplier &&
+                            scenario.fastForwardMultiplier > 1
+                            ? scenario.fastForwardMultiplier
+                            : 1,
+                        ),
+                      ),
+                    ),
+                  )}
+                  onValueChange={(next) => {
+                    if (!next) return;
+                    const multiplier = Number(next);
+                    if (!Number.isFinite(multiplier) || multiplier <= 1) {
                       updateScenario({ fastForwardMultiplier: undefined });
                       return;
                     }
-                    const next = Number(raw);
-                    if (!Number.isFinite(next)) return;
-                    // Treat 1 (and below) as off — omit; reject > 10 in the field.
-                    if (next <= 1) {
-                      updateScenario({ fastForwardMultiplier: undefined });
-                      return;
-                    }
-                    if (next > 10) return;
-                    updateScenario({ fastForwardMultiplier: next });
+                    updateScenario({ fastForwardMultiplier: multiplier });
                   }}
-                  aria-invalid={fieldHasIssue(validationIssues, "fastForwardMultiplier")}
-                  aria-describedby="scenario-fast-forward-hint"
-                />
+                >
+                  <SelectTrigger
+                    id="scenario-fast-forward"
+                    className="w-full"
+                    aria-invalid={fieldHasIssue(validationIssues, "fastForwardMultiplier")}
+                    aria-describedby="scenario-fast-forward-hint"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {FAST_FORWARD_MULTIPLIERS.map((multiplier) => (
+                        <SelectItem key={multiplier} value={String(multiplier)}>
+                          {multiplier}×
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 {fieldHasIssue(validationIssues, "fastForwardMultiplier") ? (
                   <FieldError>
                     {validationIssues.find((issue) => issue.path === "fastForwardMultiplier")
@@ -1511,8 +1536,8 @@ export function ScenarioBuilder() {
                   </FieldError>
                 ) : (
                   <FieldDescription id="scenario-fast-forward-hint">
-                    Compresses schedule from the earliest event. Authored times stay unchanged.
-                    Empty or 1 = off; max 10×.
+                    Multiplies sim speed from the first event: 1 hour of authored time at 10×
+                    fires in 6 minutes. Authored times stay unchanged. 1× = off.
                   </FieldDescription>
                 )}
               </Field>

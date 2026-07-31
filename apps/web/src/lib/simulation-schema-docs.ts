@@ -48,7 +48,7 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
         type: "number",
         required: false,
         notes:
-          "Compresses schedule relative to the earliest event.at. Omit or 1 = off; allowed range is greater than 1 through 10. When set, each event gets firesAt = anchor + (at − anchor) / multiplier. Does not rewrite authored at.",
+          "Multiplicative sim speed-up relative to the earliest event.at. Omit or 1 = off; allowed range is greater than 1 through 10 (builder select: integer 1×–10×). firesAt = anchor + (at − anchor) / multiplier — e.g. 1 hour at 10× fires 6 minutes after the start event. Does not rewrite authored at.",
       },
       {
         name: "priorityTerms",
@@ -148,7 +148,7 @@ export const SCHEMA_CONSTRAINTS = [
   "Datetimes must be ISO 8601 with an explicit offset.",
   "Optional delaySeconds must be >= 0; omit or 0 means no delay.",
   "Optional maxCruiseKnots on targets must be >= 0 when set.",
-  "Optional fastForwardMultiplier must be > 1 and <= 10; omit or 1 means off.",
+  "Optional fastForwardMultiplier must be > 1 and <= 10; omit or 1 means off. Builder offers integer 1×–10×.",
   "Optional event.firesAt is set only while fast-forward is active; stripped when cleared.",
   "Colors must match #RRGGBB.",
   "Optional position speed is stored in knots (builder accepts mph, km/h, m/s, ft/s, mach).",

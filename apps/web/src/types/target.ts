@@ -62,8 +62,9 @@ export interface SimulationScenario {
   /** Seconds added to every event.at for scheduling. Omit or 0 = no delay. */
   delaySeconds?: number;
   /**
-   * Compresses schedule relative to the earliest event.at.
+   * Compresses schedule relative to the earliest event.at (multiplicative).
    * Omit or 1 = off; allowed range is greater than 1 through 10.
+   * Example: 1 hour after the first event at 10× → firesAt is 6 minutes after that event.
    */
   fastForwardMultiplier?: number;
   priorityTerms: string[];
