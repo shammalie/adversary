@@ -309,7 +309,7 @@ export function GenerateRouteForm({
       toast.error(message);
       if (/end/i.test(message) && /start/i.test(message)) {
         setErrors((current) => ({ ...current, endAt: message }));
-      } else if (/maximum|kt|distance|end point/i.test(message)) {
+      } else if (/maximum|minimum|kt|distance|end point/i.test(message)) {
         setErrors((current) => ({ ...current, endAt: message, endPoint: message }));
       }
     }

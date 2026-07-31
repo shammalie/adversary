@@ -47,7 +47,9 @@ import {
   resolveGenerationCruiseKnots,
   resolveVehicleProfile,
 } from "@/lib/geo/vehicle-profiles";
+import { haversineDistanceNm } from "@/lib/position-telemetry";
 import { createSeededRandom, resolveIdFactory } from "@/lib/random";
+import { CATEGORY_TOP_SPEED_KNOTS } from "@/lib/vehicle-speed";
 import type {
   Affiliation,
   SimulationEvent,
@@ -187,6 +189,49 @@ function offsetPath(path: readonly PathPoint[], dLat: number, dLng: number): Pat
     latitude: clampDemoLatitude(point.latitude + dLat),
     longitude: point.longitude + dLng,
   }));
+}
+
+function pathLengthNm(path: readonly PathPoint[]): number {
+  let total = 0;
+  for (let i = 1; i < path.length; i += 1) {
+    total += haversineDistanceNm(path[i - 1]!, path[i]!);
+  }
+  return total;
+}
+
+/**
+ * Clamp a track end delay so average speed stays inside the profile cruise band.
+ * Mock/short router paths paired with long demo durations would otherwise fall
+ * below the cruise floor (or above the ceiling) inside pathToEvents.
+ */
+function clampEndDelayToCruiseBand(options: {
+  path: readonly PathPoint[];
+  trackStartDelay: number;
+  trackEndDelay: number;
+  vehicleCategory: VehicleCategory;
+  vehicleSubtype?: string;
+}): number {
+  const profile = resolveVehicleProfile(options.vehicleCategory, options.vehicleSubtype);
+  const floor = profile.cruiseKnots.minKnots;
+  const ceiling = Math.min(
+    profile.maxKnots,
+    CATEGORY_TOP_SPEED_KNOTS[options.vehicleCategory],
+  );
+  const totalNm = pathLengthNm(options.path);
+  if (totalNm < 0.001 || floor <= 0 || ceiling <= 0) {
+    return options.trackEndDelay;
+  }
+  const durationSec = Math.max(1, options.trackEndDelay - options.trackStartDelay);
+  const requiredKnots = totalNm / (durationSec / 3_600);
+  if (requiredKnots < floor) {
+    const maxSec = Math.max(60, (totalNm / floor) * 3_600 * 0.98);
+    return options.trackStartDelay + maxSec;
+  }
+  if (requiredKnots > ceiling) {
+    const minSec = Math.max(60, (totalNm / ceiling) * 3_600 * 1.02);
+    return options.trackStartDelay + minSec;
+  }
+  return options.trackEndDelay;
 }
 
 function greatCirclePath(plan: DemoTravelPlan): PathPoint[] {
@@ -354,10 +399,17 @@ function buildRoutedTarget(args: {
         : 0;
   const trackStartDelay = job.plan.startDelaySeconds + memberStagger;
   const rawEndDelay = trackStartDelay + job.plan.durationMinutes * 60;
-  const trackEndDelay =
+  const boundedEndDelay =
     windowSeconds !== null
       ? Math.max(trackStartDelay + 60, Math.min(rawEndDelay, windowSeconds))
       : rawEndDelay;
+  const trackEndDelay = clampEndDelayToCruiseBand({
+    path,
+    trackStartDelay,
+    trackEndDelay: boundedEndDelay,
+    vehicleCategory: job.category,
+    vehicleSubtype: job.subtype,
+  });
 
   const targetId = idFactory();
   const target: TargetDefinition = {

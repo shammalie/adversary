@@ -30,7 +30,7 @@
     "semantic_hash": ""
   },
   "apps/web/package.json": {
-    "mtime": 1785267208.3224828,
+    "mtime": 1785523837.7770875,
     "ast_hash": "b67e09bf99467e29c9d2c14a89dae97a",
     "semantic_hash": ""
   },
@@ -50,12 +50,12 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/grouped-timeline-event.tsx": {
-    "mtime": 1785509174.100138,
-    "ast_hash": "c95ac5b772621d6f3ddbb663595b6e97",
+    "mtime": 1785512081.5157993,
+    "ast_hash": "fd9d850683437e9f695a741c188ee977",
     "semantic_hash": ""
   },
   "apps/web/src/components/header.tsx": {
-    "mtime": 1784971755.1445353,
+    "mtime": 1785523837.784421,
     "ast_hash": "33233f9fca1732702f8e7a4a701a51bc",
     "semantic_hash": ""
   },
@@ -80,7 +80,7 @@
     "semantic_hash": "72b4c42569685952b9c20525a49cacfd"
   },
   "apps/web/src/components/operations-dashboard.tsx": {
-    "mtime": 1785267208.3261752,
+    "mtime": 1785523837.784421,
     "ast_hash": "8c5d49aa1e1e5203db99afeaf40368d9",
     "semantic_hash": ""
   },
@@ -90,17 +90,17 @@
     "semantic_hash": "f0ea3f014305e2494f49b1ca1e06c639"
   },
   "apps/web/src/components/scenario-builder.tsx": {
-    "mtime": 1785511789.0588138,
-    "ast_hash": "a592227db157fc28593ff5f8566f198f",
+    "mtime": 1785523837.784421,
+    "ast_hash": "4544dbff1ef617f24029073f6bc52c63",
     "semantic_hash": ""
   },
   "apps/web/src/components/simulation-import.tsx": {
-    "mtime": 1784914260.7245798,
+    "mtime": 1785523837.784421,
     "ast_hash": "0ecce2d6783312e2ef75d0f7475d8b51",
     "semantic_hash": "0ecce2d6783312e2ef75d0f7475d8b51"
   },
   "apps/web/src/components/simulation-provider.tsx": {
-    "mtime": 1784899725.579355,
+    "mtime": 1785523837.784421,
     "ast_hash": "51d4806782f8c58c7be5e43ee9b3029b",
     "semantic_hash": "51d4806782f8c58c7be5e43ee9b3029b"
   },
@@ -115,8 +115,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/tracking-map.tsx": {
-    "mtime": 1785509323.727566,
-    "ast_hash": "6c37f36aa26791f23a57c50a4d5da806",
+    "mtime": 1785525131.150556,
+    "ast_hash": "afbf45c40b97e4dfbf9243f4cfab10f0",
     "semantic_hash": ""
   },
   "apps/web/src/lib/demo-scenario.test.ts": {
@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/position-telemetry.ts": {
-    "mtime": 1785075537.8412015,
-    "ast_hash": "ce80c693488efac64f66dec889f86e86",
+    "mtime": 1785525141.783889,
+    "ast_hash": "8d3e66ec0851749279c6fc8d8b548863",
     "semantic_hash": ""
   },
   "apps/web/src/lib/preview-revision.ts": {
@@ -230,8 +230,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/simulation-schema-docs.ts": {
-    "mtime": 1785511792.0160737,
-    "ast_hash": "abe985e48f94f3617b31a92453fc102f",
+    "mtime": 1785512044.0566013,
+    "ast_hash": "23f194bb693ce6a6973563afad7f256f",
     "semantic_hash": ""
   },
   "apps/web/src/lib/simulation-schema.test.ts": {
@@ -305,7 +305,7 @@
     "semantic_hash": "9c0fe8cd8900f4674a9747678f138224"
   },
   "apps/web/src/routes/__root.tsx": {
-    "mtime": 1785067074.8727505,
+    "mtime": 1785523837.784421,
     "ast_hash": "49c27bdf5cfd4b29e6b21ccc3995bef0",
     "semantic_hash": ""
   },
@@ -340,8 +340,8 @@
     "semantic_hash": "1004b817457d08df005db2c917966ada"
   },
   "apps/web/src/types/target.ts": {
-    "mtime": 1785509159.1512997,
-    "ast_hash": "8f7d3b1585163e642a0063c407bf69e5",
+    "mtime": 1785512093.4837964,
+    "ast_hash": "2be6fb34a1d04273e871893d439933b3",
     "semantic_hash": ""
   },
   "apps/web/src/vite-env.d.ts": {
@@ -355,12 +355,12 @@
     "semantic_hash": ""
   },
   "apps/web/vite.config.ts": {
-    "mtime": 1785267208.3557143,
+    "mtime": 1785523837.784421,
     "ast_hash": "8cc1f8284fe25747b91585b9c350ba63",
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1785267208.407408,
+    "mtime": 1785523837.8064208,
     "ast_hash": "dd45016aa7ef48711449716fb71222d5",
     "semantic_hash": ""
   },
@@ -380,7 +380,7 @@
     "semantic_hash": ""
   },
   "packages/env/src/web.ts": {
-    "mtime": 1785267208.407408,
+    "mtime": 1785523837.8064208,
     "ast_hash": "bb5cc9e2e553e7a2071099d5e0334ac5",
     "semantic_hash": ""
   },
@@ -1210,7 +1210,7 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785267208.315098,
+    "mtime": 1785523837.7770875,
     "ast_hash": "68d9cfcee2d2b0a7548fedfb25785d2c",
     "semantic_hash": ""
   },
@@ -1230,7 +1230,7 @@
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1785267208.3594067,
+    "mtime": 1785523837.784421,
     "ast_hash": "0c84d44740f7b389fb360ff9ada94a5f",
     "semantic_hash": ""
   },
@@ -1490,12 +1490,12 @@
     "semantic_hash": ""
   },
   "scripts/collect-map-tiles.sh": {
-    "mtime": 1785068486.3858445,
+    "mtime": 1785523837.8064208,
     "ast_hash": "e19ebbca8840205047ffc1a1176e9733",
     "semantic_hash": ""
   },
   "apps/web/src/components/generate-route-form.tsx": {
-    "mtime": 1785509277.0187593,
+    "mtime": 1785523837.784421,
     "ast_hash": "88040858036f4702e65ec3d0ff75e83d",
     "semantic_hash": ""
   },
@@ -1520,8 +1520,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/grouped-timeline.tsx": {
-    "mtime": 1785082207.0023928,
-    "ast_hash": "31c4434c43cee279c8076be6bbb06bd4",
+    "mtime": 1785512088.4934642,
+    "ast_hash": "d5c2eb297b0b216dabbaca139cf7534d",
     "semantic_hash": ""
   },
   ".cursor/agents/georoute-gate-spike.md": {
@@ -1625,13 +1625,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/path-to-events.test.ts": {
-    "mtime": 1785509341.956036,
-    "ast_hash": "645e3bb065f55b4514df1ef7ba3b4165",
+    "mtime": 1785524282.1358562,
+    "ast_hash": "cade9196756ddb20b43579175b09ebc6",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/path-to-events.ts": {
-    "mtime": 1785509216.3353295,
-    "ast_hash": "c1d33a0289d03605216786b76ed49527",
+    "mtime": 1785524351.6562948,
+    "ast_hash": "02fca4ddde5f411250bc1ef7de8deab5",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/vehicle-profiles.test.ts": {
@@ -1665,7 +1665,7 @@
     "semantic_hash": ""
   },
   "scripts/build-geo-seeds.mjs": {
-    "mtime": 1785267208.4111004,
+    "mtime": 1785523837.8064208,
     "ast_hash": "94cf91b29a24f11151da4780eb5afadb",
     "semantic_hash": ""
   },
@@ -1675,13 +1675,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/air-router.test.ts": {
-    "mtime": 1785267208.3261752,
-    "ast_hash": "df2e95bf824456540d98fef5c4f76beb",
+    "mtime": 1785524905.9850354,
+    "ast_hash": "892feedc29464e6438182fe54f678b8e",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/air-router.ts": {
-    "mtime": 1785267208.3261752,
-    "ast_hash": "534cc45ae0dbbfe414c336f7a274ad07",
+    "mtime": 1785524874.8637235,
+    "ast_hash": "0fa600cd5f63fed122a41a782663cde2",
     "semantic_hash": ""
   },
   "apps/web/src/lib/geo/road-router.test.ts": {
@@ -1735,7 +1735,7 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/generate-random-route-form.tsx": {
-    "mtime": 1785267208.3261752,
+    "mtime": 1785523837.7770875,
     "ast_hash": "86f8066f4416ec9bafda5f3e3b083b78",
     "semantic_hash": ""
   },
@@ -1750,7 +1750,7 @@
     "semantic_hash": ""
   },
   "docs/geo-seeds.md": {
-    "mtime": 1785267208.3594067,
+    "mtime": 1785523837.784421,
     "ast_hash": "0864a1ad6262b4e6de7ab2c1f14121b4",
     "semantic_hash": ""
   },
@@ -1795,13 +1795,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/scenario-timing.test.ts": {
-    "mtime": 1785509197.4474683,
-    "ast_hash": "7eb38dc26a7dbe3750ee7904accbd806",
+    "mtime": 1785512105.7041323,
+    "ast_hash": "ee80da4d874020c8785e49041b09ff90",
     "semantic_hash": ""
   },
   "apps/web/src/lib/scenario-timing.ts": {
-    "mtime": 1785509141.7866695,
-    "ast_hash": "8f304032b63b6726e568f204959585ee",
+    "mtime": 1785512071.716292,
+    "ast_hash": "d9857afc31157992f87528e14801cdda",
     "semantic_hash": ""
   },
   ".agents/skills/wayfinder/SKILL.md": {

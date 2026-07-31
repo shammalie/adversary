@@ -1,16 +1,16 @@
 # Graph Report - adversary  (2026-07-31)
 
 ## Corpus Check
-- 581 files · ~568,609 words
+- 581 files · ~570,973 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4907 nodes · 6847 edges · 453 communities (352 shown, 101 thin omitted)
+- 4916 nodes · 6890 edges · 450 communities (349 shown, 101 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 27 edges (avg confidence: 0.66)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5a171cc3`
+- Built from commit: `21066dc0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -358,7 +358,7 @@
 - Viper Test Isolation
 - Viper WatchConfig and Hot Reload
 - pprof Reference
-- Flight Recorder (Go 1.25+)
+- fake-indexeddb
 - output.go
 - renovate.json
 - Map Internals Deep Dive
@@ -404,7 +404,6 @@
 - Compilation Issues
 - completion.go
 - Slice Internals
-- APIs
 - Interfaces
 - Numeric Safety
 - Initialization Safety
@@ -424,23 +423,21 @@
 - Slice Transformations
 - JSON Pitfalls
 - @mapbox/vector-tile
-- next-themes
-- react
 - react-hook-form
 - sonner
 - @tailwindcss/vite
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 210 edges
-2. `ScenarioBuilder()` - 32 edges
+2. `ScenarioBuilder()` - 33 edges
 3. `Common Go Bugs` - 31 edges
-4. `haversineDistanceNm()` - 29 edges
+4. `haversineDistanceNm()` - 30 edges
 5. `SimulationEvent` - 29 edges
 6. `Top Go Libraries by Category` - 28 edges
 7. `VehicleCategory` - 25 edges
 8. `Button()` - 25 edges
 9. `Interactive CLI Commands` - 25 edges
-10. `iterateDemoTargets()` - 24 edges
+10. `destinationPoint()` - 24 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `MapPickerFallback()` --calls--> `cn()`  [EXTRACTED]
@@ -457,7 +454,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (453 total, 101 thin omitted)
+## Communities (450 total, 101 thin omitted)
 
 ### Community 0 - "event-generator.ts"
 Cohesion: 0.04
@@ -465,31 +462,31 @@ Nodes (49): `alloc_objects` high, `inuse_space` low, `callgrind` — export for 
 
 ### Community 1 - "scenario-builder.tsx"
 Cohesion: 0.08
-Nodes (24): MapDataContext, MapDataContextValue, MapDataProvider(), resolveColorScheme(), getDevtoolsEnabled(), RouterDevtoolsGate(), subscribeToDevtoolsFlag(), TanStackRouterDevtools (+16 more)
+Nodes (25): MapDataContext, MapDataContextValue, MapDataProvider(), resolveColorScheme(), getDevtoolsEnabled(), RouterDevtoolsGate(), subscribeToDevtoolsFlag(), TanStackRouterDevtools (+17 more)
 
 ### Community 2 - "operations-dashboard.tsx"
 Cohesion: 0.08
-Nodes (49): ARTERIAL_CLASSES, astarRoad(), BLOCKED_ACCESS, buildRoadGraph(), CLASS_SPEED_MPS, classPreferenceMultiplier(), cumulativeDistances(), DRIVABLE_CLASSES (+41 more)
+Nodes (48): ARTERIAL_CLASSES, astarRoad(), BLOCKED_ACCESS, buildRoadGraph(), CLASS_SPEED_MPS, classPreferenceMultiplier(), cumulativeDistances(), DRIVABLE_CLASSES (+40 more)
 
 ### Community 3 - "map-data-provider.tsx"
-Cohesion: 0.17
-Nodes (19): OperationsDashboard(), EventIngestTable(), eventPayloadBadges(), eventSummary(), VirtualizedTableShell(), addPriorityTerm(), isPriorityMessage(), matchPriorityTerms() (+11 more)
+Cohesion: 0.14
+Nodes (21): OperationsDashboard(), EventIngestTable(), eventPayloadBadges(), eventSummary(), VirtualizedTableShell(), addPriorityTerm(), isPriorityMessage(), matchPriorityTerms() (+13 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.06
 Nodes (33): devDependencies, @adversary/config, @axe-core/playwright, fake-indexeddb, @playwright/test, postcss, sharp, tailwindcss (+25 more)
 
 ### Community 5 - "simulation-storage.ts"
-Cohesion: 0.11
-Nodes (19): BrandMark(), ModeToggle(), ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, DropdownMenu(), DropdownMenuCheckboxItem() (+11 more)
+Cohesion: 0.12
+Nodes (20): BrandMark(), Header(), ModeToggle(), useSimulation(), Button(), buttonVariants, Calendar(), CalendarDayButton() (+12 more)
 
 ### Community 6 - "scripts"
 Cohesion: 0.04
 Nodes (44): dependencies, @adversary/env, dotenv, zod, devDependencies, @adversary/config, rolldown, @types/node (+36 more)
 
 ### Community 7 - "cn"
-Cohesion: 0.05
-Nodes (56): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogMedia(), AlertDialogOverlay() (+48 more)
+Cohesion: 0.04
+Nodes (62): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogMedia(), AlertDialogOverlay() (+54 more)
 
 ### Community 8 - "simulation-import.tsx"
 Cohesion: 0.08
@@ -504,8 +501,8 @@ Cohesion: 0.06
 Nodes (71): DemoRegion, assignTravelGroupIds(), atOffsetIso(), buildTravelPlans(), CALLSIGN_PREFIXES, clamp(), clampDemoLatitude(), CreateDemoScenarioOptions (+63 more)
 
 ### Community 11 - "simulation-engine.ts"
-Cohesion: 0.25
-Nodes (19): applyLatitudeBound(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING, clamp(), clampLatitude(), deriveEndAtFromDistance(), distributeTimestamps(), generatePointToPointEvents() (+11 more)
+Cohesion: 0.18
+Nodes (23): MapLocationPickerProps, EventDraft, applyLatitudeBound(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING, categoryCruiseMidpointKnots(), clamp(), clampLatitude() (+15 more)
 
 ### Community 12 - "web/components.json"
 Cohesion: 0.09
@@ -528,8 +525,8 @@ Cohesion: 0.09
 Nodes (22): dependencies, dotenv, @t3-oss/env-core, zod, devDependencies, @adversary/config, @types/node, typescript (+14 more)
 
 ### Community 17 - "button.tsx"
-Cohesion: 0.12
-Nodes (26): DemoRegionSelect(), formatRegionSupports(), incompatibleRegionCategories(), FieldErrors, GenerateRandomRouteForm(), validateRandomForm(), defaultEndPoint(), FieldErrors (+18 more)
+Cohesion: 0.08
+Nodes (41): DateTimePicker(), DateTimePickerProps, parseValue(), PRESETS, toLocalInputValue(), DemoRegionSelect(), formatRegionSupports(), incompatibleRegionCategories() (+33 more)
 
 ### Community 18 - "loader.tsx"
 Cohesion: 0.13
@@ -564,12 +561,12 @@ Cohesion: 0.15
 Nodes (13): devDependencies, @adversary/config, tailwindcss, @tailwindcss/postcss, @types/react, @types/react-dom, typescript, @adversary/config (+5 more)
 
 ### Community 26 - "attachment.tsx"
-Cohesion: 0.15
-Nodes (25): demoRegionById(), kinematicsForSubtype(), kinematicsFromProfile(), unpackGeoSeedsAerodromes(), PathPoint, categoryFallbackProfile(), profile(), profileCruiseMidpointKnots() (+17 more)
+Cohesion: 0.12
+Nodes (25): DemoRegionSelectProps, PathToEventsOptions, categoryFallbackProfile(), profile(), profileCruiseMidpointKnots(), resolveGenerationCruiseKnots(), resolveVehicleProfile(), EXPECTED_SUBTYPES (+17 more)
 
 ### Community 27 - "input-group.tsx"
-Cohesion: 0.05
-Nodes (62): EventMessageExportDialog(), Header(), blankScenario(), FAST_FORWARD_MULTIPLIERS, focusElementById(), MapLocationPicker, matchingDemoLocationName(), PreviewEventGraph (+54 more)
+Cohesion: 0.07
+Nodes (43): EventMessageExportDialog(), FAST_FORWARD_MULTIPLIERS, MapLocationPicker, matchingDemoLocationName(), PreviewEventGraph, TrackingMap, getTocItemOffset(), SCHEMA_TOC_ITEMS (+35 more)
 
 ### Community 28 - "a11y.helpers.ts"
 Cohesion: 0.25
@@ -577,7 +574,7 @@ Nodes (9): assertNoWcag21AaViolations(), ColorScheme, FormattedViolation, format
 
 ### Community 29 - "build-event-graph.ts"
 Cohesion: 0.11
-Nodes (27): GenerateRandomRouteFormProps, GenerateRouteFormProps, IntelligenceMessagesTable(), edgeTypes, nodeTypes, PreviewEventGraphCanvas(), PreviewEventGraphProps, buildEventGraph() (+19 more)
+Nodes (25): GenerateRandomRouteFormProps, GenerateRouteFormProps, edgeTypes, nodeTypes, PreviewEventGraphCanvas(), PreviewEventGraphProps, buildEventGraph(), BuildEventGraphInput (+17 more)
 
 ### Community 30 - "ui/package.json"
 Cohesion: 0.29
@@ -608,8 +605,8 @@ Cohesion: 0.07
 Nodes (56): useMapData(), buildBounds(), buildTrailCoordinates(), CameraMode, createEventPointElement(), createMarkerElement(), EMPTY_EVENT_POINTS, EMPTY_TRAIL_COLLECTION (+48 more)
 
 ### Community 40 - "clsx"
-Cohesion: 0.17
-Nodes (26): SimulationContext, SimulationContextValue, clampPreviewTimeMs(), computePreviewRevision(), getPreviewRangeMs(), getPreviewStartMs(), appearTarget(), applyEvent() (+18 more)
+Cohesion: 0.15
+Nodes (29): IntelligenceMessagesTable(), blankScenario(), focusElementById(), ScenarioBuilder(), event(), clampPreviewTimeMs(), computePreviewRevision(), getPreviewRangeMs() (+21 more)
 
 ### Community 41 - "attachment.tsx"
 Cohesion: 0.04
@@ -621,11 +618,11 @@ Nodes (42): Advanced — uber-go/dig, Container, Container options, Decorate, Er
 
 ### Community 50 - "marker.tsx"
 Cohesion: 0.09
-Nodes (45): Aerodrome, aerodromeInBbox(), AerodromeRunway, AirLoiterPattern, AirPathPoint, AirRouteErr, AirRouteFailureReason, AirRouteOk (+37 more)
+Nodes (58): Aerodrome, aerodromeInBbox(), AerodromeRunway, AirLoiterPattern, AirPathPoint, AirRouteErr, AirRouteFailureReason, AirRouteOk (+50 more)
 
 ### Community 56 - "fake-indexeddb"
-Cohesion: 0.18
-Nodes (15): DateTimePicker(), DateTimePickerProps, parseValue(), PRESETS, toLocalInputValue(), Button(), buttonVariants, Calendar() (+7 more)
+Cohesion: 0.12
+Nodes (33): SimulationContext, SimulationContextValue, SimulationProvider(), stopRuntime(), clearLegacyScenarios(), coerceEditableScenario(), deleteScenario(), ensureMigrated() (+25 more)
 
 ### Community 57 - "SimulationEvent"
 Cohesion: 0.04
@@ -640,12 +637,12 @@ Cohesion: 0.18
 Nodes (11): Component Docs, Examples, and Usage, Component Selection, Current Project Context, Detailed References, Key Fields, Key Patterns, Principles, Quick Reference (+3 more)
 
 ### Community 60 - "ui/src/lib/utils.ts"
-Cohesion: 0.16
-Nodes (22): SimulationProvider(), isLegacyScenario(), mergeProfile(), migrateRetiredVehicleCategories(), migrateScenarioV1ToV2(), migrateVehicleCategory(), legacy, VEHICLE_CATEGORY_SET (+14 more)
+Cohesion: 0.27
+Nodes (11): isLegacyScenario(), mergeProfile(), migrateRetiredVehicleCategories(), migrateScenarioV1ToV2(), migrateVehicleCategory(), legacy, VEHICLE_CATEGORY_SET, normalizeScenario() (+3 more)
 
 ### Community 61 - "VehicleCategory"
-Cohesion: 0.12
-Nodes (19): DemoRegionSelectProps, CATEGORY_SET, demoRegionsByIds(), parseRegions(), parseSupports(), regionsSupporting(), PathToEventsOptions, SCHEMA_CONSTRAINTS (+11 more)
+Cohesion: 0.18
+Nodes (18): CATEGORY_SET, demoRegionById(), demoRegionsByIds(), parseRegions(), parseSupports(), regionsSupporting(), unpackGeoSeedsAerodromes(), PathPoint (+10 more)
 
 ### Community 62 - "next-themes"
 Cohesion: 0.12
@@ -816,8 +813,8 @@ Cohesion: 0.05
 Nodes (36): Generated Code, google/wire — Compile-Time Code Generation, Injector Definition, Provider Definitions, Testing, Tradeoffs, Complete Application Example, Manual Constructor Injection (+28 more)
 
 ### Community 183 - "cmdk"
-Cohesion: 0.08
-Nodes (37): createDemoScenario(), parseDemoTargetCount(), FIXTURE_DIR, loadFixtureSource(), ManifestEntry, seededRandom(), acceptsCategory(), classifyPoint() (+29 more)
+Cohesion: 0.10
+Nodes (29): acceptsCategory(), classifyPoint(), ClassifyPointOptions, closestPointOnSegment(), DRIVABLE_ROAD, NAVIGABLE_WATER_CLASSES, NavigableWaterClass, NearestRoad (+21 more)
 
 ### Community 187 - "bubble.tsx"
 Cohesion: 0.05
@@ -828,12 +825,12 @@ Cohesion: 0.40
 Nodes (4): 1. Root README (`README.md`), 2. Guide: `docs/authentic-geo-routes.md`, 3. Guide: `docs/geo-seeds.md`, 4. Cross-links
 
 ### Community 200 - "clsx"
-Cohesion: 0.12
-Nodes (32): arrivalBearingDeg(), cruiseAltitudeForDistance(), departureBearingDeg(), altitudeAlongPath(), assertFeasiblePathWindow(), categoryCeilingKnots(), clamp(), dedupePath() (+24 more)
+Cohesion: 0.15
+Nodes (24): cruiseAltitudeForDistance(), altitudeAlongPath(), assertFeasiblePathWindow(), categoryCeilingKnots(), clamp(), curveChordErrorM(), dedupePath(), densifyAlongPath() (+16 more)
 
 ### Community 205 - "map-location-picker.tsx"
-Cohesion: 0.22
-Nodes (9): SeaSeeds, FIXTURE_DIR, loadFixtureSource(), loadManifest(), ManifestEntry, SEEDS_PATH, waterFeaturesFor(), DecodedTileFeature (+1 more)
+Cohesion: 0.11
+Nodes (21): createDemoScenario(), parseDemoTargetCount(), FIXTURE_DIR, loadFixtureSource(), ManifestEntry, readSeaOptions(), loadFixtureSource(), loadManifest() (+13 more)
 
 ### Community 206 - "gr"
 Cohesion: 0.05
@@ -856,12 +853,12 @@ Cohesion: 0.07
 Nodes (27): Complexity, Correctness & Safety, Formatting, Linter Categories, Linter Reference, Logging, Modernization & Meta, Performance (+19 more)
 
 ### Community 211 - "simulation-idb-storage.ts"
-Cohesion: 0.24
-Nodes (17): clearLegacyScenarios(), deleteScenario(), ensureMigrated(), extractId(), extractName(), extractUpdatedAt(), getDb(), getScenario() (+9 more)
+Cohesion: 0.38
+Nodes (5): ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, Separator()
 
 ### Community 212 - "event-draft.ts"
-Cohesion: 0.23
-Nodes (13): MapLocationPickerProps, createDraftForTargetChange(), createEventDraft(), createFollowOnDraft(), DEFAULT_EVENT_POSITION, draftFromEvent(), EventDraft, eventFromDraft() (+5 more)
+Cohesion: 0.15
+Nodes (17): createDraftForTargetChange(), createEventDraft(), createFollowOnDraft(), DEFAULT_EVENT_POSITION, draftFromEvent(), eventFromDraft(), lastPositionForTarget(), replaceEvent() (+9 more)
 
 ### Community 213 - "target.ts"
 Cohesion: 0.07
@@ -888,28 +885,28 @@ Cohesion: 0.40
 Nodes (4): Graphify (mandatory), Key files, Locked decisions (do not re-litigate), When invoked
 
 ### Community 222 - "scenario-timing.ts"
-Cohesion: 0.48
-Nodes (4): applyFastForwardTimes(), isFastForwardActive(), stripFiresAt(), coerceEditableScenario()
+Cohesion: 0.16
+Nodes (18): describeEvent(), FlatItem, GroupedTimeline(), HeaderItem, TargetHeaderBar(), countPayloadStats(), SimulationImport(), fieldHasIssue() (+10 more)
 
 ### Community 223 - "@axe-core/playwright"
 Cohesion: 0.08
 Nodes (22): Assertions, Configuration, Logger integration, samber/oops — Advanced Patterns, Accessing error information, Common scenarios, Context propagation, Core pattern: Error builder chain (+14 more)
 
 ### Community 224 - "tile-source.ts"
-Cohesion: 0.19
-Nodes (12): buildTileUrl(), CacheEntry, clearTileSourceCache(), fetchTileBytes(), isGzipFramed(), maybeGunzip(), pickTileTemplate(), resolveTileUrlTemplate() (+4 more)
+Cohesion: 0.22
+Nodes (11): buildTileUrl(), CacheEntry, clearTileSourceCache(), fetchTileBytes(), isGzipFramed(), maybeGunzip(), pickTileTemplate(), resolveTileUrlTemplate() (+3 more)
 
 ### Community 225 - "Go Structs & Interfaces"
 Cohesion: 0.08
 Nodes (23): Accept Interfaces, Return Structs, Avoid `any` / `interface{}` When a Specific Type Will Do, Common Mistakes, Compile-Time Interface Check, Cross-References, Define Interfaces Where They're Consumed, Dependency Injection via Interfaces, Don't Create Interfaces Prematurely (+15 more)
 
 ### Community 226 - "benchstat Reference"
-Cohesion: 0.09
-Nodes (23): `assume=exact`, `assume=nothing` (default), benchstat in CI, benchstat Reference, Common Pitfalls, Filter examples, Filter Expression Syntax, Filter flag (+15 more)
+Cohesion: 0.11
+Nodes (19): `assume=exact`, `assume=nothing` (default), benchstat in CI, benchstat Reference, Common Pitfalls, Filter examples, Filter Expression Syntax, Filter key types (+11 more)
 
 ### Community 227 - "Execution Trace Reference"
-Cohesion: 0.09
-Nodes (23): Custom Annotations, Execution Trace Reference, From benchmarks, From code (programmatic), From running service, From tests, GC phases, Generating Traces (+15 more)
+Cohesion: 0.06
+Nodes (36): Analyzing a snapshot, Constraints, Custom Annotations, Execution Trace Reference, Extracting pprof profiles from traces, Flight Recorder (Go 1.25+), From benchmarks, From code (programmatic) (+28 more)
 
 ### Community 228 - "Go CLI Best Practices"
 Cohesion: 0.09
@@ -928,8 +925,8 @@ Cohesion: 0.11
 Nodes (18): Avoid io.ReadAll for large payloads, Batch Operations, Buffered I/O, Cgo Overhead, Channel: batch processing from a stream, Concurrent Multi-Stage Pipelines, Connection pooling, Database: batch inserts over row-by-row (+10 more)
 
 ### Community 232 - "geo-router.worker.ts"
-Cohesion: 0.27
-Nodes (10): createGeoRouterClient(), GeoRouterClient, GeoRouteRequest, Pending, createGeoRouterWorker(), GeoRouterLngLat, GeoRouterMode, GeoRouterRequest (+2 more)
+Cohesion: 0.17
+Nodes (18): createGeoRouterClient(), GeoRouterClient, GeoRouteRequest, Pending, createGeoRouterWorker(), GeoRouterLngLat, GeoRouterMode, GeoRouterRequest (+10 more)
 
 ### Community 233 - "swag CLI Reference"
 Cohesion: 0.11
@@ -984,12 +981,12 @@ Cohesion: 0.12
 Nodes (16): Additional Resources, Code Review Checklist, Common Mistakes, Cross-References, Detailed Categories, Go Security, Overview, Quick Reference (+8 more)
 
 ### Community 246 - "event-graph-node.tsx"
-Cohesion: 0.25
-Nodes (12): TimedEventEdgeView(), EventGraphNodeView(), KIND_BADGE, KIND_COLOR, KIND_LABEL, eventGraphKind, EventGraphNode, eventGraphDetailLevel (+4 more)
+Cohesion: 0.50
+Nodes (4): APIs, `samber/cc-skills-golang@golang-graphql`, `samber/cc-skills-golang@golang-grpc`, `samber/cc-skills-golang@golang-swagger`
 
 ### Community 247 - "event-message-export.ts"
-Cohesion: 0.20
-Nodes (12): DEFAULT_EVENT_MESSAGE_EXPORT_OPTIONS, downloadEventMessages(), EventMessageExportOptions, formatEventMessages(), formatLatitude(), formatLongitude(), formatOrdinal(), formatPositionedEventLine() (+4 more)
+Cohesion: 0.18
+Nodes (13): DEFAULT_EVENT_MESSAGE_EXPORT_OPTIONS, downloadEventMessages(), EventMessageExportOptions, formatEventMessages(), formatLatitude(), formatLongitude(), formatOrdinal(), formatPositionedEventLine() (+5 more)
 
 ### Community 248 - "Go Data Structures"
 Cohesion: 0.13
@@ -1100,8 +1097,8 @@ Cohesion: 0.15
 Nodes (13): 1. Read the Error Message First, 2. Reproduce Before You Fix, 3. If You Don't Measure It, You're Guessing, 4. One Hypothesis at a Time, 5. Find the Root Cause — No Workarounds, 6. Research the Codebase, Not Just the Diff, 7. Start Simple, Cross-References (+5 more)
 
 ### Community 275 - "geo-router.worker.ts"
-Cohesion: 0.24
-Nodes (12): handleCancel(), handlePing(), handleRoute(), inflight, post(), readRoadOptions(), readSeaOptions(), RoadVehicleKind (+4 more)
+Cohesion: 0.25
+Nodes (12): TimedEventEdgeView(), EventGraphNodeView(), KIND_BADGE, KIND_COLOR, KIND_LABEL, eventGraphKind, EventGraphNode, eventGraphDetailLevel (+4 more)
 
 ### Community 276 - "Go Benchmarking & Performance Measurement"
 Cohesion: 0.17
@@ -1116,8 +1113,8 @@ Cohesion: 0.17
 Nodes (12): Code Examples, Core Concepts, Domain — pure business logic, Hexagonal Architecture (Ports & Adapters) in Go, Multiple Entry Points, Ports — interfaces defined separately from implementations, Primary Adapter — HTTP handler calls the service port, Project Structure (+4 more)
 
 ### Community 279 - "@mapbox/vector-tile"
-Cohesion: 0.14
-Nodes (17): describeEvent(), DEFAULT_POSITION, EditTimelineEvent(), EditTimelineEventProps, issuesForField(), TimelineEventShell(), TimelineEventShellProps, ViewTimelineEvent() (+9 more)
+Cohesion: 0.42
+Nodes (6): applyFastForwardTimes(), compressedScheduleMs(), formatSimOffsetFromAnchor(), isFastForwardActive(), scenarioScheduleAnchorMs(), stripFiresAt()
 
 ### Community 280 - "[Unreleased]"
 Cohesion: 0.17
@@ -1391,10 +1388,6 @@ Nodes (8): cobra-cli scaffolder, Cobra Documentation and Scaffolding Generators,
 Cohesion: 0.22
 Nodes (9): Basic Unmarshal, mapstructure tags, net.IP and custom types, Remain for unknown keys, Squash for embedded structs, time.Duration, UnmarshalKey — extracting a sub-tree, Viper Unmarshal and Struct Mapping (+1 more)
 
-### Community 351 - "simulation-schema.ts"
-Cohesion: 0.25
-Nodes (7): idSchema, isoDateSchema, positionPayloadSchema, simulationEventSchema, simulationScenarioSchema, targetDefinitionSchema, targetProfileSchema
-
 ### Community 352 - "Transactions, Isolation Levels, and Locking"
 Cohesion: 0.25
 Nodes (5): Basic transaction pattern, Custom isolation level, Locking variants, SELECT FOR UPDATE — prevent race conditions, Transactions, Isolation Levels, and Locking
@@ -1459,10 +1452,6 @@ Nodes (7): Basic setup, Debouncing rapid changes, Race-safe reload pattern, Stop
 Cohesion: 0.25
 Nodes (8): Analyzing and Interpreting Profiles, Capturing Profiles, Enable pprof HTTP Server, pprof Reference, Profile Types, Quick Setup (Development), Remote Profiling (Production), Secure Setup (Production)
 
-### Community 368 - "Flight Recorder (Go 1.25+)"
-Cohesion: 0.29
-Nodes (7): Analyzing a snapshot, Constraints, Flight Recorder (Go 1.25+), Setup, Snapshot on error, Trigger patterns, When to use flight recorder vs regular tracing
-
 ### Community 369 - "output.go"
 Cohesion: 0.43
 Nodes (5): colorExamples(), Command, outputExample(), printUsers(), User
@@ -1516,8 +1505,8 @@ Cohesion: 0.33
 Nodes (6): Basic Workflow, Step 0: Write benchmarks, Step 1: Measure baseline, Step 2: Make your change, Step 3: Measure again, Step 4: Compare
 
 ### Community 382 - "Full Command Reference"
-Cohesion: 0.33
-Nodes (6): Extracting pprof profiles from traces, Full capture-to-analysis workflows, Full Command Reference, `go tool trace` flags summary, HTTP endpoints served by the web UI, Opening traces
+Cohesion: 0.50
+Nodes (4): Filter flag, Flags Reference, Input labeling, Projection flags
 
 ### Community 383 - "Struct Scanning and NULLable Columns"
 Cohesion: 0.33
@@ -1635,10 +1624,6 @@ Nodes (4): CGO Issues, Compilation Issues, Module Problems, Version Mismatch
 Cohesion: 0.50
 Nodes (4): Capacity Growth, Preallocation, Slice Internals, `slices` Package (Go 1.21+)
 
-### Community 418 - "APIs"
-Cohesion: 0.50
-Nodes (4): APIs, `samber/cc-skills-golang@golang-graphql`, `samber/cc-skills-golang@golang-grpc`, `samber/cc-skills-golang@golang-swagger`
-
 ### Community 419 - "Interfaces"
 Cohesion: 0.50
 Nodes (4): Canonical Method Names, Interfaces, Multi-Method Interfaces, Single-Method Interfaces
@@ -1719,12 +1704,12 @@ Nodes (3): JSON Pitfalls, Numbers into `interface{}` become `float64`, Unexporte
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `map-data-provider.tsx`, `simulation-storage.ts`, `tracking-map.tsx`, `simulation-import.tsx`, `button.tsx`, `event-graph-node.tsx`, `@mapbox/vector-tile`, `fake-indexeddb`, `input-group.tsx`, `build-event-graph.ts`, `next-themes`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `LruCache` connect `@base-ui/react` to `cmdk`?**
+- **Why does `cn()` connect `cn` to `map-data-provider.tsx`, `simulation-storage.ts`, `tracking-map.tsx`, `simulation-import.tsx`, `clsx`, `button.tsx`, `build-event-graph.ts`, `geo-router.worker.ts`, `simulation-idb-storage.ts`, `input-group.tsx`, `scenario-timing.ts`, `next-themes`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `VehicleCategory` connect `attachment.tsx` to `tracking-map.tsx`, `clsx`, `position-telemetry.ts`, `simulation-engine.ts`, `button.tsx`, `marker.tsx`, `input-group.tsx`, `ui/src/lib/utils.ts`, `VehicleCategory`, `scenario-timing.ts`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **Why does `Prometheus Go Runtime Metrics Reference` connect `pointsToPolygonDistance` to `golang-benchmark/SKILL.md`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+- **Why does `Execution Trace Reference` connect `Execution Trace Reference` to `golang-benchmark/SKILL.md`?**
+  _High betweenness centrality (0.001) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `ScenarioBuilder()` (e.g. with `event()` and `at()`) actually correct?**
   _`ScenarioBuilder()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `$schema`, `config:recommended`, `gomodTidy` to the rest of the system?**
@@ -1732,4 +1717,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `event-generator.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.04081632653061224 - nodes in this community are weakly interconnected._
 - **Should `scenario-builder.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.08392603129445235 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07948717948717948 - nodes in this community are weakly interconnected._

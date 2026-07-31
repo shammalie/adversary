@@ -27,7 +27,12 @@ const MAX_DEPARTURE_NM = 8;
 const MIN_APPROACH_NM = 2;
 const MAX_APPROACH_NM = 8;
 const RACETRACK_LEG_FACTOR = 2.5;
-const ORBIT_SAMPLES = 24;
+/** Full-circle hold samples — dense enough that DP + map polylines read as curves. */
+const ORBIT_SAMPLES = 48;
+/** Samples per 180° racetrack turn (~7.5° steps). */
+const RACETRACK_TURN_SAMPLES = 24;
+/** Auto loiter is uncommon — most air tracks are straight transit. */
+const LOITER_AUTO_PROBABILITY = 0.15;
 const GREAT_CIRCLE_STEP_NM = 25;
 const SHORT_HOP_NM = 80;
 const BEARING_MATCH_TOLERANCE_DEG = 12;
@@ -138,7 +143,10 @@ export interface PlanAirRouteOptions {
    * When omitted, RTB is chosen randomly (~35%) if `returnsToBase`.
    */
   returnToBase?: boolean;
-  /** Loiter selection. `"auto"` picks from platform capability. */
+  /**
+   * Loiter selection. `"auto"` (default) inserts a hold on ~15% of capable
+   * platforms; `"none"` never loiters; `"racetrack"` / `"orbit"` force a pattern.
+   */
   loiter?: AirLoiterPattern | "auto" | "none";
   /** Pin origin (and optionally dest) for tests / planner overrides. */
   origin?: Aerodrome;
@@ -352,7 +360,7 @@ function appendUnique(path: AirPathPoint[], next: AirPathPoint) {
 /**
  * Sample a right-hand 180° turn: centre stays on the aircraft's right.
  * Geographic bearings increase clockwise; a right turn orbits the centre
- * counter-clockwise (decreasing bearing from the centre).
+ * clockwise (increasing bearing from the centre).
  */
 function sampleRightTurn180(options: {
   start: Pick<AirPathPoint, "latitude" | "longitude">;
@@ -361,14 +369,14 @@ function sampleRightTurn180(options: {
   altitudeFt: number;
   samples?: number;
 }): AirPathPoint[] {
-  const samples = options.samples ?? 12;
+  const samples = options.samples ?? RACETRACK_TURN_SAMPLES;
   const right = normalizeHeading(options.headingDeg + 90);
   const centre = destinationPoint(options.start, options.radiusNm, right);
   const startBearing = normalizeHeading(right + 180); // from centre → start
   const points: AirPathPoint[] = [];
   for (let i = 1; i <= samples; i += 1) {
-    // Counter-clockwise around centre = decreasing geographic bearing
-    const bearing = normalizeHeading(startBearing - (180 * i) / samples);
+    // Clockwise around centre = increasing geographic bearing (right turn)
+    const bearing = normalizeHeading(startBearing + (180 * i) / samples);
     const p = destinationPoint(centre, options.radiusNm, bearing);
     points.push({
       latitude: p.latitude,
@@ -380,8 +388,22 @@ function sampleRightTurn180(options: {
 }
 
 /**
+ * Centre of a right-hand orbit that is tangent at `entry` for an aircraft
+ * arriving on `inboundHeadingDeg`. Centre lies to the right of track so the
+ * first clockwise step continues on that heading (no radial spike).
+ */
+export function rightHandOrbitCentre(
+  entry: Pick<AirPathPoint, "latitude" | "longitude">,
+  inboundHeadingDeg: number,
+  radiusNm: number,
+): Pick<AirPathPoint, "latitude" | "longitude"> {
+  return destinationPoint(entry, radiusNm, normalizeHeading(inboundHeadingDeg + 90));
+}
+
+/**
  * Racetrack holding pattern: two parallel legs joined by 180° turns at the
- * platform turn radius. Geometry closes on the entry point after one circuit.
+ * platform turn radius. Geometry closes on the entry point after `circuits`
+ * laps (default 2 — matches typical ISR racetrack overlays).
  */
 export function buildRacetrack(options: {
   entry: Pick<AirPathPoint, "latitude" | "longitude">;
@@ -390,11 +412,14 @@ export function buildRacetrack(options: {
   altitudeFt: number;
   /** Straight leg length; defaults to ~2.5× turn diameter. */
   legLengthNm?: number;
+  /** Number of full circuits; minimum 1. */
+  circuits?: number;
 }): AirPathPoint[] {
   const radiusNm = Math.max(metersToNm(options.turnRadiusM), 0.15);
   const legNm = options.legLengthNm ?? Math.max(RACETRACK_LEG_FACTOR * radiusNm * 2, 3);
   const hdg = normalizeHeading(options.inboundHeadingDeg);
   const reciprocal = normalizeHeading(hdg + 180);
+  const circuits = Math.max(1, Math.floor(options.circuits ?? 2));
 
   const points: AirPathPoint[] = [
     {
@@ -404,31 +429,35 @@ export function buildRacetrack(options: {
     },
   ];
 
-  // Leg 1 outbound
-  const a = destinationPoint(options.entry, legNm, hdg);
-  appendUnique(points, { ...a, altitude: options.altitudeFt });
+  for (let lap = 0; lap < circuits; lap += 1) {
+    const legStart = points[points.length - 1]!;
 
-  for (const p of sampleRightTurn180({
-    start: a,
-    headingDeg: hdg,
-    radiusNm,
-    altitudeFt: options.altitudeFt,
-  })) {
-    appendUnique(points, p);
-  }
+    // Leg 1 outbound
+    const a = destinationPoint(legStart, legNm, hdg);
+    appendUnique(points, { ...a, altitude: options.altitudeFt });
 
-  const b = points[points.length - 1]!;
-  // Leg 2 back
-  const c = destinationPoint(b, legNm, reciprocal);
-  appendUnique(points, { ...c, altitude: options.altitudeFt });
+    for (const p of sampleRightTurn180({
+      start: a,
+      headingDeg: hdg,
+      radiusNm,
+      altitudeFt: options.altitudeFt,
+    })) {
+      appendUnique(points, p);
+    }
 
-  for (const p of sampleRightTurn180({
-    start: c,
-    headingDeg: reciprocal,
-    radiusNm,
-    altitudeFt: options.altitudeFt,
-  })) {
-    appendUnique(points, p);
+    const b = points[points.length - 1]!;
+    // Leg 2 back
+    const c = destinationPoint(b, legNm, reciprocal);
+    appendUnique(points, { ...c, altitude: options.altitudeFt });
+
+    for (const p of sampleRightTurn180({
+      start: c,
+      headingDeg: reciprocal,
+      radiusNm,
+      altitudeFt: options.altitudeFt,
+    })) {
+      appendUnique(points, p);
+    }
   }
 
   // Snap close to entry
@@ -441,7 +470,10 @@ export function buildRacetrack(options: {
 }
 
 /**
- * Orbit (circular hold) at `radiusM` (≥ turn radius). Samples a full 360°.
+ * Orbit (circular hold) at `radiusM` (≥ turn radius). Samples clockwise
+ * (right-hand) for `circuits` full turns. Callers should place `centre` via
+ * {@link rightHandOrbitCentre} so `startBearingDeg` is centre→entry and the
+ * inbound track is tangent at the first point.
  */
 export function buildOrbit(options: {
   centre: Pick<AirPathPoint, "latitude" | "longitude">;
@@ -450,14 +482,18 @@ export function buildOrbit(options: {
   altitudeFt: number;
   startBearingDeg?: number;
   samples?: number;
+  /** Number of full 360° circuits; minimum 1. */
+  circuits?: number;
 }): AirPathPoint[] {
   const radiusM = Math.max(options.radiusM, options.turnRadiusM);
   const radiusNm = metersToNm(radiusM);
   const samples = options.samples ?? ORBIT_SAMPLES;
+  const circuits = Math.max(1, Math.floor(options.circuits ?? 2));
   const start = normalizeHeading(options.startBearingDeg ?? 0);
   const points: AirPathPoint[] = [];
-  for (let i = 0; i <= samples; i += 1) {
-    const bearing = normalizeHeading(start + (360 * i) / samples);
+  const totalSamples = samples * circuits;
+  for (let i = 0; i <= totalSamples; i += 1) {
+    const bearing = normalizeHeading(start + (360 * circuits * i) / totalSamples);
     const p = destinationPoint(options.centre, radiusNm, bearing);
     points.push({
       latitude: p.latitude,
@@ -466,6 +502,34 @@ export function buildOrbit(options: {
     });
   }
   return points;
+}
+
+/**
+ * Right-hand circular loiter entered tangentially at `entry` on `inboundHeadingDeg`.
+ */
+export function buildTangentOrbit(options: {
+  entry: Pick<AirPathPoint, "latitude" | "longitude">;
+  inboundHeadingDeg: number;
+  turnRadiusM: number;
+  altitudeFt: number;
+  /** Orbit radius; defaults to turn radius. */
+  radiusM?: number;
+  samples?: number;
+  circuits?: number;
+}): AirPathPoint[] {
+  const radiusM = Math.max(options.radiusM ?? options.turnRadiusM, options.turnRadiusM);
+  const radiusNm = metersToNm(radiusM);
+  const centre = rightHandOrbitCentre(options.entry, options.inboundHeadingDeg, radiusNm);
+  const startBearing = initialBearingDegrees(centre, options.entry);
+  return buildOrbit({
+    centre,
+    radiusM,
+    turnRadiusM: options.turnRadiusM,
+    altitudeFt: options.altitudeFt,
+    startBearingDeg: startBearing,
+    samples: options.samples,
+    circuits: options.circuits,
+  });
 }
 
 /** Path length in nm (planar haversine sum). */
@@ -511,16 +575,16 @@ function pickLoiter(
   kinematics: AirRouterKinematics,
   loiterOpt: PlanAirRouteOptions["loiter"],
   random: () => number,
-  forceForRtb: boolean,
 ): AirLoiterPattern | null {
-  if (loiterOpt === "none") return forceForRtb && kinematics.canLoiter ? "racetrack" : null;
+  if (loiterOpt === "none") return null;
   if (loiterOpt === "racetrack" || loiterOpt === "orbit") {
-    return kinematics.canLoiter || forceForRtb ? loiterOpt : null;
+    return kinematics.canLoiter ? loiterOpt : null;
   }
-  // auto
-  if (!kinematics.canLoiter && !forceForRtb) return null;
-  if (!kinematics.canLoiter && forceForRtb) return "racetrack";
-  return random() < 0.5 ? "racetrack" : "orbit";
+  // auto — most flights transit; only a minority hold.
+  if (!kinematics.canLoiter) return null;
+  if (random() >= LOITER_AUTO_PROBABILITY) return null;
+  // Prefer racetrack (typical ISR overlay) when we do hold.
+  return random() < 0.65 ? "racetrack" : "orbit";
 }
 
 function composePointToPoint(options: {
@@ -594,14 +658,16 @@ function composePointToPoint(options: {
 
   if (loiter && cruiseDist > 1) {
     const inbound = initialBearingDegrees(loiterEntry, approachFix);
+    // Tangential entry: arrive on `inbound`, hold to the right of track, then
+    // continue toward the approach fix (same heading) — never spike through the
+    // orbit centre or chord across the hold.
     const pattern =
       loiter === "orbit"
-        ? buildOrbit({
-            centre: loiterEntry,
-            radiusM: kinematics.turnRadiusM,
+        ? buildTangentOrbit({
+            entry: loiterEntry,
+            inboundHeadingDeg: inbound,
             turnRadiusM: kinematics.turnRadiusM,
             altitudeFt: cruiseAltFt,
-            startBearingDeg: inbound,
           })
         : buildRacetrack({
             entry: loiterEntry,
@@ -666,13 +732,13 @@ function composeReturnToBase(options: {
   field: Aerodrome;
   kinematics: AirRouterKinematics;
   cruiseAltFt: number;
-  loiter: AirLoiterPattern;
+  loiter: AirLoiterPattern | null;
   random: () => number;
 }): AirPathPoint[] {
   const { field, kinematics, cruiseAltFt, loiter, random } = options;
   const patrolBearing = selectRunwayHeading(field, random() * 360).flyHeading;
   const radiusNm = metersToNm(kinematics.turnRadiusM);
-  // Outbound far enough for a meaningful patrol before the hold.
+  // Outbound far enough for a meaningful patrol before the hold / reverse.
   const outboundNm = Math.max(12, radiusNm * 6 + MIN_DEPARTURE_NM * 2);
 
   const dep = selectRunwayHeading(field, patrolBearing);
@@ -705,30 +771,44 @@ function composeReturnToBase(options: {
     appendUnique(path, p);
   }
 
-  const pattern =
-    loiter === "orbit"
-      ? buildOrbit({
-          centre: patrolPoint,
-          radiusM: kinematics.turnRadiusM,
-          turnRadiusM: kinematics.turnRadiusM,
-          altitudeFt: cruiseAltFt,
-          startBearingDeg: patrolBearing,
-        })
-      : buildRacetrack({
-          entry: patrolPoint,
-          inboundHeadingDeg: patrolBearing,
-          turnRadiusM: kinematics.turnRadiusM,
-          altitudeFt: cruiseAltFt,
-        });
-  for (const p of pattern) appendUnique(path, p);
+  if (loiter) {
+    const pattern =
+      loiter === "orbit"
+        ? buildTangentOrbit({
+            entry: patrolPoint,
+            inboundHeadingDeg: patrolBearing,
+            turnRadiusM: kinematics.turnRadiusM,
+            altitudeFt: cruiseAltFt,
+          })
+        : buildRacetrack({
+            entry: patrolPoint,
+            inboundHeadingDeg: patrolBearing,
+            turnRadiusM: kinematics.turnRadiusM,
+            altitudeFt: cruiseAltFt,
+          });
+    for (const p of pattern) appendUnique(path, p);
+  }
+
+  // Hold / patrol ends still heading outbound — reverse with a right 180° before
+  // homing, otherwise the return leg is a hairpin chord back on itself.
+  const turnStart = path[path.length - 1]!;
+  for (const p of sampleRightTurn180({
+    start: turnStart,
+    headingDeg: patrolBearing,
+    radiusNm,
+    altitudeFt: cruiseAltFt,
+  })) {
+    appendUnique(path, p);
+  }
 
   // Return — approach along reciprocal of departure (or best matching runway)
-  const homeBearing = initialBearingDegrees(pattern[pattern.length - 1]!, field);
+  const homeStart = path[path.length - 1]!;
+  const homeBearing = initialBearingDegrees(homeStart, field);
   const arr = selectRunwayHeading(field, homeBearing);
   const appNm = clamp(MIN_APPROACH_NM + 1, MIN_APPROACH_NM, MAX_APPROACH_NM);
   const approachFix = destinationPoint(field, appNm, normalizeHeading(arr.flyHeading + 180));
 
-  for (const p of sampleGreatCircle(pattern[pattern.length - 1]!, approachFix, cruiseAltFt, 10)) {
+  for (const p of sampleGreatCircle(homeStart, approachFix, cruiseAltFt, 10)) {
     appendUnique(path, p);
   }
   for (let i = 1; i <= 4; i += 1) {
@@ -802,8 +882,7 @@ export function planAirRoute(options: PlanAirRouteOptions): AirRouteResult {
 
   if (wantRtb && kinematics.returnsToBase) {
     const field = options.origin ?? pool[Math.floor(random() * pool.length)]!;
-    const loiter =
-      pickLoiter(kinematics, options.loiter, random, true) ?? ("racetrack" as const);
+    const loiter = pickLoiter(kinematics, options.loiter, random);
     // Probe length with a representative cruise altitude
     const probeAlt = cruiseAltitudeForDistance(40, kinematics.typicalFlightLevelFt);
     const path = composeReturnToBase({
@@ -868,7 +947,7 @@ export function planAirRoute(options: PlanAirRouteOptions): AirRouteResult {
   const pick = viable[Math.floor(random() * viable.length)]!;
   const destination = pick.dest;
   const cruiseAltFt = cruiseAltitudeForDistance(pick.dist, kinematics.typicalFlightLevelFt);
-  const loiter = pickLoiter(kinematics, options.loiter, random, false);
+  const loiter = pickLoiter(kinematics, options.loiter, random);
 
   const path = composePointToPoint({
     origin,

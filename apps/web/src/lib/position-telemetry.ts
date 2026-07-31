@@ -113,7 +113,7 @@ export function interpolatePositionSnapshot(
   vehicleCategory?: VehicleCategory,
 ): PositionSnapshot {
   if (currentTimeMs <= fromTimeMs) return from;
-  if (currentTimeMs >= toTimeMs) {
+  if (currentTimeMs >= toTimeMs || toTimeMs <= fromTimeMs) {
     return derivePositionSnapshot(to, new Date(toTimeMs).toISOString(), from, vehicleCategory);
   }
 

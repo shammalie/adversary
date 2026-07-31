@@ -465,6 +465,9 @@ export function TrackingMap({
     for (const target of positionedTargets) {
       const position = target.position;
       if (!position) continue;
+      if (!Number.isFinite(position.latitude) || !Number.isFinite(position.longitude)) {
+        continue;
+      }
       let marker = markersRef.current.get(target.targetId);
       if (!marker) {
         const element = createMarkerElement(target, Boolean(onSelectTarget), (id) =>
@@ -530,10 +533,12 @@ export function TrackingMap({
         target.vehicleCategory,
       );
       element.style.setProperty("--marker-rotate", `${markerRotate}deg`);
+      // Lift the icon in globe mode via a CSS variable on the SVG — never set
+      // element.style.transform here; MapLibre owns that for lat/lng placement.
+      // Overwriting it pins markers at the map container's top-left.
       const altitudeLift =
         mode === "globe" ? globeAltitudeOffsetPx(position.altitude) : 0;
-      element.style.transform =
-        altitudeLift > 0 ? `translateY(-${altitudeLift.toFixed(1)}px)` : "";
+      element.style.setProperty("--altitude-lift", `${altitudeLift}px`);
       element.dataset.selected = String(target.targetId === selectedTargetId);
       element.dataset.tracked = String(trackedSet.has(target.targetId));
       element.setAttribute("aria-pressed", String(target.targetId === selectedTargetId));

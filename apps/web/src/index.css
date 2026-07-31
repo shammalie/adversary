@@ -93,13 +93,14 @@
     border: 1.5px solid color-mix(in oklab, var(--background) 80%, white);
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--event-point-color, #38bdf8) 45%, transparent);
     cursor: pointer;
+    /* Use `scale` (not `transform`) so MapLibre's positioning transform is preserved. */
     transition:
-      transform 160ms ease,
+      scale 160ms ease,
       box-shadow 160ms ease;
   }
 
   .tracking-event-point[data-highlighted="true"] {
-    transform: scale(1.45);
+    scale: 1.45;
     box-shadow:
       0 0 0 2px color-mix(in oklab, var(--background) 70%, white),
       0 0 0 4px color-mix(in oklab, var(--event-point-color, #38bdf8) 75%, transparent);
@@ -123,18 +124,17 @@
     border-radius: 9999px;
     background: transparent;
     color: var(--affiliation-color, var(--foreground));
-    /* transform may be set inline for globe altitude lift */
-    will-change: transform;
+    /* Do not set or transition `transform` here — MapLibre positions the marker with it. */
     transition:
       width 180ms ease,
-      height 180ms ease,
-      transform 180ms ease;
+      height 180ms ease;
   }
 
   .tracking-marker svg {
     width: 1rem;
     height: 1rem;
-    transform: rotate(var(--marker-rotate, 0deg));
+    /* Altitude lift + heading live on the icon so the marker root transform stays MapLibre's. */
+    transform: translateY(calc(-1 * var(--altitude-lift, 0px))) rotate(var(--marker-rotate, 0deg));
     filter: drop-shadow(0 0 1.5px var(--background)) drop-shadow(0 1px 2px color-mix(in oklab, var(--background) 70%, transparent));
     transition: transform 180ms ease;
   }

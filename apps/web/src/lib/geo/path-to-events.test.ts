@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import { buildOrbit, metersToNm } from "@/lib/geo/air-router";
 import {
+  curveChordErrorM,
   douglasPeuckerSimplify,
   PATH_EVENT_BUDGET_MAX,
   PATH_EVENT_BUDGET_MIN,
   pathToEvents,
   perpendicularDistanceMeters,
+  restoreArcDetail,
   simplifyToEventBudget,
 } from "@/lib/geo/path-to-events";
 import { resolveVehicleProfile } from "@/lib/geo/vehicle-profiles";
@@ -44,6 +47,34 @@ function zigzagPolyline(legs = 80) {
     points.push({ latitude: lat, longitude: lng });
   }
   return points;
+}
+
+function pathLengthNmOf(
+  path: ReadonlyArray<{ latitude: number; longitude: number }>,
+): number {
+  let total = 0;
+  for (let i = 1; i < path.length; i += 1) {
+    total += haversineDistanceNm(path[i - 1]!, path[i]!);
+  }
+  return total;
+}
+
+/** End time sized for cruise midpoint with light slack, inside [min, max] cruise. */
+function feasibleEndAt(
+  path: ReadonlyArray<{ latitude: number; longitude: number }>,
+  startAt: string,
+  profile: ReturnType<typeof resolveVehicleProfile>,
+  slack = 1.02,
+): string {
+  const totalNm = pathLengthNmOf(path);
+  const mid = profileMid(profile);
+  const floor = profile.cruiseKnots.minKnots;
+  const ceiling = Math.min(profile.maxKnots, CATEGORY_TOP_SPEED_KNOTS[profile.category]);
+  const hoursAtMid = (totalNm / mid) * slack;
+  const minHours = totalNm / ceiling;
+  const maxHours = totalNm / floor;
+  const hours = Math.min(Math.max(hoursAtMid, minHours * 1.01), maxHours * 0.98);
+  return new Date(Date.parse(startAt) + Math.max(hours, 1 / 3600) * 3_600_000).toISOString();
 }
 
 describe("douglas-peucker simplification", () => {
@@ -93,11 +124,13 @@ describe("pathToEvents", () => {
       { latitude: 51.55, longitude: -0.1, altitude: 0 },
       { latitude: 51.6, longitude: -0.08, altitude: 0 },
     ];
+    const profile = resolveVehicleProfile("car", "Sedan");
+    const startAt = "2026-07-27T12:00:00.000Z";
     const events = pathToEvents({
       targetId: "t1",
       path,
-      startAt: "2026-07-27T12:00:00.000Z",
-      endAt: "2026-07-27T14:00:00.000Z",
+      startAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "car",
       vehicleSubtype: "Sedan",
       idFactory: idFactory(),
@@ -116,11 +149,13 @@ describe("pathToEvents", () => {
 
   it("never emits a speed above the category ceiling", () => {
     const path = zigzagPolyline(40);
+    const profile = resolveVehicleProfile("truck", "Cargo truck");
+    const startAt = "2026-07-27T12:00:00.000Z";
     const events = pathToEvents({
       targetId: "t1",
       path,
-      startAt: "2026-07-27T12:00:00.000Z",
-      endAt: "2026-07-27T20:00:00.000Z",
+      startAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "truck",
       vehicleSubtype: "Cargo truck",
       idFactory: idFactory(),
@@ -128,10 +163,38 @@ describe("pathToEvents", () => {
     const ceiling = CATEGORY_TOP_SPEED_KNOTS.truck;
     for (const event of events) {
       expect(event.position!.speed!).toBeLessThanOrEqual(ceiling);
-      expect(event.position!.speed!).toBeLessThanOrEqual(
-        resolveVehicleProfile("truck", "Cargo truck").maxKnots,
-      );
+      expect(event.position!.speed!).toBeLessThanOrEqual(profile.maxKnots);
     }
+  });
+
+  it("keeps aircraft speeds within the profile cruise band when retimed", () => {
+    const path = [
+      { latitude: 51.47, longitude: -0.46, altitude: 0 },
+      { latitude: 51.5, longitude: 2.0, altitude: 0 },
+      { latitude: 51.55, longitude: 4.5, altitude: 0 },
+      { latitude: 51.6, longitude: 7.0, altitude: 0 },
+    ];
+    const transport = resolveVehicleProfile("aircraft", "Transport");
+    const startAt = "2026-07-27T12:00:00.000Z";
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt,
+      endAt: feasibleEndAt(path, startAt, transport),
+      vehicleCategory: "aircraft",
+      vehicleSubtype: "Transport",
+      idFactory: idFactory(),
+    });
+
+    const turnFloor = transport.cruiseKnots.minKnots * 0.35;
+    for (const event of events) {
+      expect(event.position!.speed!).toBeGreaterThanOrEqual(turnFloor - 0.5);
+      expect(event.position!.speed!).toBeLessThanOrEqual(transport.maxKnots);
+    }
+    const cruiseSamples = events.filter(
+      (e) => (e.position!.speed ?? 0) >= transport.cruiseKnots.minKnots * 0.9,
+    );
+    expect(cruiseSamples.length).toBeGreaterThan(0);
   });
 
   it("uses subtype cruise rather than the wide aircraft category band", () => {
@@ -142,20 +205,14 @@ describe("pathToEvents", () => {
       { latitude: 51.55, longitude: 4.5, altitude: 0 },
       { latitude: 51.6, longitude: 7.0, altitude: 0 },
     ];
-    let totalNm = 0;
-    for (let i = 1; i < path.length; i += 1) {
-      totalNm += haversineDistanceNm(path[i - 1]!, path[i]!);
-    }
     const transport = resolveVehicleProfile("aircraft", "Transport");
-    const hours = totalNm / profileMid(transport);
     const startAt = "2026-07-27T12:00:00.000Z";
-    const endAt = new Date(Date.parse(startAt) + hours * 3_600_000 * 1.1).toISOString();
 
     const events = pathToEvents({
       targetId: "t1",
       path,
       startAt,
-      endAt,
+      endAt: feasibleEndAt(path, startAt, transport),
       vehicleCategory: "aircraft",
       vehicleSubtype: "Transport",
       idFactory: idFactory(),
@@ -179,19 +236,13 @@ describe("pathToEvents", () => {
       });
     }
 
-    const totalNm = path.reduce((sum, point, index) => {
-      if (index === 0) return 0;
-      return sum + haversineDistanceNm(path[index - 1]!, point);
-    }, 0);
-    const hours = totalNm / profileCruise(profile);
     const startAt = "2026-07-27T12:00:00.000Z";
-    const endAt = new Date(Date.parse(startAt) + hours * 3_600_000 * 1.15).toISOString();
 
     const events = pathToEvents({
       targetId: "t1",
       path,
       startAt,
-      endAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "aircraft",
       vehicleSubtype: "Transport",
       idFactory: idFactory(),
@@ -225,19 +276,13 @@ describe("pathToEvents", () => {
       { latitude: 52, longitude: 4, altitude: endAlt },
       { latitude: 54, longitude: 8, altitude: endAlt },
     ];
-    let totalNm = 0;
-    for (let i = 1; i < path.length; i += 1) {
-      totalNm += haversineDistanceNm(path[i - 1]!, path[i]!);
-    }
-    const hours = totalNm / profileCruise(profile);
     const startAt = "2026-07-27T12:00:00.000Z";
-    const endAt = new Date(Date.parse(startAt) + hours * 3_600_000 * 1.2).toISOString();
 
     const events = pathToEvents({
       targetId: "t1",
       path,
       startAt,
-      endAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "aircraft",
       vehicleSubtype: "Transport",
       idFactory: idFactory(),
@@ -260,19 +305,13 @@ describe("pathToEvents", () => {
       { latitude: 51, longitude: 2, altitude: cruise },
       { latitude: 52, longitude: 4, altitude: cruise },
     ];
-    let totalNm = 0;
-    for (let i = 1; i < path.length; i += 1) {
-      totalNm += haversineDistanceNm(path[i - 1]!, path[i]!);
-    }
-    const hours = totalNm / profileCruise(profile);
     const startAt = "2026-07-27T12:00:00.000Z";
-    const endAt = new Date(Date.parse(startAt) + hours * 3_600_000 * 1.15).toISOString();
 
     const events = pathToEvents({
       targetId: "t1",
       path,
       startAt,
-      endAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "aircraft",
       vehicleSubtype: "Transport",
       idFactory: idFactory(),
@@ -306,13 +345,34 @@ describe("pathToEvents", () => {
     ).toThrow(/maximum of/);
   });
 
+  it("rejects a window too long for the profile cruise floor", () => {
+    // Short hop stretched over 24 h would author ~1–2 kt — below aircraft min.
+    const path = [
+      { latitude: 51.47, longitude: -0.46, altitude: 0 },
+      { latitude: 51.5, longitude: -0.2, altitude: 0 },
+    ];
+    expect(() =>
+      pathToEvents({
+        targetId: "t1",
+        path,
+        startAt: "2026-07-27T12:00:00.000Z",
+        endAt: "2026-07-28T12:00:00.000Z",
+        vehicleCategory: "aircraft",
+        vehicleSubtype: "Transport",
+        idFactory: idFactory(),
+      }),
+    ).toThrow(/minimum of/);
+  });
+
   it("preserves distance ≈ speed × time on consecutive events", () => {
     const path = cornerPolyline();
+    const profile = resolveVehicleProfile("car", "Sedan");
+    const startAt = "2026-07-27T12:00:00.000Z";
     const events = pathToEvents({
       targetId: "t1",
       path,
-      startAt: "2026-07-27T12:00:00.000Z",
-      endAt: "2026-07-27T16:00:00.000Z",
+      startAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "car",
       vehicleSubtype: "Sedan",
       idFactory: idFactory(),
@@ -330,12 +390,19 @@ describe("pathToEvents", () => {
   });
 
   it("honors an explicit eventCount", () => {
-    const path = zigzagPolyline(80);
+    // Dense collinear samples — DP drops vertices but path length is preserved,
+    // so the cruise-floor window stays valid after simplification.
+    const path: Array<{ latitude: number; longitude: number }> = [];
+    for (let i = 0; i <= 120; i += 1) {
+      path.push({ latitude: 51.0 + i * 0.04, longitude: 0 });
+    }
+    const profile = resolveVehicleProfile("car", "Sedan");
+    const startAt = "2026-07-27T12:00:00.000Z";
     const events = pathToEvents({
       targetId: "t1",
       path,
-      startAt: "2026-07-27T12:00:00.000Z",
-      endAt: "2026-07-28T12:00:00.000Z",
+      startAt,
+      endAt: feasibleEndAt(path, startAt, profile),
       vehicleCategory: "car",
       vehicleSubtype: "Sedan",
       eventCount: 40,
@@ -343,12 +410,68 @@ describe("pathToEvents", () => {
     });
     expect(events).toHaveLength(40);
   });
+
+  it("keeps loiter orbits curved even under a tight eventCount", () => {
+    const centre = { latitude: 51.5, longitude: 0.5 };
+    const radiusM = 3_000;
+    const orbit = buildOrbit({
+      centre,
+      radiusM,
+      turnRadiusM: 2_500,
+      altitudeFt: 15_000,
+      samples: 48,
+    });
+    // Cruise stubs so budget trim has room to flatten the hold without restore.
+    const path = [
+      { latitude: 51.5, longitude: -1.5, altitude: 15_000 },
+      { latitude: 51.5, longitude: -0.5, altitude: 15_000 },
+      ...orbit.map((p) => ({ ...p, altitude: 15_000 })),
+      { latitude: 51.5, longitude: 1.5, altitude: 15_000 },
+      { latitude: 51.5, longitude: 2.5, altitude: 15_000 },
+    ];
+    const profile = resolveVehicleProfile("aircraft", "UAV");
+    const startAt = "2026-07-27T12:00:00.000Z";
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt,
+      endAt: feasibleEndAt(path, startAt, profile),
+      vehicleCategory: "aircraft",
+      vehicleSubtype: "UAV",
+      eventCount: 36,
+      idFactory: idFactory(),
+    });
+
+    const radiusNm = metersToNm(radiusM);
+    const onOrbit = events.filter((event) => {
+      const d = haversineDistanceNm(centre, event.position!);
+      return Math.abs(d - radiusNm) < radiusNm * 0.15;
+    });
+    // A diamond has ~4 corners; a readable curve needs a clear ring of samples.
+    expect(onOrbit.length).toBeGreaterThanOrEqual(12);
+    expect(events.length).toBeGreaterThanOrEqual(36);
+  });
+});
+
+describe("restoreArcDetail", () => {
+  it("reinserts arc vertices that budget simplification dropped", () => {
+    const centre = { latitude: 51.5, longitude: 0.5 };
+    const radiusM = 3_000;
+    const walked = buildOrbit({
+      centre,
+      radiusM,
+      turnRadiusM: 2_500,
+      altitudeFt: 10_000,
+      samples: 48,
+    });
+    // Diamond: every 12th sample (~90°).
+    const diamond = [0, 12, 24, 36, 48].map((i) => walked[i]!);
+    const restored = restoreArcDetail(walked, diamond, curveChordErrorM(2_500));
+    expect(restored.length).toBeGreaterThan(diamond.length);
+    expect(restored.length).toBeGreaterThanOrEqual(12);
+  });
 });
 
 function profileMid(profile: ReturnType<typeof resolveVehicleProfile>) {
   return (profile.cruiseKnots.minKnots + profile.cruiseKnots.maxKnots) / 2;
-}
-
-function profileCruise(profile: ReturnType<typeof resolveVehicleProfile>) {
-  return profileMid(profile);
 }

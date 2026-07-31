@@ -23,6 +23,13 @@ const METERS_PER_DEG_LAT = 111_320;
 const MIN_SEGMENT_NM = 1e-6;
 /** Floor on turn slowdown so vehicles never crawl to a stop at a vertex. */
 const TURN_SPEED_FLOOR = 0.35;
+/**
+ * Chord-error floor (m) when restoring arc detail. Keeps road DP budgets intact
+ * while still recovering air loiter curves after aggressive simplification.
+ */
+const ARC_CHORD_ERROR_FLOOR_M = 40;
+/** Cap so huge transport radii don't force hundreds of loiter vertices. */
+const ARC_CHORD_ERROR_CEILING_M = 180;
 
 export interface PathPoint {
   latitude: number;
@@ -152,13 +159,23 @@ export function douglasPeuckerSimplify<T extends PathPoint>(
  * Binary-search a metre tolerance so the simplified polyline lands in
  * [PATH_EVENT_BUDGET_MIN, PATH_EVENT_BUDGET_MAX] when the input is long enough.
  * Short inputs are returned as-is (never padded).
+ *
+ * When `maxToleranceM` is set, geometry wins over the count budget: tolerance
+ * never exceeds the cap (keeps loiter orbits curved) and the result may soft-
+ * exceed `maxCount`.
  */
 export function simplifyToEventBudget<T extends PathPoint>(
   points: readonly T[],
   minCount: number = PATH_EVENT_BUDGET_MIN,
   maxCount: number = PATH_EVENT_BUDGET_MAX,
+  maxToleranceM?: number,
 ): T[] {
   if (points.length <= 2) return [...points];
+
+  const toleranceCap =
+    maxToleranceM !== undefined && Number.isFinite(maxToleranceM) && maxToleranceM > 0
+      ? maxToleranceM
+      : null;
 
   if (points.length <= maxCount) {
     // Drop near-collinear vertices; never invent points to reach minCount.
@@ -168,7 +185,7 @@ export function simplifyToEventBudget<T extends PathPoint>(
 
   // Find the smallest tolerance that yields ≤ maxCount (keeps the most corners).
   let lo = 0;
-  let hi = 50_000;
+  let hi = toleranceCap ?? 50_000;
   let best = douglasPeuckerSimplify(points, hi);
   for (let iter = 0; iter < 28; iter += 1) {
     const mid = (lo + hi) / 2;
@@ -200,14 +217,110 @@ export function simplifyToEventBudget<T extends PathPoint>(
   }
 
   if (best.length > maxCount) {
-    let grow = Math.max(hi, 1);
-    while (best.length > maxCount && grow < 1e7) {
-      grow *= 1.5;
-      best = douglasPeuckerSimplify(points, grow);
+    if (toleranceCap !== null) {
+      // Soft-exceed the count budget — do not flatten curves past the cap.
+      best = douglasPeuckerSimplify(points, toleranceCap);
+    } else {
+      let grow = Math.max(hi, 1);
+      while (best.length > maxCount && grow < 1e7) {
+        grow *= 1.5;
+        best = douglasPeuckerSimplify(points, grow);
+      }
     }
   }
 
   return best;
+}
+
+/**
+ * Max Douglas-Peucker chord error (m) that still reads as a smooth turn of
+ * radius `turnRadiusM` (~25° central angle between kept vertices).
+ */
+export function curveChordErrorM(turnRadiusM: number): number {
+  const radius = Math.max(turnRadiusM, 1);
+  // sagitta = R (1 - cos(θ/2)) with θ = 25°
+  const sagitta = radius * (1 - Math.cos((25 * Math.PI) / 360));
+  return clamp(sagitta, ARC_CHORD_ERROR_FLOOR_M, ARC_CHORD_ERROR_CEILING_M);
+}
+
+function nearestPathIndex(
+  path: readonly PathPoint[],
+  point: PathPoint,
+  fromIndex = 0,
+): number {
+  let best = Math.max(0, Math.min(fromIndex, path.length - 1));
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (let i = fromIndex; i < path.length; i += 1) {
+    const candidate = path[i]!;
+    if (
+      Math.abs(candidate.latitude - point.latitude) < 1e-9 &&
+      Math.abs(candidate.longitude - point.longitude) < 1e-9
+    ) {
+      return i;
+    }
+    const d = haversineDistanceNm(candidate, point);
+    if (d < bestDist) {
+      bestDist = d;
+      best = i;
+    }
+  }
+  // Exact match may sit slightly before fromIndex after densify/nearest drift.
+  for (let i = 0; i < fromIndex; i += 1) {
+    const candidate = path[i]!;
+    if (
+      Math.abs(candidate.latitude - point.latitude) < 1e-9 &&
+      Math.abs(candidate.longitude - point.longitude) < 1e-9
+    ) {
+      return i;
+    }
+  }
+  return best;
+}
+
+/**
+ * Minimum walked intermediates before a simplified edge is treated as a flattened
+ * arc (loiter) rather than an intentionally dropped sharp corner.
+ */
+const ARC_RESTORE_MIN_INTERMEDIATES = 4;
+
+/**
+ * Re-insert walked vertices between simplified corners so arcs (loiter orbits /
+ * racetrack turns) keep a bounded chord error. Straight legs and sharp zigzag
+ * corners stay as simplified — only dense arc spans are refined.
+ */
+export function restoreArcDetail<T extends PathPoint>(
+  walked: readonly T[],
+  simplified: readonly T[],
+  maxChordErrorM: number,
+): T[] {
+  if (simplified.length < 2 || walked.length < 3) return [...simplified];
+
+  const result: T[] = [];
+  let walkFrom = nearestPathIndex(walked, simplified[0]!);
+
+  for (let s = 0; s < simplified.length - 1; s += 1) {
+    const start = simplified[s]!;
+    const end = simplified[s + 1]!;
+    if (s === 0) result.push(start);
+
+    const walkTo = nearestPathIndex(walked, end, walkFrom);
+    const intermediates = walkTo - walkFrom - 1;
+    if (walkTo <= walkFrom || intermediates < ARC_RESTORE_MIN_INTERMEDIATES) {
+      // Degenerate match or sharp-corner span — keep the simplified edge.
+      result.push(end);
+      walkFrom = Math.max(walkFrom, walkTo);
+      continue;
+    }
+
+    const slice = walked.slice(walkFrom, walkTo + 1);
+    const refined = douglasPeuckerSimplify(slice, maxChordErrorM);
+    for (let i = 1; i < refined.length; i += 1) {
+      result.push(refined[i]!);
+    }
+    walkFrom = walkTo;
+  }
+
+  return result.length >= 2 ? result : [...simplified];
 }
 
 /**
@@ -294,8 +407,9 @@ function categoryCeilingKnots(category: VehicleCategory, profile: VehicleProfile
 
 /**
  * Assert the path can be flown/driven inside the window without exceeding the
- * category/platform ceiling — same contract as assertFeasibleEndWindow, but on
- * routed path length rather than the geodesic chord.
+ * category/platform ceiling or falling below the profile cruise floor — same
+ * contract as assertFeasibleEndWindow, but on routed path length rather than
+ * the geodesic chord.
  */
 export function assertFeasiblePathWindow(options: {
   startMs: number;
@@ -303,6 +417,8 @@ export function assertFeasiblePathWindow(options: {
   pathLengthNm: number;
   vehicleCategory: VehicleCategory;
   maxKnots: number;
+  /** Profile cruise minimum; windows that force a slower average are rejected. */
+  minKnots: number;
 }) {
   if (options.endMs <= options.startMs) {
     throw new Error("End time must be after start time.");
@@ -315,6 +431,11 @@ export function assertFeasiblePathWindow(options: {
   if (requiredKnots > options.maxKnots + 1e-6) {
     throw new Error(
       `Route requires about ${requiredKnots.toFixed(0)} kt average, above the ${options.vehicleCategory} maximum of ${options.maxKnots} kt. Use a later end time or a shorter distance.`,
+    );
+  }
+  if (requiredKnots < options.minKnots - 1e-6) {
+    throw new Error(
+      `Route requires about ${requiredKnots.toFixed(1)} kt average, below the ${options.vehicleCategory} minimum of ${options.minKnots} kt. Use an earlier end time or a longer distance.`,
     );
   }
 }
@@ -454,7 +575,7 @@ function deriveEndMsFromPath(startMs: number, pathLengthNmValue: number, cruiseK
  * Convert a routed polyline into timed SimulationEvents with authored speed and
  * altitude. Applies turn-limited walking, Douglas-Peucker simplification to the
  * 60–150 event budget, and rejects windows that would require speeds above the
- * platform/category ceiling.
+ * platform/category ceiling or below the profile cruise minimum.
  */
 export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
   const idFactory = options.idFactory ?? (() => crypto.randomUUID());
@@ -487,12 +608,14 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
     throw new Error("End time must be after start time.");
   }
 
+  const floorKnots = profile.cruiseKnots.minKnots;
   assertFeasiblePathWindow({
     startMs,
     endMs,
     pathLengthNm: totalNm,
     vehicleCategory: options.vehicleCategory,
     maxKnots: ceilingKnots,
+    minKnots: floorKnots,
   });
 
   const walked = walkPath({ path, profile, cruiseKnots, ceilingKnots });
@@ -502,7 +625,51 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
       : null;
   const budgetMin = requestedCount ?? PATH_EVENT_BUDGET_MIN;
   const budgetMax = requestedCount ?? PATH_EVENT_BUDGET_MAX;
-  let simplified = simplifyToEventBudget(walked, budgetMin, budgetMax);
+  // Aircraft loiter orbits need a chord-error cap so DP cannot collapse them
+  // into diamonds when fitting the event budget.
+  const simplifyToleranceCap =
+    options.vehicleCategory === "aircraft"
+      ? curveChordErrorM(profile.turnRadiusM)
+      : undefined;
+  let simplified = simplifyToEventBudget(
+    walked,
+    budgetMin,
+    budgetMax,
+    simplifyToleranceCap,
+  );
+  // When the caller asked for an exact count and we still have more vertices
+  // than needed, keep endpoints and evenly sample intermediate indices.
+  // Skip for aircraft — even sampling drops whole loiter arcs; the tolerance
+  // cap above already soft-exceeds the count to preserve curves.
+  if (
+    simplifyToleranceCap === undefined &&
+    requestedCount !== null &&
+    simplified.length > requestedCount &&
+    simplified.length > 2
+  ) {
+    const sampled: typeof simplified = [];
+    for (let i = 0; i < requestedCount; i += 1) {
+      const index =
+        i === requestedCount - 1
+          ? simplified.length - 1
+          : Math.round((i * (simplified.length - 1)) / (requestedCount - 1));
+      sampled.push(simplified[index]!);
+    }
+    simplified = sampled;
+  }
+  // Belt-and-suspenders: re-insert walked arc samples if any span still exceeds
+  // the chord-error cap (e.g. light DP on short aircraft paths).
+  if (simplifyToleranceCap !== undefined) {
+    simplified = restoreArcDetail(walked, simplified, simplifyToleranceCap);
+    if (simplified.length > MAX_GENERATED_EVENTS) {
+      simplified = simplifyToEventBudget(
+        simplified,
+        2,
+        MAX_GENERATED_EVENTS,
+        simplifyToleranceCap,
+      );
+    }
+  }
   // Collinear legs (typical air great-circles) collapse under DP; densify so
   // climb/cruise/descent and the budget floor remain representable.
   if (simplified.length < budgetMin && walked.length >= 2) {
@@ -525,19 +692,6 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
         altitude: point.altitude ?? 0,
       };
     });
-  }
-  // When the caller asked for an exact count and we still have more vertices
-  // than needed, keep endpoints and evenly sample intermediate indices.
-  if (requestedCount !== null && simplified.length > requestedCount && simplified.length > 2) {
-    const sampled: typeof simplified = [];
-    for (let i = 0; i < requestedCount; i += 1) {
-      const index =
-        i === requestedCount - 1
-          ? simplified.length - 1
-          : Math.round((i * (simplified.length - 1)) / (requestedCount - 1));
-      sampled.push(simplified[index]!);
-    }
-    simplified = sampled;
   }
 
   // Rebuild cumulative distances on the simplified polyline and assign times so
@@ -600,17 +754,25 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
   const retime = options.retimeToWindow !== false;
 
   // Average speed implied by fitting the simplified path into the window.
+  // Re-check after DP — simplification can shorten the path and drop the
+  // required average below the cruise floor.
   const requiredAvg = simplifiedNm / windowHours;
   if (requiredAvg > ceilingKnots + 1e-6) {
     throw new Error(
       `Route requires about ${requiredAvg.toFixed(0)} kt average, above the ${options.vehicleCategory} maximum of ${ceilingKnots} kt. Use a later end time or a shorter distance.`,
     );
   }
+  if (requiredAvg < floorKnots - 1e-6) {
+    throw new Error(
+      `Route requires about ${requiredAvg.toFixed(1)} kt average, below the ${options.vehicleCategory} minimum of ${floorKnots} kt. Use an earlier end time or a longer distance.`,
+    );
+  }
 
   let scale = 1;
   if (retime && kinematicHours > 1e-9) {
     // Stretch or compress the kinematic schedule into the authored window.
-    // Compression is only allowed up to the ceiling (already checked via requiredAvg).
+    // Stretch is capped by the cruise floor; compression by the ceiling
+    // (both already checked via requiredAvg).
     scale = windowHours / kinematicHours;
   } else if (!retime && kinematicHours > windowHours + 1e-9) {
     throw new Error(
@@ -625,7 +787,10 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
     const point = simplified[i]!;
     let speedKnots: number;
     if (i === 0) {
-      speedKnots = Math.min(point.speedKnots, ceilingKnots);
+      // Match the first segment's retimed pace so the opener isn't left at the
+      // unscaled cruise while later events are stretched/compressed.
+      const opening = segmentSpeeds[0] ?? point.speedKnots;
+      speedKnots = Math.min(opening / scale, ceilingKnots);
     } else {
       const segNm = distances[i]! - distances[i - 1]!;
       const baseSpeed = segmentSpeeds[i - 1]!;
