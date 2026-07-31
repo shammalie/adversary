@@ -1,0 +1,1849 @@
+basePath: /
+definitions:
+  github_com_shammalie_adversary_apps_api_internal_engine.Snapshot:
+    properties:
+      asOf:
+        type: string
+      criticalAlertIds:
+        items:
+          type: string
+        type: array
+      ingestedEvents:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.SimulationEvent'
+        type: array
+      processedEventIds:
+        items:
+          type: string
+        type: array
+      run:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary'
+      status:
+        type: string
+      targetStates:
+        additionalProperties:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.RuntimeTargetState'
+        type: object
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_engine.ViewportSnapshot:
+    properties:
+      asOf:
+        type: string
+      bbox:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_viewport.BBox'
+      includeTargetIds:
+        items:
+          type: string
+        type: array
+      run:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary'
+      status:
+        type: string
+      targetStates:
+        additionalProperties:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.RuntimeTargetState'
+        type: object
+      zoom:
+        type: number
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_generate.DemoOrigin:
+    properties:
+      latitude:
+        format: float64
+        type: number
+      longitude:
+        format: float64
+        type: number
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_generate.GenerateRequest:
+    properties:
+      anywhere:
+        type: boolean
+      endAt:
+        type: string
+      forceSynthetic:
+        type: boolean
+      name:
+        type: string
+      origin:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.DemoOrigin'
+      regionIds:
+        items:
+          type: string
+        type: array
+      seed:
+        type: integer
+      startAt:
+        type: string
+      targetCount:
+        type: integer
+      vehicleSelection:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_generate.Job:
+    properties:
+      anywhereFallbackCount:
+        type: integer
+      catalogueEmpty:
+        type: boolean
+      createdAt:
+        type: string
+      degradedTrackCount:
+        type: integer
+      error:
+        type: string
+      finishedAt:
+        type: string
+      id:
+        type: string
+      progress:
+        type: string
+      reseedKicked:
+        type: boolean
+      scenarioId:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_generate.RouteRequest:
+    properties:
+      anywhere:
+        type: boolean
+      endAt:
+        type: string
+      eventCount:
+        type: integer
+      regionIds:
+        items:
+          type: string
+        type: array
+      seed:
+        type: integer
+      startAt:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_generate.RouteTargetResult:
+    properties:
+      anywhereFallback:
+        type: boolean
+      catalogueEmpty:
+        type: boolean
+      degraded:
+        type: boolean
+      events:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.SimulationEvent'
+        type: array
+      regionId:
+        type: string
+      reseedKicked:
+        type: boolean
+      scenarioId:
+        type: string
+      targetId:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_geoseed.Job:
+    properties:
+      createdAt:
+        type: string
+      error:
+        type: string
+      finishedAt:
+        type: string
+      id:
+        type: string
+      mbtilesPath:
+        type: string
+      progress:
+        type: string
+      startedAt:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow:
+    properties:
+      class:
+        type: string
+      eleFt:
+        type: integer
+      iata:
+        type: string
+      icao:
+        type: string
+      id:
+        type: integer
+      kind:
+        type: string
+      lat:
+        type: number
+      lng:
+        type: number
+      name:
+        type: string
+      regionId:
+        type: string
+      runways:
+        items:
+          type: integer
+        type: array
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_geoseed.Region:
+    properties:
+      bbox:
+        items:
+          type: number
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      supports:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_scenario.PositionPayload:
+    properties:
+      altitude:
+        type: number
+      latitude:
+        type: number
+      longitude:
+        type: number
+      speed:
+        type: number
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_scenario.SimulationEvent:
+    properties:
+      at:
+        type: string
+      firesAt:
+        type: string
+      id:
+        type: string
+      message:
+        type: string
+      position:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.PositionPayload'
+      targetId:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_scenario.ValidationIssue:
+    properties:
+      field:
+        type: string
+      index:
+        type: integer
+      message:
+        type: string
+      path:
+        type: string
+      section:
+        description: scenario | targets | events
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_simulation.PositionSnapshot:
+    properties:
+      altitude:
+        type: number
+      at:
+        type: string
+      course:
+        type: number
+      heading:
+        type: number
+      latitude:
+        type: number
+      longitude:
+        type: number
+      speed:
+        type: number
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_simulation.RuntimeTargetState:
+    properties:
+      appeared:
+        type: boolean
+      callsign:
+        type: string
+      color:
+        type: string
+      lastEventAt:
+        type: string
+      position:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.PositionSnapshot'
+      profile:
+        additionalProperties: {}
+        type: object
+      revealed:
+        type: boolean
+      targetId:
+        type: string
+      trail:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.PositionSnapshot'
+        type: array
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.ManageListResult:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ManageScenarioRow'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.ManageScenarioRow:
+    properties:
+      activeRuns:
+        type: integer
+      eventCount:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      ownerUserId:
+        type: string
+      sizeBytes:
+        type: integer
+      status:
+        type: string
+      targetCount:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.ManageStats:
+    properties:
+      draftCount:
+        type: integer
+      readyCount:
+        type: integer
+      runsActive:
+        type: integer
+      runsCompleted:
+        type: integer
+      runsStopped:
+        type: integer
+      scenarioCount:
+        type: integer
+      totalPayloadBytes:
+        type: integer
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.RunSummary:
+    properties:
+      completedAt:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      scenarioId:
+        type: string
+      scenarioName:
+        type: string
+      scheduleOffsetMs:
+        type: integer
+      startAt:
+        type: string
+      startedAt:
+        type: string
+      status:
+        type: string
+      stoppedAt:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.ScenarioSummary:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      schemaVersion:
+        type: integer
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.UsageBucket:
+    properties:
+      bucket:
+        type: string
+      counts:
+        additionalProperties:
+          type: integer
+        type: object
+      total:
+        type: integer
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_store.UsageMetricsResult:
+    properties:
+      bucket:
+        type: string
+      buckets:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.UsageBucket'
+        type: array
+      clientId:
+        type: string
+      from:
+        type: string
+      to:
+        type: string
+      totals:
+        additionalProperties:
+          type: integer
+        type: object
+      userId:
+        type: string
+    type: object
+  github_com_shammalie_adversary_apps_api_internal_viewport.BBox:
+    properties:
+      east:
+        type: number
+      north:
+        type: number
+      south:
+        type: number
+      west:
+        type: number
+    type: object
+  internal_handler.HealthResponse:
+    properties:
+      status:
+        example: ok
+        type: string
+    type: object
+  internal_handler.authCredentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  internal_handler.authSessionResponse:
+    properties:
+      expiresAt:
+        type: string
+      user:
+        $ref: '#/definitions/internal_handler.authUserResponse'
+    type: object
+  internal_handler.authUserResponse:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+    type: object
+  internal_handler.bulkDeleteRequest:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    type: object
+  internal_handler.bulkDeleteResult:
+    properties:
+      deleted:
+        items:
+          type: string
+        type: array
+      failed:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+  internal_handler.createRunRequest:
+    properties:
+      scenarioId:
+        type: string
+      startAt:
+        type: string
+    type: object
+  internal_handler.createRunResponse:
+    properties:
+      completedAt:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      runId:
+        type: string
+      scenarioId:
+        type: string
+      scenarioName:
+        type: string
+      scheduleOffsetMs:
+        type: integer
+      startAt:
+        type: string
+      startedAt:
+        type: string
+      status:
+        type: string
+      stoppedAt:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  internal_handler.createScenarioRequest:
+    properties:
+      name:
+        type: string
+      payload:
+        items:
+          type: integer
+        type: array
+    type: object
+  internal_handler.errorBody:
+    properties:
+      error:
+        type: string
+    type: object
+  internal_handler.generateAccepted:
+    properties:
+      jobId:
+        type: string
+      status:
+        type: string
+    type: object
+  internal_handler.manageDeleteResponse:
+    properties:
+      deletedRuns:
+        type: integer
+      id:
+        type: string
+      stoppedRuns:
+        type: integer
+    type: object
+  internal_handler.metaResponse:
+    properties:
+      aerodromeCount:
+        type: integer
+      error:
+        type: string
+      generatedAt:
+        type: string
+      jobStatus:
+        type: string
+      latestJob:
+        $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.Job'
+      mbtilesExists:
+        type: boolean
+      mbtilesPath:
+        type: string
+      mbtilesSourceUrl:
+        type: string
+      portCount:
+        type: integer
+      regionCount:
+        type: integer
+      roadAnchorCount:
+        type: integer
+      schemaV:
+        type: integer
+      seaLaneCount:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  internal_handler.patchScenarioRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  internal_handler.reseedResponse:
+    properties:
+      jobId:
+        type: string
+      status:
+        type: string
+    type: object
+  internal_handler.scenarioResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      issues:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.ValidationIssue'
+        type: array
+      name:
+        type: string
+      payload:
+        items:
+          type: integer
+        type: array
+      schemaVersion:
+        type: integer
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  internal_handler.validateResponse:
+    properties:
+      issues:
+        items:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.ValidationIssue'
+        type: array
+      valid:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 'Adversary backend API — scenarios, geo, runs (WebSocket ops+map),
+    manage, generate/route, AUTH_MODE=off|session. Live channels: GET /v1/runs/{id}/ws/ops
+    and /ws/map (Upgrade). Prometheus scrape: GET /metrics (not listed as OpenAPI
+    paths). Architecture: docs/api.md.'
+  title: Adversary API
+  version: 0.9.0
+paths:
+  /healthz:
+    get:
+      description: Returns 200 when the API process is up
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.HealthResponse'
+      summary: Health check
+      tags:
+      - system
+  /v1/admin/geo/jobs/{id}:
+    get:
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.Job'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Reseed job status
+      tags:
+      - admin-geo
+  /v1/admin/geo/meta:
+    get:
+      description: Last seed job status, MBTiles path health, and row counts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.metaResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Geo catalogue metadata
+      tags:
+      - admin-geo
+  /v1/admin/geo/reseed:
+    post:
+      description: Mines MBTILES_PATH asynchronously into PostGIS; one job at a time
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/internal_handler.reseedResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Start geo catalogue reseed
+      tags:
+      - admin-geo
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Verifies credentials and sets the HttpOnly session cookie (AUTH_MODE=session).
+      parameters:
+      - description: email + password
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.authCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.authSessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Login
+      tags:
+      - auth
+  /v1/auth/logout:
+    post:
+      description: Clears the session cookie and deletes the server session when present.
+      responses:
+        "204":
+          description: No Content
+      summary: Logout
+      tags:
+      - auth
+  /v1/auth/me:
+    get:
+      description: Returns the authenticated user when the session cookie is valid.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.authUserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Current user
+      tags:
+      - auth
+  /v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a user and sets the HttpOnly session cookie (AUTH_MODE=session).
+      parameters:
+      - description: email + password (min 8)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.authCredentials'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handler.authSessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Register
+      tags:
+      - auth
+  /v1/geo/aerodromes:
+    get:
+      parameters:
+      - description: West
+        in: query
+        name: west
+        required: true
+        type: number
+      - description: South
+        in: query
+        name: south
+        required: true
+        type: number
+      - description: East
+        in: query
+        name: east
+        required: true
+        type: number
+      - description: North
+        in: query
+        name: north
+        required: true
+        type: number
+      - description: Max rows
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List aerodromes in bbox
+      tags:
+      - geo
+  /v1/geo/ports:
+    get:
+      parameters:
+      - description: West
+        in: query
+        name: west
+        required: true
+        type: number
+      - description: South
+        in: query
+        name: south
+        required: true
+        type: number
+      - description: East
+        in: query
+        name: east
+        required: true
+        type: number
+      - description: North
+        in: query
+        name: north
+        required: true
+        type: number
+      - description: Max rows
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List ports in bbox
+      tags:
+      - geo
+  /v1/geo/regions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.Region'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List geo regions
+      tags:
+      - geo
+  /v1/geo/road-anchors:
+    get:
+      parameters:
+      - description: West
+        in: query
+        name: west
+        required: true
+        type: number
+      - description: South
+        in: query
+        name: south
+        required: true
+        type: number
+      - description: East
+        in: query
+        name: east
+        required: true
+        type: number
+      - description: North
+        in: query
+        name: north
+        required: true
+        type: number
+      - description: Max rows
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List road anchors in bbox
+      tags:
+      - geo
+  /v1/geo/sea-lanes:
+    get:
+      parameters:
+      - description: West
+        in: query
+        name: west
+        required: true
+        type: number
+      - description: South
+        in: query
+        name: south
+        required: true
+        type: number
+      - description: East
+        in: query
+        name: east
+        required: true
+        type: number
+      - description: North
+        in: query
+        name: north
+        required: true
+        type: number
+      - description: Max rows
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List sea-lane points in bbox
+      tags:
+      - geo
+  /v1/manage/metrics/usage:
+    get:
+      description: 'Time-bucketed counts from usage_events. Filter by userId / clientId
+        / from / to. Buckets: 15m, 1h (default), 1d. AUTH_MODE=off uses user_id=null
+        rows; optional X-Client-Id is stored in properties.'
+      parameters:
+      - description: 'RFC3339 start (default: now-24h)'
+        in: query
+        name: from
+        type: string
+      - description: 'RFC3339 end (default: now)'
+        in: query
+        name: to
+        type: string
+      - description: Filter by usage_events.user_id
+        in: query
+        name: userId
+        type: string
+      - description: Filter by properties.client_id
+        in: query
+        name: clientId
+        type: string
+      - description: 15m | 1h | 1d
+        in: query
+        name: bucket
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.UsageMetricsResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: 'Manage: product usage metrics'
+      tags:
+      - manage
+  /v1/manage/scenarios:
+    get:
+      description: 'Paginated list with payload size_bytes, target/event counts, owner,
+        active run count. AUTH_MODE=off: ownerUserId usually null.'
+      parameters:
+      - description: draft or ready
+        in: query
+        name: status
+        type: string
+      - description: Name search (ILIKE)
+        in: query
+        name: q
+        type: string
+      - description: Page size (default 50, max 200)
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ManageListResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: 'Manage: list scenarios (storage)'
+      tags:
+      - manage
+  /v1/manage/scenarios/{id}:
+    delete:
+      description: Cascade-stops active runs for the scenario, deletes all runs referencing
+        it, then deletes the scenario.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.manageDeleteResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: 'Manage: delete scenario'
+      tags:
+      - manage
+  /v1/manage/scenarios/bulk-delete:
+    post:
+      consumes:
+      - application/json
+      description: Same cascade-stop semantics as single delete. Partial success returns
+        200 with failed map.
+      parameters:
+      - description: Scenario ids
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.bulkDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.bulkDeleteResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: 'Manage: bulk delete scenarios'
+      tags:
+      - manage
+  /v1/manage/stats:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ManageStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: 'Manage: storage / run stats'
+      tags:
+      - manage
+  /v1/runs:
+    get:
+      description: 'Default: status=running plus recently completed/stopped (updated
+        within 24h). Each row includes scenarioName. Use ?active=true for running-only.'
+      parameters:
+      - description: If true, only status=running
+        in: query
+        name: active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List runs (Active scenarios)
+      tags:
+      - runs
+    post:
+      consumes:
+      - application/json
+      description: Starts a ready scenario. startAt shifts the schedule (schedule_offset_ms);
+        omit for now. AUTH_MODE=session requires ownership of the scenario.
+      parameters:
+      - description: scenarioId + optional startAt
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.createRunRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handler.createRunResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      security:
+      - CookieAuth: []
+      summary: Start a run
+      tags:
+      - runs
+  /v1/runs/{id}:
+    get:
+      parameters:
+      - description: Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Get run
+      tags:
+      - runs
+  /v1/runs/{id}/snapshot:
+    get:
+      description: 'Cold-load: all events due ≤ now plus current target states (not
+        catch-up wire shape)'
+      parameters:
+      - description: Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_engine.Snapshot'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Run snapshot (full due-set)
+      tags:
+      - runs
+  /v1/runs/{id}/stop:
+    post:
+      parameters:
+      - description: Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Stop a run
+      tags:
+      - runs
+  /v1/runs/{id}/viewport:
+    get:
+      description: 'Cold-load targets/trails in PostGIS envelope bbox ∪ includeTargetIds.
+        zoom is advisory (LOD reserved). Eviction: client drops overlay when unwatched
+        and outside bbox; server only sends matching targets.'
+      parameters:
+      - description: Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: BBox west (WGS84)
+        in: query
+        name: west
+        required: true
+        type: number
+      - description: BBox south
+        in: query
+        name: south
+        required: true
+        type: number
+      - description: BBox east
+        in: query
+        name: east
+        required: true
+        type: number
+      - description: BBox north
+        in: query
+        name: north
+        required: true
+        type: number
+      - description: Map zoom (advisory)
+        in: query
+        name: zoom
+        type: number
+      - description: Comma-separated off-screen tracked target ids
+        in: query
+        name: includeTargetIds
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_engine.ViewportSnapshot'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Map viewport snapshot
+      tags:
+      - runs
+  /v1/runs/{id}/ws/map:
+    get:
+      description: 'Live map: target.updated / catchup.target.updated filtered by
+        bbox ∪ includeTargetIds; run.completed/stopped. In-band control: {"type":"map.viewport","west","south","east","north","zoom?","includeTargetIds"?}.
+        Client eviction: drop overlay when unwatched and outside bbox (server never
+        sends evict). Redis fan-out.'
+      parameters:
+      - description: Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Initial west
+        in: query
+        name: west
+        type: number
+      - description: Initial south
+        in: query
+        name: south
+        type: number
+      - description: Initial east
+        in: query
+        name: east
+        type: number
+      - description: Initial north
+        in: query
+        name: north
+        type: number
+      - description: Initial zoom (advisory)
+        in: query
+        name: zoom
+        type: number
+      - description: Comma-separated target ids
+        in: query
+        name: includeTargetIds
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      security:
+      - CookieAuth: []
+      summary: Map WebSocket channel
+      tags:
+      - runs
+  /v1/runs/{id}/ws/ops:
+    get:
+      description: 'Live ops: event.ingested, alert.raised, target.updated, run.completed/stopped;
+        catch-up = catchup.target.updated (latest target set). Redis pub/sub for multi-instance.
+        AUTH_MODE=session requires cookie.'
+      parameters:
+      - description: Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      security:
+      - CookieAuth: []
+      summary: Ops WebSocket channel
+      tags:
+      - runs
+  /v1/scenarios:
+    get:
+      description: Includes drafts by default; use status=ready for the run picker
+      parameters:
+      - description: 'Filter: draft or ready'
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ScenarioSummary'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: List scenarios
+      tags:
+      - scenarios
+    post:
+      consumes:
+      - application/json
+      description: Creates an empty draft or seeds payload when provided. AUTH_MODE=session
+        sets owner_user_id from the session cookie.
+      parameters:
+      - description: Optional name/payload
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/internal_handler.createScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handler.scenarioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      security:
+      - CookieAuth: []
+      summary: Create scenario draft
+      tags:
+      - scenarios
+  /v1/scenarios/{id}:
+    delete:
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Delete scenario
+      tags:
+      - scenarios
+    get:
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.scenarioResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Get scenario
+      tags:
+      - scenarios
+    patch:
+      consumes:
+      - application/json
+      description: Currently supports renaming (updates denormalized name + payload.name)
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Patch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.patchScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.scenarioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Patch scenario metadata
+      tags:
+      - scenarios
+  /v1/scenarios/{id}/draft:
+    put:
+      consumes:
+      - application/json
+      description: Accepts incomplete JSON (mirrors saveScenarioDraft); never rejects
+        for validation. Returns optional issues for UI badges. Reverts ready→draft.
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Builder document (any JSON object)
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.scenarioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Autosave scenario draft
+      tags:
+      - scenarios
+  /v1/scenarios/{id}/publish:
+    post:
+      consumes:
+      - application/json
+      description: Full validation; on success sets status=ready and writes normalized
+        targets/events
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Optional payload override to publish
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.scenarioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/internal_handler.validateResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Publish scenario
+      tags:
+      - scenarios
+  /v1/scenarios/{id}/targets/{tid}/route:
+    post:
+      consumes:
+      - application/json
+      description: Persists generated events into the scenario draft. Soft-fails to
+        synthetic wander when routing fails or catalogue is empty (kicks reseed when
+        possible).
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target ID
+        in: path
+        name: tid
+        required: true
+        type: string
+      - description: Route options
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.RouteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.RouteTargetResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Plan authentic route for one target
+      tags:
+      - scenarios
+  /v1/scenarios/{id}/validate:
+    post:
+      consumes:
+      - application/json
+      description: Full schema checks against stored payload (or optional body override);
+        does not change status
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Optional payload override
+        in: body
+        name: body
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.validateResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Validate scenario payload
+      tags:
+      - scenarios
+  /v1/scenarios/generate:
+    post:
+      consumes:
+      - application/json
+      description: Async planner job. Reads geo catalogue from Postgres; empty catalogue
+        kicks reseed when possible else synthetic soft-fail. Result saved as draft
+        (or ready when valid).
+      parameters:
+      - description: Generate options
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.GenerateRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/internal_handler.generateAccepted'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Generate demo/random scenario
+      tags:
+      - scenarios
+  /v1/scenarios/generate/jobs/{id}:
+    get:
+      description: Poll progress; on success includes scenarioId
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.Job'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Generate job status
+      tags:
+      - scenarios
+  /v1/scenarios/import:
+    post:
+      consumes:
+      - application/json
+      description: Accepts v2 (or v1, migrated server-side). Lands as ready when valid,
+        otherwise draft.
+      parameters:
+      - description: Scenario document
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.scenarioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.errorBody'
+      summary: Import scenario JSON
+      tags:
+      - scenarios
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: adversary_session
+    type: apiKey
+swagger: "2.0"

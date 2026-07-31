@@ -16,13 +16,16 @@
     "staged": "vp staged",
     "hooks:setup": "vp config",
     "dev:web": "vp run --filter web dev",
+    "dev:deps": "docker compose up -d postgres redis",
+    "dev:api": "go run ./apps/api/cmd/migrate up && go run ./apps/api/cmd/api serve",
+    "dev:stack": "pnpm dev:deps && node scripts/dev-stack.mjs",
     "test:a11y": "vp run --filter web test:a11y",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "tiles:collect": "bash scripts/collect-map-tiles.sh",
-    "geo:seeds": "node scripts/build-geo-seeds.mjs"
+    "geo:seeds": "go run ./apps/api/cmd/geoseed --export-json apps/web/public/geo-seeds.json --export-fixtures apps/web/src/lib/geo/fixtures/tiles"
   },
   "dependencies": {
     "@adversary/env": "workspace:*",

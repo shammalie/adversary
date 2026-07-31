@@ -1,0 +1,2780 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Adversary backend API — scenarios, geo, runs (WebSocket ops+map), manage, generate/route, AUTH_MODE=off|session. Live channels: GET /v1/runs/{id}/ws/ops and /ws/map (Upgrade). Prometheus scrape: GET /metrics (not listed as OpenAPI paths). Architecture: docs/api.md.",
+        "title": "Adversary API",
+        "contact": {},
+        "version": "0.9.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/healthz": {
+            "get": {
+                "description": "Returns 200 when the API process is up",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/geo/jobs/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-geo"
+                ],
+                "summary": "Reseed job status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Job ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.Job"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/geo/meta": {
+            "get": {
+                "description": "Last seed job status, MBTiles path health, and row counts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-geo"
+                ],
+                "summary": "Geo catalogue metadata",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.metaResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/geo/reseed": {
+            "post": {
+                "description": "Mines MBTILES_PATH asynchronously into PostGIS; one job at a time",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin-geo"
+                ],
+                "summary": "Start geo catalogue reseed",
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.reseedResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login": {
+            "post": {
+                "description": "Verifies credentials and sets the HttpOnly session cookie (AUTH_MODE=session).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "email + password",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.authCredentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.authSessionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/logout": {
+            "post": {
+                "description": "Clears the session cookie and deletes the server session when present.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/auth/me": {
+            "get": {
+                "description": "Returns the authenticated user when the session cookie is valid.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.authUserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/register": {
+            "post": {
+                "description": "Creates a user and sets the HttpOnly session cookie (AUTH_MODE=session).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register",
+                "parameters": [
+                    {
+                        "description": "email + password (min 8)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.authCredentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.authSessionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/geo/aerodromes": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "List aerodromes in bbox",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "West",
+                        "name": "west",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "South",
+                        "name": "south",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "East",
+                        "name": "east",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "North",
+                        "name": "north",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max rows",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/geo/ports": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "List ports in bbox",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "West",
+                        "name": "west",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "South",
+                        "name": "south",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "East",
+                        "name": "east",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "North",
+                        "name": "north",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max rows",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/geo/regions": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "List geo regions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.Region"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/geo/road-anchors": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "List road anchors in bbox",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "West",
+                        "name": "west",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "South",
+                        "name": "south",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "East",
+                        "name": "east",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "North",
+                        "name": "north",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max rows",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/geo/sea-lanes": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "List sea-lane points in bbox",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "West",
+                        "name": "west",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "South",
+                        "name": "south",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "East",
+                        "name": "east",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "North",
+                        "name": "north",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Max rows",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/manage/metrics/usage": {
+            "get": {
+                "description": "Time-bucketed counts from usage_events. Filter by userId / clientId / from / to. Buckets: 15m, 1h (default), 1d. AUTH_MODE=off uses user_id=null rows; optional X-Client-Id is stored in properties.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "summary": "Manage: product usage metrics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RFC3339 start (default: now-24h)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 end (default: now)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by usage_events.user_id",
+                        "name": "userId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by properties.client_id",
+                        "name": "clientId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "15m | 1h | 1d",
+                        "name": "bucket",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.UsageMetricsResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/manage/scenarios": {
+            "get": {
+                "description": "Paginated list with payload size_bytes, target/event counts, owner, active run count. AUTH_MODE=off: ownerUserId usually null.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "summary": "Manage: list scenarios (storage)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "draft or ready",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name search (ILIKE)",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default 50, max 200)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ManageListResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/manage/scenarios/bulk-delete": {
+            "post": {
+                "description": "Same cascade-stop semantics as single delete. Partial success returns 200 with failed map.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "summary": "Manage: bulk delete scenarios",
+                "parameters": [
+                    {
+                        "description": "Scenario ids",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.bulkDeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.bulkDeleteResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/manage/scenarios/{id}": {
+            "delete": {
+                "description": "Cascade-stops active runs for the scenario, deletes all runs referencing it, then deletes the scenario.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "summary": "Manage: delete scenario",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.manageDeleteResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/manage/stats": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "summary": "Manage: storage / run stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ManageStats"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs": {
+            "get": {
+                "description": "Default: status=running plus recently completed/stopped (updated within 24h). Each row includes scenarioName. Use ?active=true for running-only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runs"
+                ],
+                "summary": "List runs (Active scenarios)",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "If true, only status=running",
+                        "name": "active",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Starts a ready scenario. startAt shifts the schedule (schedule_offset_ms); omit for now. AUTH_MODE=session requires ownership of the scenario.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Start a run",
+                "parameters": [
+                    {
+                        "description": "scenarioId + optional startAt",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.createRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.createRunResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Get run",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs/{id}/snapshot": {
+            "get": {
+                "description": "Cold-load: all events due ≤ now plus current target states (not catch-up wire shape)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Run snapshot (full due-set)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_engine.Snapshot"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs/{id}/stop": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Stop a run",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs/{id}/viewport": {
+            "get": {
+                "description": "Cold-load targets/trails in PostGIS envelope bbox ∪ includeTargetIds. zoom is advisory (LOD reserved). Eviction: client drops overlay when unwatched and outside bbox; server only sends matching targets.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Map viewport snapshot",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "BBox west (WGS84)",
+                        "name": "west",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "BBox south",
+                        "name": "south",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "BBox east",
+                        "name": "east",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "BBox north",
+                        "name": "north",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Map zoom (advisory)",
+                        "name": "zoom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated off-screen tracked target ids",
+                        "name": "includeTargetIds",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_engine.ViewportSnapshot"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs/{id}/ws/map": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Live map: target.updated / catchup.target.updated filtered by bbox ∪ includeTargetIds; run.completed/stopped. In-band control: {\"type\":\"map.viewport\",\"west\",\"south\",\"east\",\"north\",\"zoom?\",\"includeTargetIds\"?}. Client eviction: drop overlay when unwatched and outside bbox (server never sends evict). Redis fan-out.",
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Map WebSocket channel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Initial west",
+                        "name": "west",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Initial south",
+                        "name": "south",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Initial east",
+                        "name": "east",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Initial north",
+                        "name": "north",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Initial zoom (advisory)",
+                        "name": "zoom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comma-separated target ids",
+                        "name": "includeTargetIds",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/runs/{id}/ws/ops": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Live ops: event.ingested, alert.raised, target.updated, run.completed/stopped; catch-up = catchup.target.updated (latest target set). Redis pub/sub for multi-instance. AUTH_MODE=session requires cookie.",
+                "tags": [
+                    "runs"
+                ],
+                "summary": "Ops WebSocket channel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Run ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios": {
+            "get": {
+                "description": "Includes drafts by default; use status=ready for the run picker",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "List scenarios",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter: draft or ready",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ScenarioSummary"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Creates an empty draft or seeds payload when provided. AUTH_MODE=session sets owner_user_id from the session cookie.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Create scenario draft",
+                "parameters": [
+                    {
+                        "description": "Optional name/payload",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.createScenarioRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.scenarioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/generate": {
+            "post": {
+                "description": "Async planner job. Reads geo catalogue from Postgres; empty catalogue kicks reseed when possible else synthetic soft-fail. Result saved as draft (or ready when valid).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Generate demo/random scenario",
+                "parameters": [
+                    {
+                        "description": "Generate options",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.GenerateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.generateAccepted"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/generate/jobs/{id}": {
+            "get": {
+                "description": "Poll progress; on success includes scenarioId",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Generate job status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Job ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.Job"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/import": {
+            "post": {
+                "description": "Accepts v2 (or v1, migrated server-side). Lands as ready when valid, otherwise draft.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Import scenario JSON",
+                "parameters": [
+                    {
+                        "description": "Scenario document",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.scenarioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Get scenario",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.scenarioResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Delete scenario",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Currently supports renaming (updates denormalized name + payload.name)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Patch scenario metadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Patch",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.patchScenarioRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.scenarioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/{id}/draft": {
+            "put": {
+                "description": "Accepts incomplete JSON (mirrors saveScenarioDraft); never rejects for validation. Returns optional issues for UI badges. Reverts ready→draft.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Autosave scenario draft",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Builder document (any JSON object)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.scenarioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/{id}/publish": {
+            "post": {
+                "description": "Full validation; on success sets status=ready and writes normalized targets/events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Publish scenario",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Optional payload override to publish",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.scenarioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.validateResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/{id}/targets/{tid}/route": {
+            "post": {
+                "description": "Persists generated events into the scenario draft. Soft-fails to synthetic wander when routing fails or catalogue is empty (kicks reseed when possible).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Plan authentic route for one target",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Target ID",
+                        "name": "tid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Route options",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.RouteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.RouteTargetResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/scenarios/{id}/validate": {
+            "post": {
+                "description": "Full schema checks against stored payload (or optional body override); does not change status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Validate scenario payload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Scenario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Optional payload override",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.validateResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_handler.errorBody"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_shammalie_adversary_apps_api_internal_engine.Snapshot": {
+            "type": "object",
+            "properties": {
+                "asOf": {
+                    "type": "string"
+                },
+                "criticalAlertIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "ingestedEvents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.SimulationEvent"
+                    }
+                },
+                "processedEventIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "run": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "targetStates": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.RuntimeTargetState"
+                    }
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_engine.ViewportSnapshot": {
+            "type": "object",
+            "properties": {
+                "asOf": {
+                    "type": "string"
+                },
+                "bbox": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_viewport.BBox"
+                },
+                "includeTargetIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "run": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.RunSummary"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "targetStates": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.RuntimeTargetState"
+                    }
+                },
+                "zoom": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_generate.DemoOrigin": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "type": "number",
+                    "format": "float64"
+                },
+                "longitude": {
+                    "type": "number",
+                    "format": "float64"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_generate.GenerateRequest": {
+            "type": "object",
+            "properties": {
+                "anywhere": {
+                    "type": "boolean"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "forceSynthetic": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "origin": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_generate.DemoOrigin"
+                },
+                "regionIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "seed": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "targetCount": {
+                    "type": "integer"
+                },
+                "vehicleSelection": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_generate.Job": {
+            "type": "object",
+            "properties": {
+                "anywhereFallbackCount": {
+                    "type": "integer"
+                },
+                "catalogueEmpty": {
+                    "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "degradedTrackCount": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "finishedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "progress": {
+                    "type": "string"
+                },
+                "reseedKicked": {
+                    "type": "boolean"
+                },
+                "scenarioId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_generate.RouteRequest": {
+            "type": "object",
+            "properties": {
+                "anywhere": {
+                    "type": "boolean"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "eventCount": {
+                    "type": "integer"
+                },
+                "regionIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "seed": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_generate.RouteTargetResult": {
+            "type": "object",
+            "properties": {
+                "anywhereFallback": {
+                    "type": "boolean"
+                },
+                "catalogueEmpty": {
+                    "type": "boolean"
+                },
+                "degraded": {
+                    "type": "boolean"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.SimulationEvent"
+                    }
+                },
+                "regionId": {
+                    "type": "string"
+                },
+                "reseedKicked": {
+                    "type": "boolean"
+                },
+                "scenarioId": {
+                    "type": "string"
+                },
+                "targetId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_geoseed.Job": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "finishedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mbtilesPath": {
+                    "type": "string"
+                },
+                "progress": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_geoseed.PointRow": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "type": "string"
+                },
+                "eleFt": {
+                    "type": "integer"
+                },
+                "iata": {
+                    "type": "string"
+                },
+                "icao": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "regionId": {
+                    "type": "string"
+                },
+                "runways": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_geoseed.Region": {
+            "type": "object",
+            "properties": {
+                "bbox": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "supports": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_scenario.PositionPayload": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "number"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "speed": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_scenario.SimulationEvent": {
+            "type": "object",
+            "properties": {
+                "at": {
+                    "type": "string"
+                },
+                "firesAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.PositionPayload"
+                },
+                "targetId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_scenario.ValidationIssue": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "section": {
+                    "description": "scenario | targets | events",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_simulation.PositionSnapshot": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "number"
+                },
+                "at": {
+                    "type": "string"
+                },
+                "course": {
+                    "type": "number"
+                },
+                "heading": {
+                    "type": "number"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "speed": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_simulation.RuntimeTargetState": {
+            "type": "object",
+            "properties": {
+                "appeared": {
+                    "type": "boolean"
+                },
+                "callsign": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "lastEventAt": {
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.PositionSnapshot"
+                },
+                "profile": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "revealed": {
+                    "type": "boolean"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "trail": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_simulation.PositionSnapshot"
+                    }
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.ManageListResult": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.ManageScenarioRow"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.ManageScenarioRow": {
+            "type": "object",
+            "properties": {
+                "activeRuns": {
+                    "type": "integer"
+                },
+                "eventCount": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ownerUserId": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "targetCount": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.ManageStats": {
+            "type": "object",
+            "properties": {
+                "draftCount": {
+                    "type": "integer"
+                },
+                "readyCount": {
+                    "type": "integer"
+                },
+                "runsActive": {
+                    "type": "integer"
+                },
+                "runsCompleted": {
+                    "type": "integer"
+                },
+                "runsStopped": {
+                    "type": "integer"
+                },
+                "scenarioCount": {
+                    "type": "integer"
+                },
+                "totalPayloadBytes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.RunSummary": {
+            "type": "object",
+            "properties": {
+                "completedAt": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "scenarioId": {
+                    "type": "string"
+                },
+                "scenarioName": {
+                    "type": "string"
+                },
+                "scheduleOffsetMs": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "stoppedAt": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.ScenarioSummary": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schemaVersion": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.UsageBucket": {
+            "type": "object",
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "counts": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_store.UsageMetricsResult": {
+            "type": "object",
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "buckets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_store.UsageBucket"
+                    }
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "totals": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shammalie_adversary_apps_api_internal_viewport.BBox": {
+            "type": "object",
+            "properties": {
+                "east": {
+                    "type": "number"
+                },
+                "north": {
+                    "type": "number"
+                },
+                "south": {
+                    "type": "number"
+                },
+                "west": {
+                    "type": "number"
+                }
+            }
+        },
+        "internal_handler.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                }
+            }
+        },
+        "internal_handler.authCredentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.authSessionResponse": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/internal_handler.authUserResponse"
+                }
+            }
+        },
+        "internal_handler.authUserResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.bulkDeleteRequest": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "internal_handler.bulkDeleteResult": {
+            "type": "object",
+            "properties": {
+                "deleted": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "failed": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "internal_handler.createRunRequest": {
+            "type": "object",
+            "properties": {
+                "scenarioId": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.createRunResponse": {
+            "type": "object",
+            "properties": {
+                "completedAt": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "runId": {
+                    "type": "string"
+                },
+                "scenarioId": {
+                    "type": "string"
+                },
+                "scenarioName": {
+                    "type": "string"
+                },
+                "scheduleOffsetMs": {
+                    "type": "integer"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "startedAt": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "stoppedAt": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.createScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "internal_handler.errorBody": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.generateAccepted": {
+            "type": "object",
+            "properties": {
+                "jobId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.manageDeleteResponse": {
+            "type": "object",
+            "properties": {
+                "deletedRuns": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "stoppedRuns": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_handler.metaResponse": {
+            "type": "object",
+            "properties": {
+                "aerodromeCount": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "generatedAt": {
+                    "type": "string"
+                },
+                "jobStatus": {
+                    "type": "string"
+                },
+                "latestJob": {
+                    "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_geoseed.Job"
+                },
+                "mbtilesExists": {
+                    "type": "boolean"
+                },
+                "mbtilesPath": {
+                    "type": "string"
+                },
+                "mbtilesSourceUrl": {
+                    "type": "string"
+                },
+                "portCount": {
+                    "type": "integer"
+                },
+                "regionCount": {
+                    "type": "integer"
+                },
+                "roadAnchorCount": {
+                    "type": "integer"
+                },
+                "schemaV": {
+                    "type": "integer"
+                },
+                "seaLaneCount": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.patchScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.reseedResponse": {
+            "type": "object",
+            "properties": {
+                "jobId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.scenarioResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.ValidationIssue"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "schemaVersion": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_handler.validateResponse": {
+            "type": "object",
+            "properties": {
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shammalie_adversary_apps_api_internal_scenario.ValidationIssue"
+                    }
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "CookieAuth": {
+            "type": "apiKey",
+            "name": "adversary_session",
+            "in": "cookie"
+        }
+    }
+}

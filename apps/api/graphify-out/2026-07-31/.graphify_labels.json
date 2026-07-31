@@ -1,0 +1,12 @@
+{
+  "0": "newServeCmd",
+  "1": "Adversary API",
+  "2": "NewRouter",
+  "3": "newMigrator",
+  "4": "newDownCmd",
+  "5": "Load",
+  "6": "Healthz",
+  "7": "docs.go",
+  "8": "embed.go",
+  "9": "github.com/shammalie/adversary/apps/api"
+}

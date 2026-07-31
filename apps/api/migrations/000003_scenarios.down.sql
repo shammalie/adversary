@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS usage_events;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS targets;
+DROP TABLE IF EXISTS scenarios;

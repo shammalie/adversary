@@ -9,6 +9,7 @@ import {
 
 import { RouterDevtoolsGate } from "@/components/router-devtools-gate";
 import Header from "@/components/header";
+import { QueryProvider } from "@/components/query-provider";
 import { SimulationProvider } from "@/components/simulation-provider";
 import { ThemeColorSync } from "@/components/theme-color-sync";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -90,21 +91,23 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        disableTransitionOnChange
-        storageKey="vite-ui-theme"
-      >
-        <ThemeColorSync />
-        <SimulationProvider>
-          <div className="grid min-h-svh grid-rows-[auto_1fr]">
-            <Header />
-            <Outlet />
-          </div>
-        </SimulationProvider>
-        <Toaster richColors />
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+          storageKey="vite-ui-theme"
+        >
+          <ThemeColorSync />
+          <SimulationProvider>
+            <div className="grid min-h-svh grid-rows-[auto_1fr]">
+              <Header />
+              <Outlet />
+            </div>
+          </SimulationProvider>
+          <Toaster richColors />
+        </ThemeProvider>
+      </QueryProvider>
       <RouterDevtoolsGate />
     </>
   );

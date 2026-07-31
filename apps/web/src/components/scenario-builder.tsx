@@ -76,7 +76,7 @@ import {
   Trash2Icon,
   WaypointsIcon,
 } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 
 import { BrandMark } from "@/components/brand-mark";
@@ -88,19 +88,32 @@ import { EventMessageExportDialog } from "@/components/event-message-export-dial
 import { GenerateRandomRouteForm } from "@/components/generate-random-route-form";
 import { GenerateRouteForm } from "@/components/generate-route-form";
 import { GroupedTimeline } from "@/components/grouped-timeline";
+import { IdbConflictDialog } from "@/components/idb-conflict-dialog";
 import { useSimulation } from "@/components/simulation-provider";
 import { useTheme } from "@/components/theme-provider";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
+import {
+  useDeleteScenarioMutation,
+  useGenerateJobQuery,
+  useGenerateScenarioMutation,
+  usePutDraftMutation,
+  useScenariosQuery,
+} from "@/hooks/use-scenarios";
+import type { ScenarioSummary } from "@/lib/api/types";
+import { getScenarioApi } from "@/lib/api/scenarios";
+import {
+  migrateIdbDraftsToServer,
+  type ConflictChoice,
+  type IdbConflict,
+} from "@/lib/idb-server-migrate";
 import { DEMO_REGIONS, regionCenter } from "@/lib/demo-regions";
 import {
-  createDemoScenario,
   defaultTargetProfile,
   MAX_DEMO_TARGETS,
   MIN_DEMO_TARGETS,
   parseDemoTargetCount,
   pickRandomDemoOrigin,
   type DemoOrigin,
-  type DemoRegionSelection,
-  type DemoVehicleSelection,
 } from "@/lib/demo-scenario";
 import {
   createDraftForTargetChange,
@@ -114,12 +127,7 @@ import { effectiveEventAtMs, getEventsDueByTime, sortEvents } from "@/lib/simula
 import { buildTrackingMapEventPoints } from "@/lib/tracking-map-event-points";
 import {
   coerceEditableScenario,
-  deleteScenario,
   downloadScenario,
-  listScenarios,
-  saveScenarioDraft,
-  upsertValidScenario,
-  type StoredScenarioRecord,
 } from "@/lib/simulation-storage";
 import {
   fieldHasIssue,
@@ -192,20 +200,6 @@ function matchingDemoLocationName(origin: DemoOrigin) {
       );
     })?.name ?? null
   );
-}
-
-function demoGeneratingShell(nowIso: string): SimulationScenario {
-  return {
-    schemaVersion: 2,
-    id: crypto.randomUUID(),
-    name: "Generating demo…",
-    description: "Authentic geo routes are being planned.",
-    createdAt: nowIso,
-    updatedAt: nowIso,
-    priorityTerms: ["critical", "proximity threshold"],
-    targets: [],
-    events: [],
-  };
 }
 
 function blankScenario(): SimulationScenario {
@@ -332,11 +326,16 @@ export function ScenarioBuilder() {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { scenarioId?: string };
   const scenarioId = search.scenarioId;
-  const { runtime, start } = useSimulation();
+  const { runtime, start, isStarting } = useSimulation();
   const { resolvedTheme } = useTheme();
   const colorTheme = resolveTargetColorTheme(resolvedTheme);
+  const scenariosQuery = useScenariosQuery();
+  const putDraft = usePutDraftMutation();
+  const deleteScenarioMutation = useDeleteScenarioMutation();
   const [loading, setLoading] = useState(true);
-  const [records, setRecords] = useState<StoredScenarioRecord[]>([]);
+  const [migrationDone, setMigrationDone] = useState(false);
+  const [idbConflict, setIdbConflict] = useState<IdbConflict | null>(null);
+  const conflictResolverRef = useRef<((choice: ConflictChoice) => void) | null>(null);
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
   const [scenario, setScenario] = useState<SimulationScenario>(() => blankScenario());
   const [draft, setDraft] = useState(() => createEventDraft());
@@ -366,10 +365,16 @@ export function ScenarioBuilder() {
   const [demoProgress, setDemoProgress] = useState<{ ready: number; total: number } | null>(
     null,
   );
-  const [isDemoPending, startDemoTransition] = useTransition();
-  const demoAbortRef = useRef<AbortController | null>(null);
-  const demoScenarioSnapshotRef = useRef<SimulationScenario | null>(null);
-  const demoFirstReadyRef = useRef(false);
+  const [demoJobId, setDemoJobId] = useState<string | null>(null);
+  const completedDemoJobRef = useRef<string | null>(null);
+  const hydratedRef = useRef(false);
+  const generateDemo = useGenerateScenarioMutation();
+  const demoJobQuery = useGenerateJobQuery(demoJobId);
+
+  const records: ScenarioSummary[] = scenariosQuery.data ?? [];
+  const draftAutosave = useDraftAutosave(scenario, {
+    enabled: migrationDone && Boolean(activeRecordId) && !loading,
+  });
 
   const demoTargetCount = parseDemoTargetCount(demoTargetCountInput);
   const demoTargetCountInvalid =
@@ -377,21 +382,58 @@ export function ScenarioBuilder() {
   const demoEndAtInvalid =
     demoEndAt.trim().length > 0 &&
     (!Number.isFinite(Date.parse(demoEndAt)) || Date.parse(demoEndAt) <= Date.parse(demoStartAt));
-  const demoVehicleSelection: DemoVehicleSelection = demoVehicleRandom
-    ? "random"
-    : demoVehicleCategories;
   const demoLocationLabel = demoOrigin ? matchingDemoLocationName(demoOrigin) : null;
   const demoRegionAnywhere = demoRegionIds.length === 0;
-  const demoRegionSelection: DemoRegionSelection = demoRegionAnywhere
-    ? "anywhere"
-    : demoRegionIds;
   const demoPinOverridesRegions = demoOrigin !== null;
+  const isDemoPending =
+    generateDemo.isPending ||
+    demoJobQuery.data?.status === "queued" ||
+    demoJobQuery.data?.status === "running";
 
   useEffect(() => {
     if (demoVehicleCategories.length === 0 && !demoVehicleRandom) {
       setDemoVehicleRandom(true);
     }
   }, [demoVehicleCategories.length, demoVehicleRandom]);
+
+  useEffect(() => {
+    const job = demoJobQuery.data;
+    if (!job) return;
+    if (job.status === "failed") {
+      if (completedDemoJobRef.current === job.id) return;
+      completedDemoJobRef.current = job.id;
+      toast.error(job.error ?? "Demo generation failed.");
+      setDemoJobId(null);
+      setDemoProgress(null);
+      return;
+    }
+    if (job.status !== "succeeded" || !job.scenarioId) return;
+    if (completedDemoJobRef.current === job.id) return;
+    completedDemoJobRef.current = job.id;
+
+    const typeLabel =
+      demoVehicleRandom
+        ? "mixed"
+        : demoVehicleCategories.length === 1
+          ? demoVehicleCategories[0]
+          : demoVehicleCategories.join("/");
+    setDemoProgress({ ready: demoTargetCount ?? 0, total: demoTargetCount ?? 0 });
+    toast.success(
+      `Loaded ${typeLabel} demo with ${job.degradedTrackCount ?? 0} synthetic fallback track${
+        job.degradedTrackCount === 1 ? "" : "s"
+      }.`,
+    );
+    setDemoDialogOpen(false);
+    setDemoJobId(null);
+    setDemoProgress(null);
+    void switchScenario(job.scenarioId);
+  }, [
+    demoJobQuery.data,
+    demoTargetCount,
+    demoVehicleCategories,
+    demoVehicleRandom,
+    switchScenario,
+  ]);
 
   const validationIssues = useMemo(
     () => getScenarioValidationIssues(scenario),
@@ -500,20 +542,59 @@ export function ScenarioBuilder() {
   useEffect(() => {
     let cancelled = false;
 
-    async function loadInitialScenario() {
+    async function runMigrationThenHydrate() {
       setLoading(true);
       try {
-        const stored = await listScenarios();
+        await migrateIdbDraftsToServer({
+          onConflict(conflict) {
+            return new Promise<ConflictChoice>((resolve) => {
+              conflictResolverRef.current = resolve;
+              setIdbConflict(conflict);
+            });
+          },
+        });
         if (cancelled) return;
+        setMigrationDone(true);
+        await scenariosQuery.refetch();
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Could not migrate local drafts to the server.",
+          );
+          setMigrationDone(true);
+        }
+      }
+    }
 
-        setRecords(stored);
+    void runMigrationThenHydrate();
+    return () => {
+      cancelled = true;
+    };
+    // One-shot migrate on builder mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, []);
+
+  useEffect(() => {
+    if (!migrationDone || hydratedRef.current) return;
+    if (scenariosQuery.isFetching && !scenariosQuery.data) return;
+
+    let cancelled = false;
+
+    async function hydrateFromServer() {
+      setLoading(true);
+      try {
+        const stored = scenariosQuery.data ?? [];
         const selected =
           (scenarioId ? stored.find((record) => record.id === scenarioId) : undefined) ??
           stored[0];
 
         if (selected) {
-          setActiveRecordId(selected.id);
-          const nextScenario = coerceEditableScenario(selected.payload, selected.id);
+          const detail = await getScenarioApi(selected.id);
+          if (cancelled) return;
+          setActiveRecordId(detail.id);
+          const nextScenario = coerceEditableScenario(detail.payload, detail.id);
           setScenario(nextScenario);
           setSelectedTargetId(nextScenario.targets[0]?.id ?? null);
           const firstTargetId = nextScenario.targets[0]?.id;
@@ -528,23 +609,31 @@ export function ScenarioBuilder() {
           );
         } else {
           const blank = blankScenario();
-          const record = await saveScenarioDraft(blank);
-          setActiveRecordId(record.id);
-          setScenario(blank);
+          const created = await putDraft.mutateAsync({ id: blank.id, payload: blank });
+          if (cancelled) return;
+          setActiveRecordId(created.id);
+          setScenario(coerceEditableScenario(created.payload, created.id));
           setSelectedTargetId(null);
           setDraft(createEventDraft());
-          setRecords(await listScenarios());
+          void navigate({ to: "/builder", search: { scenarioId: created.id } });
+        }
+        hydratedRef.current = true;
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(
+            error instanceof Error ? error.message : "Could not load scenarios from the API.",
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    void loadInitialScenario();
+    void hydrateFromServer();
     return () => {
       cancelled = true;
     };
-  }, [scenarioId]);
+  }, [migrationDone, navigate, putDraft, scenarioId, scenariosQuery.data, scenariosQuery.isFetching]);
 
   function applyValidation(nextScenario: SimulationScenario) {
     return getScenarioValidationIssues(nextScenario);
@@ -646,16 +735,20 @@ export function ScenarioBuilder() {
   function save() {
     void (async () => {
       const issues = applyValidation(scenario);
-      const record = await saveScenarioDraft(scenario);
-      setActiveRecordId(record.id);
-      setRecords(await listScenarios());
-      if (issues.length === 0) {
-        toast.success("Scenario saved locally.");
-        return;
+      try {
+        const record = await putDraft.mutateAsync({ id: scenario.id, payload: scenario });
+        setActiveRecordId(record.id);
+        draftAutosave.saveNow(scenario);
+        if (issues.length === 0) {
+          toast.success("Scenario saved to server.");
+          return;
+        }
+        toast.error(
+          `Saved draft with ${issues.length} validation ${issues.length === 1 ? "error" : "errors"}.`,
+        );
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Save failed.");
       }
-      toast.error(
-        `Saved draft with ${issues.length} validation ${issues.length === 1 ? "error" : "errors"}.`,
-      );
     })();
   }
 
@@ -663,26 +756,27 @@ export function ScenarioBuilder() {
     if (nextRecordId === activeRecordId) return;
 
     if (activeRecordId) {
-      await saveScenarioDraft(scenario);
+      try {
+        await putDraft.mutateAsync({ id: scenario.id, payload: scenario });
+      } catch {
+        // keep going; user explicitly switched
+      }
     }
 
     if (nextRecordId === "__new__") {
       const blank = blankScenario();
-      await saveScenarioDraft(blank);
-      setActiveRecordId(blank.id);
-      setScenario(blank);
+      const created = await putDraft.mutateAsync({ id: blank.id, payload: blank });
+      setActiveRecordId(created.id);
+      setScenario(coerceEditableScenario(created.payload, created.id));
       setSelectedTargetId(null);
       setDraft(createEventDraft());
-      setRecords(await listScenarios());
-      void navigate({ to: "/builder", search: { scenarioId: blank.id } });
+      void navigate({ to: "/builder", search: { scenarioId: created.id } });
       return;
     }
 
-    const nextRecord = records.find((record) => record.id === nextRecordId);
-    if (!nextRecord) return;
-
-    const nextScenario = coerceEditableScenario(nextRecord.payload, nextRecord.id);
-    setActiveRecordId(nextRecord.id);
+    const detail = await getScenarioApi(nextRecordId);
+    const nextScenario = coerceEditableScenario(detail.payload, detail.id);
+    setActiveRecordId(detail.id);
     setScenario(nextScenario);
     setSelectedTargetId(nextScenario.targets[0]?.id ?? null);
     {
@@ -697,7 +791,7 @@ export function ScenarioBuilder() {
           : createEventDraft(),
       );
     }
-    void navigate({ to: "/builder", search: { scenarioId: nextRecord.id } });
+    void navigate({ to: "/builder", search: { scenarioId: detail.id } });
   }
 
   async function removeStoredScenarios(recordIds: string[]) {
@@ -710,13 +804,13 @@ export function ScenarioBuilder() {
     });
     const confirmLabel =
       labels.length === 1
-        ? `Delete “${labels[0]}” from this browser? This cannot be undone.`
-        : `Delete ${labels.length} saved scenarios from this browser? This cannot be undone.`;
+        ? `Delete “${labels[0]}” from the server? This cannot be undone.`
+        : `Delete ${labels.length} scenarios from the server? This cannot be undone.`;
     if (!window.confirm(confirmLabel)) return;
 
-    await Promise.all(deletableIds.map((id) => deleteScenario(id)));
+    await Promise.all(deletableIds.map((id) => deleteScenarioMutation.mutateAsync(id)));
     setSelectedScenarioIds((current) => current.filter((id) => !deletableIds.includes(id)));
-    setRecords(await listScenarios());
+    await scenariosQuery.refetch();
     toast.success(
       deletableIds.length === 1
         ? `Deleted ${labels[0]}.`
@@ -751,7 +845,10 @@ export function ScenarioBuilder() {
   }
 
   function cancelDemoGeneration() {
-    demoAbortRef.current?.abort();
+    setDemoJobId(null);
+    setDemoProgress(null);
+    setDemoDialogOpen(false);
+    toast.message("Stopped waiting for demo generation.");
   }
 
   function handleDemoDialogOpenChange(open: boolean) {
@@ -777,131 +874,26 @@ export function ScenarioBuilder() {
     }
 
     const targetCount = demoTargetCount;
-    const vehicleSelection = demoVehicleSelection;
-    const vehicleRandom = demoVehicleRandom;
-    const vehicleCategories = demoVehicleCategories;
-    const startAt = demoStartAt;
-    const endAt = demoEndAt.trim() || undefined;
-    const origin = demoOrigin ?? undefined;
-    const regions: DemoRegionSelection | undefined = origin
-      ? undefined
-      : demoRegionSelection;
-    const typeLabel = vehicleRandom
-      ? "mixed"
-      : vehicleCategories.length === 1
-        ? vehicleCategories[0]
-        : vehicleCategories.join("/");
-
-    demoAbortRef.current?.abort();
-    const abortController = new AbortController();
-    demoAbortRef.current = abortController;
-    demoScenarioSnapshotRef.current = scenario;
-    demoFirstReadyRef.current = false;
-    const relocatedCategories = new Set<VehicleCategory>();
-
-    startDemoTransition(async () => {
-      const now = Date.now();
-      const nowIso = new Date(now).toISOString();
-      setDemoProgress({ ready: 0, total: targetCount });
-      setScenario(demoGeneratingShell(nowIso));
-
-      try {
-        const result = await createDemoScenario(now, Math.random, {
-          vehicleSelection,
-          targetCount,
-          startAt,
-          endAt,
-          origin,
-          regions,
-          signal: abortController.signal,
-          onTargetReady: (update) => {
-            if (update.anywhereFallback) {
-              relocatedCategories.add(update.target.profile.vehicleCategory);
-            }
-            setDemoProgress((previous) => ({
-              ready: (previous?.ready ?? 0) + 1,
-              total: targetCount,
-            }));
-            setScenario((current) => {
-              if (current.targets.some((target) => target.id === update.target.id)) {
-                return current;
-              }
-              return {
-                ...current,
-                targets: [...current.targets, update.target],
-                events: sortEvents([...current.events, ...update.events]),
-                updatedAt: new Date().toISOString(),
-              };
-            });
-            if (!demoFirstReadyRef.current) {
-              demoFirstReadyRef.current = true;
-              setSelectedTargetId(update.target.id);
-              setDraft(
-                createDraftForTargetChange(
-                  update.target.id,
-                  update.events,
-                  createEventDraft().at,
-                ),
-              );
-            }
-          },
-        });
-
-        if (result.cancelled || abortController.signal.aborted) {
-          const snapshot = demoScenarioSnapshotRef.current;
-          if (snapshot) {
-            setScenario(snapshot);
-          }
-          toast.message("Demo generation cancelled.");
-          return;
-        }
-
-        setScenario(result.scenario);
-        if (!demoFirstReadyRef.current) {
-          const firstTargetId = result.scenario.targets[0]?.id ?? null;
-          setSelectedTargetId(firstTargetId);
-          setDraft(
-            firstTargetId
-              ? createDraftForTargetChange(
-                  firstTargetId,
-                  result.scenario.events,
-                  createEventDraft().at,
-                )
-              : createEventDraft(),
-          );
-        }
-
-        const authenticCount =
-          result.scenario.targets.length - result.degradedTrackCount;
-        const syntheticCount = result.degradedTrackCount;
-        const relocatedList = [...relocatedCategories];
-        let message = `Loaded ${result.scenario.targets.length} ${typeLabel} target${
-          result.scenario.targets.length === 1 ? "" : "s"
-        }.`;
-        if (syntheticCount > 0 || relocatedList.length > 0) {
-          message += ` ${authenticCount} routed authentically, ${syntheticCount} fell back to synthetic.`;
-          if (relocatedList.length > 0) {
-            message += ` Relocated for want of a compatible region: ${relocatedList.join(", ")}.`;
-          }
-        }
-        toast.success(message);
-        setDemoDialogOpen(false);
-      } catch (error) {
-        const snapshot = demoScenarioSnapshotRef.current;
-        if (snapshot) {
-          setScenario(snapshot);
-        }
-        const detail =
-          error instanceof Error ? error.message : "Demo generation failed.";
-        toast.error(detail);
-      } finally {
-        if (demoAbortRef.current === abortController) {
-          demoAbortRef.current = null;
-        }
-        demoScenarioSnapshotRef.current = null;
-        setDemoProgress(null);
-      }
-    });
+    completedDemoJobRef.current = null;
+    setDemoProgress({ ready: 0, total: targetCount });
+    generateDemo.mutate(
+      {
+        vehicleSelection: demoVehicleRandom ? undefined : demoVehicleCategories,
+        targetCount,
+        startAt: demoStartAt,
+        endAt: demoEndAt.trim() || undefined,
+        origin: demoOrigin ?? undefined,
+        regionIds: demoOrigin ? undefined : demoRegionIds,
+        anywhere: !demoOrigin && demoRegionAnywhere,
+      },
+      {
+        onSuccess: (accepted) => setDemoJobId(accepted.jobId),
+        onError: (error) => {
+          setDemoProgress(null);
+          toast.error(error instanceof Error ? error.message : "Unable to start demo generation.");
+        },
+      },
+    );
   }
 
   function randomizeDemoOrigin() {
@@ -919,9 +911,12 @@ export function ScenarioBuilder() {
       return;
     }
     void (async () => {
-      await upsertValidScenario(scenario);
-      start(scenario);
-      await navigate({ to: "/operations" });
+      try {
+        await start(scenario);
+        await navigate({ to: "/operations" });
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Could not start run.");
+      }
     })();
   }
 
@@ -1031,12 +1026,28 @@ export function ScenarioBuilder() {
     return (
       <main className="grid min-h-full place-items-center p-6">
         <Loader />
+        <IdbConflictDialog
+          conflict={idbConflict}
+          onResolve={(choice) => {
+            conflictResolverRef.current?.(choice);
+            conflictResolverRef.current = null;
+            setIdbConflict(null);
+          }}
+        />
       </main>
     );
   }
 
   return (
     <main className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 p-3 sm:p-5 lg:p-7">
+      <IdbConflictDialog
+        conflict={idbConflict}
+        onResolve={(choice) => {
+          conflictResolverRef.current?.(choice);
+          conflictResolverRef.current = null;
+          setIdbConflict(null);
+        }}
+      />
       <section className="flex flex-col justify-between gap-4 border-b border-border/70 pb-5 md:flex-row md:items-end">
         <div className="flex max-w-3xl flex-col gap-2">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-primary">
@@ -1352,7 +1363,7 @@ export function ScenarioBuilder() {
                   <ScrollArea className="h-36">
                     <ul className="flex flex-col gap-1 pr-2">
                       {storedScenarioOptions.map((record) => {
-                        const ready = validateScenario(record.payload).success;
+                        const ready = record.status === "ready";
                         const displayName = record.name.trim() || "Untitled scenario";
                         const updatedLabel = new Date(record.updatedAt).toLocaleDateString(
                           undefined,
@@ -1412,7 +1423,15 @@ export function ScenarioBuilder() {
       <Card id="scenario-profile">
         <CardHeader>
           <CardTitle>Operation profile</CardTitle>
-          <CardDescription>Stored only in this browser unless exported.</CardDescription>
+          <CardDescription>
+            Autosaved to the API
+            {draftAutosave.isSaving
+              ? " · saving…"
+              : draftAutosave.isError
+                ? " · save failed"
+                : ""}
+            .
+          </CardDescription>
           <CardAction>
             <Badge variant={validationSuccess ? "secondary" : "outline"}>
               {validationSuccess ? "Ready" : `Draft · ${validationIssues.length}`}
@@ -2117,6 +2136,7 @@ export function ScenarioBuilder() {
                 {selectedDraftTarget ? (
                   <GenerateRouteForm
                     key={selectedDraftTarget.id}
+                    scenarioId={scenario.id}
                     target={selectedDraftTarget}
                     onGenerate={(events, summary) => {
                       updateScenario({ events: [...scenario.events, ...events] });
@@ -2135,9 +2155,9 @@ export function ScenarioBuilder() {
                   <GenerateRandomRouteForm
                     key={`random-${selectedDraftTarget.id}`}
                     target={selectedDraftTarget}
-                    onGenerate={(events, summary) => {
-                      updateScenario({ events: [...scenario.events, ...events] });
+                    onGeneratedScenario={(generatedScenarioId, summary) => {
                       toast.success(summary);
+                      void switchScenario(generatedScenarioId);
                     }}
                   />
                 ) : (
@@ -2171,10 +2191,10 @@ export function ScenarioBuilder() {
               size="sm"
               className="h-7 bg-background text-foreground hover:bg-background/90"
               onClick={beginSimulation}
-              disabled={!validationSuccess}
+              disabled={!validationSuccess || isStarting}
             >
               <PlayIcon data-icon="inline-start" />
-              Start simulation
+              {isStarting ? "Starting…" : "Start simulation"}
             </Button>
           </div>
         </div>

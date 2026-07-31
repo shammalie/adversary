@@ -8,14 +8,18 @@ import {
 } from "@adversary/ui/components/dropdown-menu";
 import { Separator } from "@adversary/ui/components/separator";
 import { Link } from "@tanstack/react-router";
-import { FileUpIcon, SettingsIcon, WrenchIcon } from "lucide-react";
+import { FileUpIcon, ListIcon, LogOutIcon, SettingsIcon, UserIcon, WrenchIcon } from "lucide-react";
 
 import { BrandMark } from "./brand-mark";
 import { useSimulation } from "./simulation-provider";
 import { ModeToggle } from "./mode-toggle";
+import { useLogoutMutation, useMeQuery } from "@/hooks/use-auth";
 
 export default function Header() {
   const { runtime } = useSimulation();
+  const meQuery = useMeQuery();
+  const logout = useLogoutMutation();
+  const auth = meQuery.data;
 
   return (
     <header className="sticky top-0 z-40 bg-background/92 backdrop-blur-md">
@@ -46,6 +50,35 @@ export default function Header() {
               {runtime.status}
             </Badge>
           ) : null}
+          {auth?.availability === "session" ? (
+            auth.user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button variant="outline" size="sm" aria-label={`Account: ${auth.user.email}`} />
+                  }
+                >
+                  <UserIcon data-icon="inline-start" />
+                  <span className="hidden max-w-40 truncate sm:inline">{auth.user.email}</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>{auth.user.email}</DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={logout.isPending}
+                    onClick={() => logout.mutate()}
+                  >
+                    <LogOutIcon />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="outline" size="sm" render={<Link to="/login" />}>
+                <UserIcon data-icon="inline-start" />
+                Login
+              </Button>
+            )
+          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -62,6 +95,14 @@ export default function Header() {
               <DropdownMenuItem render={<Link to="/builder" />}>
                 <WrenchIcon className="size-4" aria-hidden="true" />
                 Builder
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link to="/runs" />}>
+                <ListIcon className="size-4" aria-hidden="true" />
+                Active runs
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link to="/manage" />}>
+                <SettingsIcon className="size-4" aria-hidden="true" />
+                Manage
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

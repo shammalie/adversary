@@ -52,6 +52,14 @@ apps/web/playwright-report/
 apps/web/blob-report/
 apps/web/playwright/.cache/
 
+# Go
+*.exe
+*.test
+*.out
+apps/api/api
+apps/api/migrate
+vendor/
+
 # Misc
 *.tgz
 .cache

@@ -8,19 +8,18 @@ import {
 } from "@adversary/ui/components/field";
 import { Input } from "@adversary/ui/components/input";
 import { cn } from "@adversary/ui/lib/utils";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { DateTimePicker } from "@/components/date-time-picker";
 import { DemoRegionSelect } from "@/components/demo-region-select";
-import type { DemoRegionSelection } from "@/lib/demo-scenario";
+import { useGenerateJobQuery, useGenerateScenarioMutation } from "@/hooks/use-scenarios";
 import { MAX_GENERATED_EVENTS } from "@/lib/event-generator";
-import { planTargetRouteEvents } from "@/lib/plan-target-events";
-import type { SimulationEvent, TargetDefinition } from "@/types/target";
+import type { TargetDefinition } from "@/types/target";
 
 export interface GenerateRandomRouteFormProps {
   target: TargetDefinition;
-  onGenerate: (events: SimulationEvent[], summary: string) => void;
+  onGeneratedScenario: (scenarioId: string, summary: string) => void;
   disabled?: boolean;
 }
 
@@ -64,7 +63,7 @@ function validateRandomForm(options: {
  */
 export function GenerateRandomRouteForm({
   target,
-  onGenerate,
+  onGeneratedScenario,
   disabled = false,
 }: GenerateRandomRouteFormProps) {
   const now = Date.now();
@@ -72,25 +71,13 @@ export function GenerateRandomRouteForm({
   const [count, setCount] = useState("60");
   const [startAt, setStartAt] = useState(new Date(now).toISOString());
   const [endAt, setEndAt] = useState("");
-  const [pendingSummary, setPendingSummary] = useState<string | null>(null);
-  const [pendingEvents, setPendingEvents] = useState<SimulationEvent[]>([]);
   const [attempted, setAttempted] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const abortRef = useRef<AbortController | null>(null);
-
-  const regionSelection: DemoRegionSelection =
-    regionIds.length === 0 ? "anywhere" : regionIds;
-
-  function clearPending() {
-    setPendingSummary(null);
-    setPendingEvents([]);
-  }
+  const [jobId, setJobId] = useState<string | null>(null);
+  const generate = useGenerateScenarioMutation();
+  const jobQuery = useGenerateJobQuery(jobId);
 
   useEffect(() => {
-    clearPending();
-    setStatusMessage(null);
   }, [count, startAt, endAt, regionIds, target.id]);
 
   useEffect(() => {
@@ -99,15 +86,14 @@ export function GenerateRandomRouteForm({
   }, [attempted, count, startAt, endAt]);
 
   useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  function cancelGeneration() {
-    abortRef.current?.abort();
-    setStatusMessage(null);
-  }
+    const job = jobQuery.data;
+    if (job?.status !== "succeeded" || !job.scenarioId) return;
+    const summary = `Generated scenario with ${job.degradedTrackCount ?? 0} synthetic fallback track${
+      job.degradedTrackCount === 1 ? "" : "s"
+    }.`;
+    onGeneratedScenario(job.scenarioId, summary);
+    setJobId(null);
+  }, [jobQuery.data, onGeneratedScenario]);
 
   function handleGeneratePreview() {
     setAttempted(true);
@@ -119,65 +105,34 @@ export function GenerateRandomRouteForm({
       return;
     }
 
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    clearPending();
-    setStatusMessage("Routing authentic path…");
-
-    startTransition(async () => {
-      try {
-        const result = await planTargetRouteEvents({
-          target,
-          regions: regionSelection,
-          startAt,
-          endAt: endAt.trim() || undefined,
-          eventCount: Number(count),
-          signal: controller.signal,
-        });
-
-        if (controller.signal.aborted) return;
-
-        const regionNote =
-          regionIds.length === 0
-            ? "anywhere"
-            : `${regionIds.length} region${regionIds.length === 1 ? "" : "s"}`;
-        let summary = `Generate ${result.events.length} position events for ${target.callsign} (${regionNote}) between ${new Date(startAt).toLocaleString()}${endAt.trim() ? ` and ${new Date(endAt).toLocaleString()}` : ""}?`;
-        if (result.degraded) {
-          summary += " Authentic routing failed — synthetic path will be used.";
-        }
-        if (result.anywhereFallback) {
-          summary += " Placement fell back to anywhere-sampling.";
-        }
-
-        setPendingSummary(summary);
-        setPendingEvents(result.events);
-        setStatusMessage(null);
-      } catch (error) {
-        if (
-          (error instanceof DOMException && error.name === "AbortError") ||
-          (error instanceof Error && error.name === "AbortError")
-        ) {
-          setStatusMessage(null);
-          return;
-        }
-        const message =
-          error instanceof Error ? error.message : "Unable to generate route.";
-        toast.error(message);
-        setStatusMessage(null);
-      }
-    });
+    generate.mutate(
+      {
+        vehicleSelection: [target.profile.vehicleCategory],
+        targetCount: 1,
+        startAt,
+        endAt: endAt.trim() || undefined,
+        regionIds,
+        anywhere: regionIds.length === 0,
+      },
+      {
+        onSuccess: (accepted) => setJobId(accepted.jobId),
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : "Unable to start generation.";
+          toast.error(message);
+          setErrors((current) => ({ ...current, count: message }));
+        },
+      },
+    );
   }
 
-  function confirmInsert() {
-    if (pendingEvents.length === 0) return;
-    onGenerate(pendingEvents, pendingSummary ?? "");
-    clearPending();
-    setAttempted(false);
-    setErrors({});
-    setStatusMessage(null);
-  }
-
+  const isPending =
+    generate.isPending ||
+    jobQuery.data?.status === "queued" ||
+    jobQuery.data?.status === "running";
+  const statusMessage =
+    jobQuery.data?.status === "failed"
+      ? jobQuery.data.error ?? "Generation failed."
+      : jobQuery.data?.progress ?? (generate.isPending ? "Starting generation…" : null);
   const formDisabled = disabled || isPending;
 
   return (
@@ -268,38 +223,17 @@ export function GenerateRandomRouteForm({
           </p>
         ) : null}
 
-        {pendingSummary ? (
-          <p className="rounded-lg border bg-muted/40 px-3 py-2 text-sm" role="status">
-            {pendingSummary}
-          </p>
-        ) : null}
       </FieldGroup>
 
       <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-        {isPending ? (
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full sm:w-auto"
-            onClick={cancelGeneration}
-          >
-            Cancel
-          </Button>
-        ) : null}
-        {pendingEvents.length > 0 && !isPending ? (
-          <Button className="w-full sm:w-auto" disabled={disabled} onClick={confirmInsert}>
-            Insert {pendingEvents.length} events
-          </Button>
-        ) : (
-          <Button
-            className="w-full sm:w-auto"
-            disabled={formDisabled}
-            aria-busy={isPending || undefined}
-            onClick={handleGeneratePreview}
-          >
-            {isPending ? "Generating…" : "Preview generation"}
-          </Button>
-        )}
+        <Button
+          className="w-full sm:w-auto"
+          disabled={formDisabled}
+          aria-busy={isPending || undefined}
+          onClick={handleGeneratePreview}
+        >
+          {isPending ? "Generating…" : "Generate scenario"}
+        </Button>
       </div>
     </div>
   );

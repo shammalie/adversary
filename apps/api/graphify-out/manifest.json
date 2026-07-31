@@ -1,0 +1,192 @@
+{
+  "cmd/api/main.go": {
+    "mtime": 1785514558.4004917,
+    "ast_hash": "b379709745c610f5ea0d46db38a58cbb",
+    "semantic_hash": ""
+  },
+  "cmd/migrate/main.go": {
+    "mtime": 1785513155.5965292,
+    "ast_hash": "b7d3c49c59f40f6b803220611e1d7466",
+    "semantic_hash": ""
+  },
+  "docs/docs.go": {
+    "mtime": 1785514620.6259098,
+    "ast_hash": "44b4f67377ed2c10036c6a70aaeff52e",
+    "semantic_hash": ""
+  },
+  "docs/swagger.json": {
+    "mtime": 1785514620.6259098,
+    "ast_hash": "e04383b5c03f3d68ab0f305c29e50eb8",
+    "semantic_hash": ""
+  },
+  "go.mod": {
+    "mtime": 1785514166.4406438,
+    "ast_hash": "65d787637c7b08bac34be53cfc3aea8e",
+    "semantic_hash": ""
+  },
+  "internal/app/app.go": {
+    "mtime": 1785513905.697739,
+    "ast_hash": "f25e09d7441d67000aa3572398d8f58b",
+    "semantic_hash": ""
+  },
+  "internal/auth/auth.go": {
+    "mtime": 1785513133.506323,
+    "ast_hash": "e3ce015343a31b3e009eb679e500251b",
+    "semantic_hash": ""
+  },
+  "internal/config/config.go": {
+    "mtime": 1785513132.4649901,
+    "ast_hash": "7fe9686a194a3853e84815d8e6d49c7c",
+    "semantic_hash": ""
+  },
+  "internal/handler/healthz.go": {
+    "mtime": 1785513135.6989892,
+    "ast_hash": "faf58f7b69758cf7e08dcb4c75f5725e",
+    "semantic_hash": ""
+  },
+  "internal/handler/router.go": {
+    "mtime": 1785514583.5055153,
+    "ast_hash": "5da724d22cec0f08f217e2d620c463f4",
+    "semantic_hash": ""
+  },
+  "internal/migrate/migrate.go": {
+    "mtime": 1785513152.767069,
+    "ast_hash": "c17920e32f2cc244b2ef93169841330a",
+    "semantic_hash": ""
+  },
+  "migrations/000001_enable_postgis.down.sql": {
+    "mtime": 1785513156.2765062,
+    "ast_hash": "529cbebbc593834c20c1427ff171d846",
+    "semantic_hash": ""
+  },
+  "migrations/000001_enable_postgis.up.sql": {
+    "mtime": 1785513155.944073,
+    "ast_hash": "d07ce3d3cfa85fc4d805fcc75c9ebcf1",
+    "semantic_hash": ""
+  },
+  "migrations/embed.go": {
+    "mtime": 1785513155.758968,
+    "ast_hash": "6c72c655bdac218628c8edaa47aabe25",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785514644.5976562,
+    "ast_hash": "ca4fd89e96d33670bbd3df96ad302fc5",
+    "semantic_hash": ""
+  },
+  "docs/swagger.yaml": {
+    "mtime": 1785514620.6295927,
+    "ast_hash": "002861ae84b0255cc64d1216429d4254",
+    "semantic_hash": ""
+  },
+  "cmd/geoseed/main.go": {
+    "mtime": 1785513895.0754085,
+    "ast_hash": "09e026d2b183c104d80d13b052a94399",
+    "semantic_hash": ""
+  },
+  "internal/db/db.go": {
+    "mtime": 1785513827.1183627,
+    "ast_hash": "3e6f397c16900269f5185edf5f1a2f9b",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/bundle.go": {
+    "mtime": 1785513793.1864767,
+    "ast_hash": "615e640cd6ca7e27f4b7c369684e303a",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/geoseed_test.go": {
+    "mtime": 1785513919.4935439,
+    "ast_hash": "2a4113268ffc46604fe208eddb3e4116",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/mbtiles.go": {
+    "mtime": 1785513694.902215,
+    "ast_hash": "850cb8eef56c03087d0097d505cdaca9",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/mine.go": {
+    "mtime": 1785513758.4054418,
+    "ast_hash": "32e1b97ada8ae026ae7a53bc5cff6149",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/mvt.go": {
+    "mtime": 1785513746.868862,
+    "ast_hash": "28331cee60abffe2153010c4dc2bfb72",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/reseed.go": {
+    "mtime": 1785514207.9775872,
+    "ast_hash": "2ef05bf287a4945d693322f6ff53bc8a",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/store.go": {
+    "mtime": 1785514214.584919,
+    "ast_hash": "f8d03bd443c84a1993641465b90ae8e3",
+    "semantic_hash": ""
+  },
+  "internal/geoseed/types.go": {
+    "mtime": 1785514074.73537,
+    "ast_hash": "c71491a2ec57e6ccb0cb526b6f73f287",
+    "semantic_hash": ""
+  },
+  "internal/handler/geo.go": {
+    "mtime": 1785513882.9864116,
+    "ast_hash": "cf49fa4e2433413b84a85accab364f37",
+    "semantic_hash": ""
+  },
+  "internal/handler/scenario.go": {
+    "mtime": 1785514540.9593375,
+    "ast_hash": "17edc579984dbbe19b49467b75abab7f",
+    "semantic_hash": ""
+  },
+  "internal/handler/scenario_test.go": {
+    "mtime": 1785514599.2773392,
+    "ast_hash": "d746249e3bc9b1e2c0a0f68fc823c681",
+    "semantic_hash": ""
+  },
+  "internal/scenario/migrate.go": {
+    "mtime": 1785514611.7853992,
+    "ast_hash": "c7ab29a03f7c071e0c52a864b5e43442",
+    "semantic_hash": ""
+  },
+  "internal/scenario/types.go": {
+    "mtime": 1785514416.7641025,
+    "ast_hash": "1855f3447a859b28005d947d2fd0a945",
+    "semantic_hash": ""
+  },
+  "internal/scenario/validate.go": {
+    "mtime": 1785514449.827391,
+    "ast_hash": "869c8a009043293e64a9aa372d4de1e7",
+    "semantic_hash": ""
+  },
+  "internal/scenario/validate_test.go": {
+    "mtime": 1785514575.0962133,
+    "ast_hash": "7ff66f86a5985b1ba108a5e9bf937e34",
+    "semantic_hash": ""
+  },
+  "internal/store/scenario.go": {
+    "mtime": 1785514500.3122175,
+    "ast_hash": "74a6f7d21bf9975c051c50969115bee4",
+    "semantic_hash": ""
+  },
+  "migrations/000002_geo_catalogue.down.sql": {
+    "mtime": 1785513576.8909888,
+    "ast_hash": "49850005ff86a8899d4a2b021c36056c",
+    "semantic_hash": ""
+  },
+  "migrations/000002_geo_catalogue.up.sql": {
+    "mtime": 1785513576.5829887,
+    "ast_hash": "8dd921bfe1948781b443820d197aea89",
+    "semantic_hash": ""
+  },
+  "migrations/000003_scenarios.down.sql": {
+    "mtime": 1785514410.0648494,
+    "ast_hash": "8bf53e1122fae97d41a27944bef57e34",
+    "semantic_hash": ""
+  },
+  "migrations/000003_scenarios.up.sql": {
+    "mtime": 1785514409.7715163,
+    "ast_hash": "8fb3cdd1b6063c85d35b324671290e5a",
+    "semantic_hash": ""
+  }
+}

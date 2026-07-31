@@ -33,13 +33,13 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { useSimulation } from "@/components/simulation-provider";
+import { useImportScenarioMutation } from "@/hooks/use-scenarios";
 import {
   getExampleScenarioJson,
   SCHEMA_CONSTRAINTS,
   SCHEMA_DOC_SECTIONS,
 } from "@/lib/simulation-schema-docs";
 import { getScenarioValidationIssues } from "@/lib/scenario-validation-ui";
-import { saveScenarioDraft } from "@/lib/simulation-storage";
 import { validateScenario } from "@/lib/simulation-schema";
 
 type UploadState = "idle" | "drag-over" | "processing" | "done" | "error";
@@ -102,6 +102,7 @@ function countPayloadStats(payload: unknown) {
 export function SimulationImport() {
   const navigate = useNavigate();
   const { runtime } = useSimulation();
+  const importScenario = useImportScenarioMutation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadState, setUploadState] = useState<UploadState>("idle");
   const [lastRecordId, setLastRecordId] = useState<string | null>(null);
@@ -116,7 +117,7 @@ export function SimulationImport() {
     try {
       const text = await file.text();
       const payload = JSON.parse(text) as unknown;
-      const record = await saveScenarioDraft(payload);
+      const record = await importScenario.mutateAsync(payload);
       const validation = validateScenario(payload);
       const issues = getScenarioValidationIssues(payload);
       const stats = countPayloadStats(payload);
@@ -126,7 +127,7 @@ export function SimulationImport() {
       setUploadState("done");
 
       if (validation.success) {
-        toast.success("Simulation imported and ready to play.");
+        toast.success("Simulation imported to the server and ready to play.");
       } else {
         toast.warning(
           `Imported as draft with ${issues.length} validation issue(s).`,
@@ -141,7 +142,7 @@ export function SimulationImport() {
       setParseError(
         error instanceof Error ? error.message : "Could not read that file.",
       );
-      toast.error("That file is not valid JSON.");
+      toast.error(error instanceof Error ? error.message : "Import failed.");
     } finally {
       if (inputRef.current) inputRef.current.value = "";
     }

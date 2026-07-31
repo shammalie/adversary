@@ -49,6 +49,9 @@ import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState 
 import { EventIngestTable, IntelligenceMessagesTable } from "@/components/ops-event-tables";
 import { useSimulation } from "@/components/simulation-provider";
 import type { CameraMode } from "@/components/tracking-map";
+import { useMapWebSocket } from "@/hooks/use-map-ws";
+import { useRunViewportQuery } from "@/hooks/use-runs";
+import type { ViewportBBox } from "@/lib/api/types";
 import { isPriorityMessage, matchPriorityTerms } from "@/lib/priority-terms";
 import { getVehicleCategoryIcon } from "@/lib/vehicle-icon";
 import type { MapMode, RuntimeTargetState } from "@/types/target";
@@ -276,7 +279,7 @@ function TrackedTargetCard({ target }: { target: RuntimeTargetState }) {
 
 export function OperationsDashboard() {
   const navigate = useNavigate();
-  const { runtime, stop, reset, reconcile } = useSimulation();
+  const { runtime, stop, reset, reconcile, activeRunId } = useSimulation();
   const [now, setNow] = useState(() => new Date());
   const [mapMode, setMapMode] = useState<MapMode>("2d");
   const [cameraMode, setCameraMode] = useState<CameraMode>("overview");
@@ -284,6 +287,11 @@ export function OperationsDashboard() {
   const [showTrackedOnly, setShowTrackedOnly] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>();
+  const [mapBbox, setMapBbox] = useState<ViewportBBox | null>(null);
+
+  // Viewport Query + map WS (bbox ∪ includeTargetIds). Roster/ingest still use full snapshot.
+  useRunViewportQuery(activeRunId, mapBbox, trackedTargetIds);
+  useMapWebSocket(activeRunId, mapBbox, trackedTargetIds, undefined, Boolean(activeRunId && mapBbox));
 
   const targets = useMemo(
     () =>
@@ -292,6 +300,7 @@ export function OperationsDashboard() {
         : [],
     [runtime],
   );
+
   const selectedTarget =
     targets.find((target) => target.targetId === selectedTargetId) ?? targets[0];
   const trackedTargets = useMemo(
@@ -383,14 +392,17 @@ export function OperationsDashboard() {
           <CardHeader>
             <CardTitle>No active simulation</CardTitle>
             <CardDescription>
-              Use Settings → Import simulation to upload a scenario, or open the simulation builder
-              to author one. Start it from the builder before returning here.
+              Use Settings → Import or the builder to create a scenario, start it from the builder,
+              or open an existing run from Active runs.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2 sm:flex-row">
             <Button render={<Link to="/import" />}>Import simulation</Button>
             <Button variant="outline" render={<Link to="/builder" />}>
               Open simulation builder
+            </Button>
+            <Button variant="outline" render={<Link to="/runs" />}>
+              Active runs
             </Button>
           </CardContent>
         </Card>
@@ -562,6 +574,7 @@ export function OperationsDashboard() {
                   availableCameraModes={["track", "overview", "pan"]}
                   selectedTargetId={selectedTarget?.targetId}
                   onSelectTarget={setSelectedTargetId}
+                  onViewportChange={(bbox) => setMapBbox(bbox)}
                   mode={mapMode}
                 />
               </Suspense>

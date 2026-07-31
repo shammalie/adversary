@@ -38,21 +38,23 @@ Train operators, demo tracking workflows, or prototype geospatial intelligence p
 
 ## Quick start
 
-**Requirements:** [Node.js](https://nodejs.org/) 20+, [pnpm](https://pnpm.io/) 10+
+**Requirements:** [Node.js](https://nodejs.org/) 20+, [pnpm](https://pnpm.io/) 10+, Docker, and Go 1.26+
 
 ```bash
 pnpm install
 cp .env.example .env   # if you do not already have a root `.env`
-pnpm run dev
+pnpm dev:stack
 ```
 
-Open [http://localhost:3001](http://localhost:3001). The app redirects to **Operations**. Map styles come from `VITE_MAP_STYLE_*` in the root `.env` (public basemaps by default in development).
+This starts Postgres and Redis, migrates and serves the API on `:8080`, then starts Vite at [http://localhost:3001](http://localhost:3001). Leave `VITE_API_BASE_URL` empty to use Vite's `/v1` proxy. The app redirects to **Operations**. Map styles come from `VITE_MAP_STYLE_*` in the root `.env` (public basemaps by default in development).
 
 To run only the web app:
 
 ```bash
 pnpm run dev:web
 ```
+
+After the API cache cutover, hard-refresh once if a browser still has an older service worker.
 
 ---
 
@@ -197,10 +199,11 @@ Full field docs live on the **Import** page in the app.
 ```
 adversary/
 ├── apps/
-│   └── web/              # React app (TanStack Router, MapLibre, PWA)
-│       ├── public/
-│       │   └── geo-seeds.json   # Build-time aerodromes / ports / regions
-│       └── src/lib/geo/         # Tile client, terrain, road/sea/air routers
+│   ├── web/              # React app (TanStack Router, MapLibre, PWA)
+│   │   ├── public/
+│   │   │   └── geo-seeds.json   # Build-time aerodromes / ports / regions
+│   │   └── src/lib/geo/         # Tile client, terrain, road/sea/air routers
+│   └── api/              # Go Chi API (scenarios, geo, runs, manage, auth)
 ├── packages/
 │   ├── ui/               # Shared shadcn/ui primitives & styles
 │   ├── env/              # @t3-oss/env-core + Zod client env schema
@@ -208,12 +211,12 @@ adversary/
 ├── data/tiles/           # OpenMapTiles MBTiles + styles (gitignored bulk)
 ├── scripts/
 │   ├── collect-map-tiles.sh
-│   └── build-geo-seeds.mjs      # Mine MBTiles → geo-seeds.json
+│   └── build-geo-seeds.mjs      # Legacy Node miner (prefer Go CLI)
 ├── docs/                 # Guides + README artwork
-└── docker-compose.yml    # Traefik + nginx web + tileserver-gl
+└── docker-compose.yml    # Traefik + nginx web + tileserver-gl + api/PostGIS/Redis
 ```
 
-**Stack:** TypeScript · React 19 · TanStack Router · Tailwind CSS · MapLibre GL · OpenMapTiles · IndexedDB · Vite+ · pnpm workspaces · Traefik
+**Stack:** TypeScript · React 19 · TanStack Router · Tailwind CSS · MapLibre GL · OpenMapTiles · IndexedDB · Vite+ · pnpm workspaces · Traefik · Go (Chi / pgx / Redis)
 
 ---
 
@@ -223,13 +226,16 @@ adversary/
 | --- | --- |
 | `pnpm run dev` | Start all apps in development |
 | `pnpm run dev:web` | Start only the web app |
+| `pnpm run dev:deps` | Start local Postgres and Redis with Docker |
+| `pnpm run dev:api` | Apply migrations, then serve the Go API |
+| `pnpm run dev:stack` | Start dependencies, API, and Vite for local development |
 | `pnpm run build` | Build all apps |
 | `pnpm run check` | Format/lint + TypeScript checks |
 | `pnpm run check-types` | TypeScript only |
 | `pnpm run lint` / `pnpm run format` | Lint or format |
 | `pnpm run test:a11y` | Playwright accessibility tests (web) |
 | `pnpm run tiles:collect` | Download planet MBTiles + Liberty/Dark styles into `data/tiles` |
-| `pnpm run geo:seeds` | Mine local MBTiles into `apps/web/public/geo-seeds.json` (Node 22+) |
+| `pnpm run geo:seeds` | Mine local MBTiles via Go CLI → PostGIS (+ optional `geo-seeds.json`) |
 | `pnpm run docker:build` | Build Compose images |
 | `pnpm run docker:up` | Build and start Compose stack |
 | `pnpm run docker:logs` | Tail Compose logs |
@@ -254,6 +260,7 @@ Add to `/etc/hosts` (or equivalent DNS):
 ```text
 127.0.0.1 app.adversary
 127.0.0.1 tiles.adversary
+127.0.0.1 api.adversary
 ```
 
 ### Collect map tiles
@@ -279,6 +286,7 @@ Services:
 | --- | --- |
 | [http://app.adversary](http://app.adversary) | Traefik → nginx SPA |
 | [http://tiles.adversary](http://tiles.adversary) | Traefik → tileserver-gl |
+| [http://api.adversary](http://api.adversary) | Traefik → Go API (`apps/api`) |
 
 HTTP only for v1. Production map style URLs are baked from Compose build args (defaults: Liberty/Dark on `tiles.adversary`). There is **no** public CDN fallback in the Docker deploy — if tileserver is down, maps fail closed.
 
@@ -308,8 +316,11 @@ import { Button } from "@adversary/ui/components/button";
 
 ## Guides
 
+- [API architecture](docs/api.md) — Go backend surface, WebSocket ops/map, startAt, drafts, leases, verification checklist
+- [Adversary API README](apps/api/README.md) — env vars, Compose (`api.adversary`), migrate, curl examples, tests
 - [Authentic geo routes](docs/authentic-geo-routes.md) — tile-backed random-demo pipeline, env, gate parameters, degradation / cancel, testing
-- [Geo seed bundle](docs/geo-seeds.md) — `geo-seeds.json` contents, derived region `supports`, `pnpm run geo:seeds`
+- [Geo seed catalogue](docs/geo-seeds.md) — PostGIS catalogue, reseed CLI/API, derived region `supports`
+- [Geo / planner parity](docs/geo-parity.md) — Go vs web Worker deltas
 
 ---
 

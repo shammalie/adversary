@@ -34,6 +34,7 @@ import {
   vehicleCategoryIconSvg,
   vehicleCategoryMarkerRotationDegrees,
 } from "@/lib/vehicle-icon";
+import type { ViewportBBox } from "@/lib/api/types";
 import type { TrackingMapEventPoint } from "@/lib/tracking-map-event-points";
 import type {
   Affiliation,
@@ -73,6 +74,7 @@ interface TrackingMapProps {
   onCameraModeChange?: (mode: CameraMode) => void;
   availableCameraModes?: CameraMode[];
   onSelectTarget?: (targetId: string) => void;
+  onViewportChange?: (bbox: ViewportBBox, zoom: number) => void;
   fitTargetsKey?: string;
   continuousMotion?: boolean;
 }
@@ -270,6 +272,7 @@ export function TrackingMap({
   onCameraModeChange,
   availableCameraModes = ["overview", "pan"],
   onSelectTarget,
+  onViewportChange,
   fitTargetsKey,
   continuousMotion = false,
 }: TrackingMapProps) {
@@ -283,6 +286,8 @@ export function TrackingMap({
   const markerAnimationsRef = useRef(new Map<string, number>());
   const selectHandlerRef = useRef(onSelectTarget);
   const eventPointClickRef = useRef(onEventPointClick);
+  const viewportChangeRef = useRef(onViewportChange);
+  const viewportTimerRef = useRef<number | undefined>(undefined);
   const fittedKeyRef = useRef<string | null>(null);
   const overviewVisibleKeyRef = useRef<string>("");
   const trailCollectionRef = useRef<TrailFeatureCollection>(EMPTY_TRAIL_COLLECTION);
@@ -290,6 +295,7 @@ export function TrackingMap({
   const [mapReady, setMapReady] = useState(false);
   selectHandlerRef.current = onSelectTarget;
   eventPointClickRef.current = onEventPointClick;
+  viewportChangeRef.current = onViewportChange;
   cameraModeRef.current = cameraMode;
 
   const displayTargets = useMemo(() => targets.map(toDisplayTarget), [targets]);
@@ -329,6 +335,25 @@ export function TrackingMap({
       attributionControl: false,
       interactive: true,
     });
+    const reportViewport = () => {
+      if (viewportTimerRef.current !== undefined) {
+        window.clearTimeout(viewportTimerRef.current);
+      }
+      viewportTimerRef.current = window.setTimeout(() => {
+        const callback = viewportChangeRef.current;
+        if (!callback) return;
+        const bounds = map.getBounds();
+        callback(
+          {
+            west: bounds.getWest(),
+            south: bounds.getSouth(),
+            east: bounds.getEast(),
+            north: bounds.getNorth(),
+          },
+          map.getZoom(),
+        );
+      }, 125);
+    };
     map.on("load", () => {
       map.addSource("target-trails", {
         type: "geojson",
@@ -345,9 +370,17 @@ export function TrackingMap({
         },
       });
       setMapReady(true);
+      reportViewport();
     });
+    map.on("moveend", reportViewport);
+    map.on("zoomend", reportViewport);
     mapRef.current = map;
     return () => {
+      if (viewportTimerRef.current !== undefined) {
+        window.clearTimeout(viewportTimerRef.current);
+      }
+      map.off("moveend", reportViewport);
+      map.off("zoomend", reportViewport);
       for (const frame of markerAnimationsRef.current.values()) {
         window.cancelAnimationFrame(frame);
       }

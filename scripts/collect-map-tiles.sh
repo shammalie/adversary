@@ -176,10 +176,24 @@ EOF
 printf '%s\n' "Planet tiles + Liberty/Dark styles prepared for tileserver-gl." > "$DATA_DIR/READY.txt"
 printf '%s\n' "$planet_url" > "$DATA_DIR/SOURCE.txt"
 
+# Sidecar for the Go API (MBTILES_PATH / reseed). See docs/geo-seeds.md.
+cat > "$DATA_DIR/READY.json" <<EOF
+{
+  "mbtiles": "openmaptiles.mbtiles",
+  "mbtilesPath": "$mbtiles_path",
+  "sourceUrl": "$planet_url",
+  "collectedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+
 log "Done."
 log "  MBTiles: $mbtiles_path"
 log "  Styles:  liberty, dark"
 log "  Config:  $DATA_DIR/config.json"
+log "  SOURCE:  $DATA_DIR/SOURCE.txt"
+log "  READY:   $DATA_DIR/READY.json"
 log "Start the stack with: pnpm run docker:up"
 log "Map styles: http://tiles.adversary/styles/liberty/style.json"
 log "            http://tiles.adversary/styles/dark/style.json"
+log "After collect, mine the Postgres catalogue: pnpm run geo:seeds"
+log "  (or POST /v1/admin/geo/reseed once the API is up; MBTILES_PATH=$mbtiles_path)"

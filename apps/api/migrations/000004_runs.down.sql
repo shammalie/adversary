@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS run_leases;
+DROP TABLE IF EXISTS run_checkpoints;
+DROP TABLE IF EXISTS runs;

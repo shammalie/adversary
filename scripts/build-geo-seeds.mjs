@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Phase 1: mine openmaptiles.mbtiles into apps/web/public/geo-seeds.json
+ * Legacy Node miner — kept as behavioural reference.
+ * Prefer: go run ./apps/api/cmd/geoseed  (also: pnpm geo:seeds)
  *
- * Usage: node scripts/build-geo-seeds.mjs
- *        pnpm geo:seeds
+ * Usage (legacy): node scripts/build-geo-seeds.mjs
  *
  * Reads via Node 22 node:sqlite. Tiles use TMS y-ordering (flip: tmsY = 2^z - 1 - y).
  * Vector deps resolve from apps/web (pbf + @mapbox/vector-tile).

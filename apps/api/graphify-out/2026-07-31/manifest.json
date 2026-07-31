@@ -1,0 +1,82 @@
+{
+  "cmd/api/main.go": {
+    "mtime": 1785513374.5287106,
+    "ast_hash": "df71fedb8780dbedf7700f928737de19",
+    "semantic_hash": ""
+  },
+  "cmd/migrate/main.go": {
+    "mtime": 1785513155.5965292,
+    "ast_hash": "b7d3c49c59f40f6b803220611e1d7466",
+    "semantic_hash": ""
+  },
+  "docs/docs.go": {
+    "mtime": 1785513174.2531857,
+    "ast_hash": "49b47c82a1ac2d0efcafda547d745bb7",
+    "semantic_hash": ""
+  },
+  "docs/swagger.json": {
+    "mtime": 1785513175.4045188,
+    "ast_hash": "4dac82ff0d8c69e74986b96d3c7126ba",
+    "semantic_hash": ""
+  },
+  "go.mod": {
+    "mtime": 1785513288.3135722,
+    "ast_hash": "807ed5141f8e888326806dd21309537b",
+    "semantic_hash": ""
+  },
+  "internal/app/app.go": {
+    "mtime": 1785513144.1836536,
+    "ast_hash": "f6683e2b4b8d88fc8e2962f84902d5e9",
+    "semantic_hash": ""
+  },
+  "internal/auth/auth.go": {
+    "mtime": 1785513133.506323,
+    "ast_hash": "e3ce015343a31b3e009eb679e500251b",
+    "semantic_hash": ""
+  },
+  "internal/config/config.go": {
+    "mtime": 1785513132.4649901,
+    "ast_hash": "7fe9686a194a3853e84815d8e6d49c7c",
+    "semantic_hash": ""
+  },
+  "internal/handler/healthz.go": {
+    "mtime": 1785513135.6989892,
+    "ast_hash": "faf58f7b69758cf7e08dcb4c75f5725e",
+    "semantic_hash": ""
+  },
+  "internal/handler/router.go": {
+    "mtime": 1785513139.7543213,
+    "ast_hash": "d0455948842c197c7ea4173af2cbfe3a",
+    "semantic_hash": ""
+  },
+  "internal/migrate/migrate.go": {
+    "mtime": 1785513152.767069,
+    "ast_hash": "c17920e32f2cc244b2ef93169841330a",
+    "semantic_hash": ""
+  },
+  "migrations/000001_enable_postgis.down.sql": {
+    "mtime": 1785513156.2765062,
+    "ast_hash": "529cbebbc593834c20c1427ff171d846",
+    "semantic_hash": ""
+  },
+  "migrations/000001_enable_postgis.up.sql": {
+    "mtime": 1785513155.944073,
+    "ast_hash": "d07ce3d3cfa85fc4d805fcc75c9ebcf1",
+    "semantic_hash": ""
+  },
+  "migrations/embed.go": {
+    "mtime": 1785513155.758968,
+    "ast_hash": "6c72c655bdac218628c8edaa47aabe25",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1785513169.7028537,
+    "ast_hash": "28234fba3fbc6c3d0447080f2368e0f0",
+    "semantic_hash": ""
+  },
+  "docs/swagger.yaml": {
+    "mtime": 1785513175.7345188,
+    "ast_hash": "9d0e3fd7b1a9c1171a332852f0e2449e",
+    "semantic_hash": ""
+  }
+}

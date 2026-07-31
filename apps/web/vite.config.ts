@@ -17,6 +17,11 @@ export default defineConfig({
   },
   server: {
     port: 3001,
+    proxy: {
+      // Local same-origin API when VITE_API_BASE_URL is unset/empty.
+      "/v1": { target: "http://localhost:8080", changeOrigin: true, ws: true },
+      "/healthz": { target: "http://localhost:8080", changeOrigin: true },
+    },
     warmup: {
       clientFiles: [
         "./src/main.tsx",
@@ -77,7 +82,14 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,mjs,json}"],
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/v1\//],
         runtimeCaching: [
+          {
+            // API requests may be proxied at /v1 or sent to VITE_API_BASE_URL.
+            // Never cache either form: authenticated data and live run state must be fresh.
+            urlPattern: /\/v1\/.*/i,
+            handler: "NetworkOnly",
+          },
           {
             urlPattern: /^https:\/\/basemaps\.cartocdn\.com\/.*/i,
             handler: "CacheFirst",

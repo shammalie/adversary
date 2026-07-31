@@ -14,13 +14,9 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { DateTimePicker } from "@/components/date-time-picker";
-import {
-  deriveEndAtFromDistance,
-  generateRouteEvents,
-  MAX_GENERATED_EVENTS,
-} from "@/lib/event-generator";
-import { pathToEvents } from "@/lib/geo/path-to-events";
+import { deriveEndAtFromDistance, MAX_GENERATED_EVENTS } from "@/lib/event-generator";
 import { resolveGenerationCruiseKnots } from "@/lib/geo/vehicle-profiles";
+import { useRouteTargetMutation } from "@/hooks/use-scenarios";
 import { haversineDistanceNm } from "@/lib/position-telemetry";
 import type { PositionPayload, SimulationEvent, TargetDefinition } from "@/types/target";
 
@@ -31,6 +27,7 @@ const MapLocationPicker = lazy(() =>
 );
 
 export interface GenerateRouteFormProps {
+  scenarioId: string;
   target: TargetDefinition;
   onGenerate: (events: SimulationEvent[], summary: string) => void;
   disabled?: boolean;
@@ -129,6 +126,7 @@ function MapPickerFallback({ className }: { className?: string }) {
  * Aircraft can enable an end location; other categories use random wander.
  */
 export function GenerateRouteForm({
+  scenarioId,
   target,
   onGenerate,
   disabled = false,
@@ -151,10 +149,9 @@ export function GenerateRouteForm({
     }),
   );
   const [endPointEnabled, setEndPointEnabled] = useState(false);
-  const [pendingSummary, setPendingSummary] = useState<string | null>(null);
-  const [pendingEvents, setPendingEvents] = useState<SimulationEvent[]>([]);
   const [attempted, setAttempted] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const routeTarget = useRouteTargetMutation();
 
   const allowOptionalEndAt = isAircraft && endPointEnabled;
   const activeEndPoint = allowOptionalEndAt ? endPoint : null;
@@ -187,26 +184,6 @@ export function GenerateRouteForm({
     startAt,
     startPoint,
     target.profile.vehicleCategory,
-  ]);
-
-  function clearPending() {
-    setPendingSummary(null);
-    setPendingEvents([]);
-  }
-
-  useEffect(() => {
-    clearPending();
-  }, [
-    count,
-    startAt,
-    endAt,
-    startPoint.latitude,
-    startPoint.longitude,
-    startPoint.altitude,
-    endPoint.latitude,
-    endPoint.longitude,
-    endPoint.altitude,
-    endPointEnabled,
   ]);
 
   useEffect(() => {
@@ -254,73 +231,32 @@ export function GenerateRouteForm({
       return;
     }
 
-    try {
-      const generated = activeEndPoint
-        ? pathToEvents({
-            targetId: target.id,
-            path: [
-              {
-                latitude: startPoint.latitude,
-                longitude: startPoint.longitude,
-                altitude: startPoint.altitude,
-              },
-              {
-                latitude: activeEndPoint.latitude,
-                longitude: activeEndPoint.longitude,
-                altitude: activeEndPoint.altitude,
-              },
-            ],
-            startAt,
-            endAt: endAt.trim() || undefined,
-            vehicleCategory: target.profile.vehicleCategory,
-            vehicleSubtype: target.profile.vehicleSubtype,
-            cruiseKnots: generationCruise,
-            eventCount: Number(count),
-          })
-        : generateRouteEvents({
-            targetId: target.id,
-            count: Number(count),
-            startAt,
-            endAt: endAt.trim() || undefined,
-            startPoint,
-            endPoint: undefined,
-            vehicleCategory: target.profile.vehicleCategory,
-          });
-
-      const resolvedEnd =
-        endAt.trim() ||
-        (activeEndPoint
-          ? deriveEndAtFromDistance({
-              startAt,
-              startPoint,
-              endPoint: activeEndPoint,
-              vehicleCategory: target.profile.vehicleCategory,
-              cruiseKnots: generationCruise,
-            })
-          : endAt);
-
-      const summary = activeEndPoint
-        ? `Generate ${generated.length} position events for ${target.callsign} from start to end between ${new Date(startAt).toLocaleString()} and ${new Date(resolvedEnd).toLocaleString()}?`
-        : `Generate ${generated.length} position events for ${target.callsign} between ${new Date(startAt).toLocaleString()} and ${new Date(resolvedEnd).toLocaleString()}?`;
-      setPendingSummary(summary);
-      setPendingEvents(generated);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to generate route.";
-      toast.error(message);
-      if (/end/i.test(message) && /start/i.test(message)) {
-        setErrors((current) => ({ ...current, endAt: message }));
-      } else if (/maximum|kt|distance|end point/i.test(message)) {
-        setErrors((current) => ({ ...current, endAt: message, endPoint: message }));
-      }
-    }
-  }
-
-  function confirmInsert() {
-    if (pendingEvents.length === 0) return;
-    onGenerate(pendingEvents, pendingSummary ?? "");
-    clearPending();
-    setAttempted(false);
-    setErrors({});
+    routeTarget.mutate(
+      {
+        scenarioId,
+        targetId: target.id,
+        input: {
+          startAt,
+          endAt: endAt.trim() || undefined,
+          eventCount: Number(count),
+        },
+      },
+      {
+        onSuccess: (result) => {
+          const summary = `Generated ${result.events.length} position events for ${target.callsign}${
+            result.degraded ? " with synthetic fallback." : "."
+          }`;
+          onGenerate(result.events, summary);
+          setAttempted(false);
+          setErrors({});
+        },
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : "Unable to generate route.";
+          toast.error(message);
+          setErrors((current) => ({ ...current, endAt: message }));
+        },
+      },
+    );
   }
 
   return (
@@ -478,27 +414,21 @@ export function GenerateRouteForm({
           </Field>
         ) : null}
 
-        {pendingSummary ? (
+        {routeTarget.isPending ? (
           <p className="rounded-lg border bg-muted/40 px-3 py-2 text-sm" role="status">
-            {pendingSummary}
+            Planning route…
           </p>
         ) : null}
       </FieldGroup>
 
       <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-        {pendingEvents.length > 0 ? (
-          <Button className="w-full sm:w-auto" disabled={disabled} onClick={confirmInsert}>
-            Insert {pendingEvents.length} events
-          </Button>
-        ) : (
-          <Button
-            className="w-full sm:w-auto"
-            disabled={disabled}
-            onClick={handleGeneratePreview}
-          >
-            Preview generation
-          </Button>
-        )}
+        <Button
+          className="w-full sm:w-auto"
+          disabled={disabled || routeTarget.isPending}
+          onClick={handleGeneratePreview}
+        >
+          {routeTarget.isPending ? "Generating…" : "Generate route"}
+        </Button>
       </div>
     </div>
   );
