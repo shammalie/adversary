@@ -5,6 +5,7 @@ import {
 } from "@/lib/position-telemetry";
 import { CATEGORY_TOP_SPEED_KNOTS } from "@/lib/vehicle-speed";
 import { MAX_GENERATED_EVENTS } from "@/lib/event-generator";
+import { cruiseAltitudeForDistance } from "@/lib/geo/air-router";
 import {
   profileCruiseMidpointKnots,
   resolveVehicleProfile,
@@ -325,14 +326,23 @@ function altitudeAlongPath(options: {
   cruiseKnots: number;
   startAltitude: number;
   endAltitude: number;
+  cruiseAltitudeFt: number;
 }): number {
-  const { profile, cruiseKnots, totalNm, distanceNm, startAltitude, endAltitude } = options;
+  const {
+    profile,
+    cruiseKnots,
+    totalNm,
+    distanceNm,
+    startAltitude,
+    endAltitude,
+    cruiseAltitudeFt,
+  } = options;
   if (profile.climbRateFtPerMin <= 0 && profile.descentRateFtPerMin <= 0) {
     if (totalNm < MIN_SEGMENT_NM) return startAltitude;
     return startAltitude + (endAltitude - startAltitude) * (distanceNm / totalNm);
   }
 
-  const cruiseAlt = profile.typicalFlightLevelFt;
+  const cruiseAlt = cruiseAltitudeFt;
   const climbFt = Math.max(0, cruiseAlt - startAltitude);
   const descentFt = Math.max(0, cruiseAlt - endAltitude);
   const climbHours = profile.climbRateFtPerMin > 0 ? climbFt / profile.climbRateFtPerMin / 60 : 0;
@@ -544,6 +554,13 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
   const endAltitude =
     path[path.length - 1]?.altitude ??
     (profile.typicalFlightLevelFt > 0 ? 0 : startAltitude);
+  const distanceScaledCruise = cruiseAltitudeForDistance(
+    simplifiedNm,
+    profile.typicalFlightLevelFt,
+  );
+  // Cruise at least as high as either endpoint so a high end isn't climbed past
+  // only to descend again, and short hops still use distance-scaled FL.
+  const cruiseAltitudeFt = Math.max(distanceScaledCruise, startAltitude, endAltitude);
 
   // Apply vertical profile after DP so climb/cruise/descent survive collinear
   // simplification of straight great-circle legs.
@@ -555,7 +572,13 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
       cruiseKnots,
       startAltitude,
       endAltitude,
+      cruiseAltitudeFt,
     });
+  }
+  // Authored start/end altitudes win on the endpoints (no forced landing).
+  if (simplified.length > 0) {
+    simplified[0]!.altitude = startAltitude;
+    simplified[simplified.length - 1]!.altitude = endAltitude;
   }
 
   // Kinematic duration from turn-limited segment speeds.

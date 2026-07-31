@@ -103,6 +103,12 @@ describe("builder preview helpers", () => {
     expect(computePreviewRevision(delayed)).not.toBe(computePreviewRevision(initial));
   });
 
+  it("changes preview revision when fastForwardMultiplier changes", () => {
+    const initial = baseScenario();
+    const spedUp = baseScenario({ fastForwardMultiplier: 2 });
+    expect(computePreviewRevision(spedUp)).not.toBe(computePreviewRevision(initial));
+  });
+
   it("changes preview revision when a target is added", () => {
     const initial = baseScenario();
     const revised = baseScenario({

@@ -109,6 +109,7 @@ import {
   eventFromDraft,
 } from "@/lib/event-draft";
 import { addPriorityTerm, matchPriorityTerms, removePriorityTerm } from "@/lib/priority-terms";
+import { applyFastForwardTimes } from "@/lib/scenario-timing";
 import { getEventsDueByTime, sortEvents } from "@/lib/simulation-engine";
 import { buildTrackingMapEventPoints } from "@/lib/tracking-map-event-points";
 import {
@@ -541,11 +542,17 @@ export function ScenarioBuilder() {
   }
 
   function updateScenario(patch: Partial<SimulationScenario>) {
-    setScenario((current) => ({
-      ...current,
-      ...patch,
-      updatedAt: new Date().toISOString(),
-    }));
+    setScenario((current) => {
+      const merged: SimulationScenario = {
+        ...current,
+        ...patch,
+        updatedAt: new Date().toISOString(),
+      };
+      if ("events" in patch || "fastForwardMultiplier" in patch) {
+        return applyFastForwardTimes(merged);
+      }
+      return merged;
+    });
   }
 
   function updateTarget(targetId: string, patch: Partial<TargetDefinition>) {
@@ -1429,40 +1436,87 @@ export function ScenarioBuilder() {
                 placeholder="Purpose, location, and operator notes"
               />
             </Field>
-            <Field data-invalid={fieldHasIssue(validationIssues, "delaySeconds") || undefined}>
-              <FieldLabel htmlFor="scenario-delay-seconds">Delay (seconds)</FieldLabel>
-              <Input
-                id="scenario-delay-seconds"
-                type="number"
-                inputMode="numeric"
-                min={0}
-                step={1}
-                value={scenario.delaySeconds ?? ""}
-                onChange={(event) => {
-                  const raw = event.target.value;
-                  if (raw === "") {
-                    updateScenario({ delaySeconds: undefined });
-                    return;
-                  }
-                  const next = Number(raw);
-                  if (!Number.isFinite(next) || next < 0) return;
-                  updateScenario({ delaySeconds: next === 0 ? undefined : next });
-                }}
-                aria-invalid={fieldHasIssue(validationIssues, "delaySeconds")}
-                aria-describedby="scenario-delay-seconds-hint"
-              />
-              {fieldHasIssue(validationIssues, "delaySeconds") ? (
-                <FieldError>
-                  {validationIssues.find((issue) => issue.path === "delaySeconds")?.message ??
-                    "Delay cannot be negative."}
-                </FieldError>
-              ) : (
-                <FieldDescription id="scenario-delay-seconds-hint">
-                  Offsets when events fire. Authored timeline times stay unchanged. Empty or 0 =
-                  none.
-                </FieldDescription>
-              )}
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field data-invalid={fieldHasIssue(validationIssues, "delaySeconds") || undefined}>
+                <FieldLabel htmlFor="scenario-delay-seconds">Delay (seconds)</FieldLabel>
+                <Input
+                  id="scenario-delay-seconds"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  step={1}
+                  value={scenario.delaySeconds ?? ""}
+                  onChange={(event) => {
+                    const raw = event.target.value;
+                    if (raw === "") {
+                      updateScenario({ delaySeconds: undefined });
+                      return;
+                    }
+                    const next = Number(raw);
+                    if (!Number.isFinite(next) || next < 0) return;
+                    updateScenario({ delaySeconds: next === 0 ? undefined : next });
+                  }}
+                  aria-invalid={fieldHasIssue(validationIssues, "delaySeconds")}
+                  aria-describedby="scenario-delay-seconds-hint"
+                />
+                {fieldHasIssue(validationIssues, "delaySeconds") ? (
+                  <FieldError>
+                    {validationIssues.find((issue) => issue.path === "delaySeconds")?.message ??
+                      "Delay cannot be negative."}
+                  </FieldError>
+                ) : (
+                  <FieldDescription id="scenario-delay-seconds-hint">
+                    Offsets when events fire. Authored timeline times stay unchanged. Empty or 0 =
+                    none.
+                  </FieldDescription>
+                )}
+              </Field>
+              <Field
+                data-invalid={
+                  fieldHasIssue(validationIssues, "fastForwardMultiplier") || undefined
+                }
+              >
+                <FieldLabel htmlFor="scenario-fast-forward">Fast-forward</FieldLabel>
+                <Input
+                  id="scenario-fast-forward"
+                  type="number"
+                  inputMode="decimal"
+                  min={1.01}
+                  max={10}
+                  step={0.1}
+                  value={scenario.fastForwardMultiplier ?? ""}
+                  onChange={(event) => {
+                    const raw = event.target.value;
+                    if (raw === "") {
+                      updateScenario({ fastForwardMultiplier: undefined });
+                      return;
+                    }
+                    const next = Number(raw);
+                    if (!Number.isFinite(next)) return;
+                    // Treat 1 (and below) as off — omit; reject > 10 in the field.
+                    if (next <= 1) {
+                      updateScenario({ fastForwardMultiplier: undefined });
+                      return;
+                    }
+                    if (next > 10) return;
+                    updateScenario({ fastForwardMultiplier: next });
+                  }}
+                  aria-invalid={fieldHasIssue(validationIssues, "fastForwardMultiplier")}
+                  aria-describedby="scenario-fast-forward-hint"
+                />
+                {fieldHasIssue(validationIssues, "fastForwardMultiplier") ? (
+                  <FieldError>
+                    {validationIssues.find((issue) => issue.path === "fastForwardMultiplier")
+                      ?.message ?? "Fast-forward must be greater than 1 and at most 10."}
+                  </FieldError>
+                ) : (
+                  <FieldDescription id="scenario-fast-forward-hint">
+                    Compresses schedule from the earliest event. Authored times stay unchanged.
+                    Empty or 1 = off; max 10×.
+                  </FieldDescription>
+                )}
+              </Field>
+            </div>
           </FieldGroup>
           <Field>
             <FieldLabel htmlFor="priority-term-input">Priority terms</FieldLabel>
@@ -1757,6 +1811,52 @@ export function ScenarioBuilder() {
                     {colorTheme === "light" ? "Light" : "Dark"}-mode palette (AA). Random skips
                     colors already used by other targets.
                   </FieldDescription>
+                </Field>
+                <Field
+                  data-invalid={
+                    selectedTargetIssues.some((issue) => issue.field === "maxCruiseKnots") ||
+                    undefined
+                  }
+                >
+                  <FieldLabel htmlFor={`${selectedTarget.id}-max-cruise`}>
+                    Max cruise (kt)
+                  </FieldLabel>
+                  <Input
+                    id={`${selectedTarget.id}-max-cruise`}
+                    type="number"
+                    min={0}
+                    step={1}
+                    placeholder="Profile default"
+                    value={selectedTarget.maxCruiseKnots ?? ""}
+                    onChange={(event) => {
+                      const raw = event.target.value.trim();
+                      if (raw === "") {
+                        updateScenario({
+                          targets: scenario.targets.map((target) => {
+                            if (target.id !== selectedTarget.id) return target;
+                            const { maxCruiseKnots: _cleared, ...rest } = target;
+                            return rest;
+                          }),
+                        });
+                        return;
+                      }
+                      const next = Number(raw);
+                      if (!Number.isFinite(next) || next < 0) return;
+                      updateTarget(selectedTarget.id, { maxCruiseKnots: next });
+                    }}
+                    aria-invalid={
+                      selectedTargetIssues.some((issue) => issue.field === "maxCruiseKnots") ||
+                      undefined
+                    }
+                  />
+                  <FieldDescription>
+                    Optional cruise override for route generation. Empty clears.
+                  </FieldDescription>
+                  {selectedTargetIssues
+                    .filter((issue) => issue.field === "maxCruiseKnots")
+                    .map((issue) => (
+                      <FieldError key={issue.message}>{issue.message}</FieldError>
+                    ))}
                 </Field>
                 <TargetProfileFields
                   idPrefix={selectedTarget.id}

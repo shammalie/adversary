@@ -1,7 +1,13 @@
 import { Badge } from "@adversary/ui/components/badge";
 import { Button } from "@adversary/ui/components/button";
 import { Checkbox } from "@adversary/ui/components/checkbox";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@adversary/ui/components/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@adversary/ui/components/field";
 import { Input } from "@adversary/ui/components/input";
 import { Textarea } from "@adversary/ui/components/textarea";
 import { cn } from "@adversary/ui/lib/utils";
@@ -106,6 +112,11 @@ export function ViewTimelineEvent({
       <div className="font-mono text-xs text-muted-foreground">
         {new Date(event.at).toLocaleString()}
       </div>
+      {event.firesAt ? (
+        <div className="font-mono text-xs text-muted-foreground">
+          Fires at {new Date(event.firesAt).toLocaleString()}
+        </div>
+      ) : null}
       <div className="mt-1 flex flex-wrap items-center gap-2">
         {event.position ? (
           <Badge variant="outline">
@@ -202,6 +213,11 @@ export function EditTimelineEvent({
           {atIssues.map((issue) => (
             <FieldError key={issue.message}>{issue.message}</FieldError>
           ))}
+          {event.firesAt ? (
+            <FieldDescription>
+              Fires at {new Date(event.firesAt).toLocaleString()}
+            </FieldDescription>
+          ) : null}
         </Field>
 
         <div className="flex flex-col gap-2 rounded-md border px-2 py-1.5">

@@ -156,7 +156,7 @@ export function EventIngestTable({
         return (
           <TableRow key={event.id} className={cn(critical && "bg-destructive/10")}>
             <TableCell className="whitespace-nowrap font-mono text-xs">
-              {new Date(effectiveEventAtMs(event.at, delaySeconds)).toLocaleTimeString()}
+              {new Date(effectiveEventAtMs(event, delaySeconds)).toLocaleTimeString()}
             </TableCell>
             <TableCell className="font-medium">{target?.callsign}</TableCell>
             <TableCell>{eventPayloadBadges(event)}</TableCell>
@@ -213,7 +213,7 @@ export function IntelligenceMessagesTable({
             className={cn(matches.length > 0 && "bg-destructive/10 font-medium")}
           >
             <TableCell className="whitespace-nowrap font-mono text-xs">
-              {new Date(effectiveEventAtMs(event.at, delaySeconds)).toLocaleTimeString()}
+              {new Date(effectiveEventAtMs(event, delaySeconds)).toLocaleTimeString()}
             </TableCell>
             <TableCell>{targetStates[event.targetId]?.callsign}</TableCell>
             <TableCell>

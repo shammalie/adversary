@@ -43,7 +43,10 @@ import {
 } from "@/lib/geo/geo-router-client";
 import type { GeoRouterLngLat, GeoRouterMode } from "@/lib/geo/geo-router-protocol";
 import { pathToEvents, type PathPoint } from "@/lib/geo/path-to-events";
-import { resolveVehicleProfile } from "@/lib/geo/vehicle-profiles";
+import {
+  resolveGenerationCruiseKnots,
+  resolveVehicleProfile,
+} from "@/lib/geo/vehicle-profiles";
 import { createSeededRandom, resolveIdFactory } from "@/lib/random";
 import type {
   Affiliation,
@@ -187,9 +190,11 @@ function offsetPath(path: readonly PathPoint[], dLat: number, dLng: number): Pat
 }
 
 function greatCirclePath(plan: DemoTravelPlan): PathPoint[] {
+  // Omit altitudes so pathToEvents applies the profile vertical curve between
+  // authored defaults (aircraft: climb then descend to 0; surface: near-zero).
   return [
-    { latitude: plan.baseLatitude, longitude: plan.baseLongitude, altitude: 0 },
-    { latitude: plan.endLatitude, longitude: plan.endLongitude, altitude: 0 },
+    { latitude: plan.baseLatitude, longitude: plan.baseLongitude },
+    { latitude: plan.endLatitude, longitude: plan.endLongitude },
   ];
 }
 
@@ -252,7 +257,14 @@ async function planAirPath(
   random: () => number,
 ): Promise<PathPoint[]> {
   const profile = resolveVehicleProfile(job.category, job.subtype);
-  const kinematics = kinematicsFromProfile(profile);
+  const cruiseKnots = resolveGenerationCruiseKnots({
+    vehicleCategory: job.category,
+    vehicleSubtype: job.subtype,
+  });
+  const kinematics = {
+    ...kinematicsFromProfile(profile),
+    cruiseKnots,
+  };
   const windowHours = Math.max(job.plan.durationMinutes / 60, 1 / 60);
   const region = job.plan.regionId ? demoRegionById(job.plan.regionId) : undefined;
   const result = planAirRoute({
@@ -265,6 +277,7 @@ async function planAirPath(
   if (!result.ok) {
     throw new Error(result.message);
   }
+  // Preserve router altitudes (start/end field elevations + cruise FL).
   return result.path;
 }
 
@@ -300,7 +313,11 @@ async function planSurfacePath(
   return coordinates.map((point) => ({
     latitude: point.latitude,
     longitude: point.longitude,
-    altitude: 0,
+    // Surface routers typically omit altitude; preserve when present.
+    ...("altitude" in point &&
+    typeof (point as { altitude?: unknown }).altitude === "number"
+      ? { altitude: (point as { altitude: number }).altitude }
+      : { altitude: 0 }),
   }));
 }
 
@@ -368,6 +385,10 @@ function buildRoutedTarget(args: {
       endAt: atOffsetIso(startMs, trackEndDelay),
       vehicleCategory: job.category,
       vehicleSubtype: job.subtype,
+      cruiseKnots: resolveGenerationCruiseKnots({
+        vehicleCategory: job.category,
+        vehicleSubtype: job.subtype,
+      }),
       idFactory,
     });
   } catch {

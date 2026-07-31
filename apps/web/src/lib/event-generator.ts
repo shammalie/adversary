@@ -170,6 +170,8 @@ export function deriveEndAtFromDistance(options: {
   startPoint: Pick<PositionPayload, "latitude" | "longitude">;
   endPoint: Pick<PositionPayload, "latitude" | "longitude">;
   vehicleCategory: VehicleCategory;
+  /** Override cruise; defaults to category midpoint. */
+  cruiseKnots?: number;
 }): string {
   const startMs = Date.parse(options.startAt);
   if (!Number.isFinite(startMs)) {
@@ -179,9 +181,12 @@ export function deriveEndAtFromDistance(options: {
   if (distanceNm < 0.001) {
     throw new Error("End point must be distinct from the start point.");
   }
-  const cruiseKnots = categoryCruiseMidpointKnots(options.vehicleCategory);
+  const cruiseKnots =
+    options.cruiseKnots !== undefined && Number.isFinite(options.cruiseKnots)
+      ? options.cruiseKnots
+      : categoryCruiseMidpointKnots(options.vehicleCategory);
   // Small slack so biased intermediate legs (heading noise) still fit under max speed.
-  const durationMs = Math.max((distanceNm / cruiseKnots) * 3_600_000 * 1.08, 1_000);
+  const durationMs = Math.max((distanceNm / Math.max(cruiseKnots, 0.1)) * 3_600_000 * 1.08, 1_000);
   return new Date(startMs + durationMs).toISOString();
 }
 

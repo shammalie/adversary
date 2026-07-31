@@ -81,8 +81,8 @@ export function useBuilderPreview(scenario: SimulationScenario) {
   );
   const firstEventMs = useMemo(() => {
     const first = sortEvents(scenario.events)[0];
-    return first ? effectiveEventAtMs(first.at, scenario.delaySeconds ?? 0) : null;
-  }, [scenario.delaySeconds, scenario.events]);
+    return first ? effectiveEventAtMs(first, scenario.delaySeconds ?? 0) : null;
+  }, [scenario.delaySeconds, scenario.events, scenario.fastForwardMultiplier]);
 
   const reset = useCallback(() => {
     if (previewRange) {

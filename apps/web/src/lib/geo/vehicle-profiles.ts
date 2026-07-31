@@ -292,3 +292,32 @@ export function sampleProfileCruiseKnots(
   const { minKnots, maxKnots } = profile.cruiseKnots;
   return minKnots + random() * (maxKnots - minKnots);
 }
+
+/**
+ * Resolve cruise knots for route generation.
+ * When `maxCruiseKnots` is set, clamp to ≤ category top, ≤ profile.maxKnots,
+ * and ≥ profile cruise minimum. When unset, return the profile cruise midpoint
+ * (existing default).
+ */
+export function resolveGenerationCruiseKnots(options: {
+  vehicleCategory: VehicleCategory;
+  vehicleSubtype?: string;
+  maxCruiseKnots?: number;
+}): number {
+  const profile = resolveVehicleProfile(
+    options.vehicleCategory,
+    options.vehicleSubtype,
+  );
+  const ceiling = Math.min(
+    profile.maxKnots,
+    CATEGORY_TOP_SPEED_KNOTS[options.vehicleCategory],
+  );
+  const floor = profile.cruiseKnots.minKnots;
+  if (
+    options.maxCruiseKnots === undefined ||
+    !Number.isFinite(options.maxCruiseKnots)
+  ) {
+    return Math.min(profileCruiseMidpointKnots(profile), ceiling);
+  }
+  return Math.min(ceiling, Math.max(floor, options.maxCruiseKnots));
+}

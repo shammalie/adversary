@@ -15,11 +15,12 @@ import { toast } from "sonner";
 
 import { DateTimePicker } from "@/components/date-time-picker";
 import {
-  categoryCruiseMidpointKnots,
   deriveEndAtFromDistance,
   generateRouteEvents,
   MAX_GENERATED_EVENTS,
 } from "@/lib/event-generator";
+import { pathToEvents } from "@/lib/geo/path-to-events";
+import { resolveGenerationCruiseKnots } from "@/lib/geo/vehicle-profiles";
 import { haversineDistanceNm } from "@/lib/position-telemetry";
 import type { PositionPayload, SimulationEvent, TargetDefinition } from "@/types/target";
 
@@ -157,6 +158,11 @@ export function GenerateRouteForm({
 
   const allowOptionalEndAt = isAircraft && endPointEnabled;
   const activeEndPoint = allowOptionalEndAt ? endPoint : null;
+  const generationCruise = resolveGenerationCruiseKnots({
+    vehicleCategory: target.profile.vehicleCategory,
+    vehicleSubtype: target.profile.vehicleSubtype,
+    maxCruiseKnots: target.maxCruiseKnots,
+  });
 
   const computedEndPreview = useMemo(() => {
     if (!allowOptionalEndAt || endAt.trim()) return null;
@@ -166,10 +172,10 @@ export function GenerateRouteForm({
         startPoint,
         endPoint,
         vehicleCategory: target.profile.vehicleCategory,
+        cruiseKnots: generationCruise,
       });
       const distanceNm = haversineDistanceNm(startPoint, endPoint);
-      const cruise = categoryCruiseMidpointKnots(target.profile.vehicleCategory);
-      return { derived, distanceNm, cruise };
+      return { derived, distanceNm, cruise: generationCruise };
     } catch {
       return null;
     }
@@ -177,6 +183,7 @@ export function GenerateRouteForm({
     allowOptionalEndAt,
     endAt,
     endPoint,
+    generationCruise,
     startAt,
     startPoint,
     target.profile.vehicleCategory,
@@ -248,15 +255,37 @@ export function GenerateRouteForm({
     }
 
     try {
-      const generated = generateRouteEvents({
-        targetId: target.id,
-        count: Number(count),
-        startAt,
-        endAt: endAt.trim() || undefined,
-        startPoint,
-        endPoint: activeEndPoint ?? undefined,
-        vehicleCategory: target.profile.vehicleCategory,
-      });
+      const generated = activeEndPoint
+        ? pathToEvents({
+            targetId: target.id,
+            path: [
+              {
+                latitude: startPoint.latitude,
+                longitude: startPoint.longitude,
+                altitude: startPoint.altitude,
+              },
+              {
+                latitude: activeEndPoint.latitude,
+                longitude: activeEndPoint.longitude,
+                altitude: activeEndPoint.altitude,
+              },
+            ],
+            startAt,
+            endAt: endAt.trim() || undefined,
+            vehicleCategory: target.profile.vehicleCategory,
+            vehicleSubtype: target.profile.vehicleSubtype,
+            cruiseKnots: generationCruise,
+            eventCount: Number(count),
+          })
+        : generateRouteEvents({
+            targetId: target.id,
+            count: Number(count),
+            startAt,
+            endAt: endAt.trim() || undefined,
+            startPoint,
+            endPoint: undefined,
+            vehicleCategory: target.profile.vehicleCategory,
+          });
 
       const resolvedEnd =
         endAt.trim() ||
@@ -266,6 +295,7 @@ export function GenerateRouteForm({
               startPoint,
               endPoint: activeEndPoint,
               vehicleCategory: target.profile.vehicleCategory,
+              cruiseKnots: generationCruise,
             })
           : endAt);
 
@@ -368,7 +398,7 @@ export function GenerateRouteForm({
           >
             Computed end {new Date(computedEndPreview.derived).toLocaleString()} ·{" "}
             {computedEndPreview.distanceNm.toFixed(1)} nm @ {computedEndPreview.cruise.toFixed(0)}{" "}
-            kt cruise midpoint
+            kt cruise
           </p>
         ) : null}
 

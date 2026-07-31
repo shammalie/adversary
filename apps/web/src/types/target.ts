@@ -24,6 +24,11 @@ export interface TargetDefinition {
   appearOnFirstEvent: boolean;
   color: string;
   profile: TargetProfile;
+  /**
+   * Optional cruise speed override (knots) for route generation.
+   * Clamped to the vehicle profile band and category top speed when applied.
+   */
+  maxCruiseKnots?: number;
 }
 
 export interface PositionPayload {
@@ -38,6 +43,11 @@ export interface SimulationEvent {
   id: string;
   targetId: string;
   at: string;
+  /**
+   * Compressed schedule time when scenario.fastForwardMultiplier is set.
+   * Only present while fast-forward is active; never rewrite authored `at`.
+   */
+  firesAt?: string;
   position?: PositionPayload;
   message?: string;
 }
@@ -51,6 +61,11 @@ export interface SimulationScenario {
   updatedAt: string;
   /** Seconds added to every event.at for scheduling. Omit or 0 = no delay. */
   delaySeconds?: number;
+  /**
+   * Compresses schedule relative to the earliest event.at.
+   * Omit or 1 = off; allowed range is greater than 1 through 10.
+   */
+  fastForwardMultiplier?: number;
   priorityTerms: string[];
   targets: TargetDefinition[];
   events: SimulationEvent[];

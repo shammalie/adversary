@@ -270,4 +270,82 @@ describe("simulation schema", () => {
       ),
     ).toBe(true);
   });
+
+  it("accepts fastForwardMultiplier in (1, 10] with optional firesAt", () => {
+    const result = validateScenario({
+      schemaVersion: 2,
+      id: "s1",
+      name: "Test",
+      createdAt: "2026-07-24T12:00:00.000Z",
+      updatedAt: "2026-07-24T12:00:00.000Z",
+      fastForwardMultiplier: 2.5,
+      priorityTerms: [],
+      targets: [
+        {
+          id: "target-1",
+          callsign: "ALPHA",
+          revealOnFirstEvent: true,
+          color: "#22d3ee",
+          profile: {
+            vehicleCategory: "aircraft",
+            affiliation: "unknown",
+            status: "active",
+          },
+        },
+      ],
+      events: [
+        {
+          id: "event-1",
+          targetId: "target-1",
+          at: "2026-07-24T12:00:00.000Z",
+          firesAt: "2026-07-24T12:00:00.000Z",
+          message: "Ping",
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.fastForwardMultiplier).toBe(2.5);
+    expect(result.data.events[0]?.firesAt).toBe("2026-07-24T12:00:00.000Z");
+  });
+
+  it("rejects fastForwardMultiplier of 1, 0, or above 10", () => {
+    for (const fastForwardMultiplier of [1, 0, -2, 10.1, 11]) {
+      const result = validateScenario({
+        schemaVersion: 2,
+        id: "s1",
+        name: "Test",
+        createdAt: "2026-07-24T12:00:00.000Z",
+        updatedAt: "2026-07-24T12:00:00.000Z",
+        fastForwardMultiplier,
+        priorityTerms: [],
+        targets: [
+          {
+            id: "target-1",
+            callsign: "ALPHA",
+            revealOnFirstEvent: true,
+            color: "#22d3ee",
+            profile: {
+              vehicleCategory: "aircraft",
+              affiliation: "unknown",
+              status: "active",
+            },
+          },
+        ],
+        events: [
+          {
+            id: "event-1",
+            targetId: "target-1",
+            at: "2026-07-24T12:00:00.000Z",
+            message: "Ping",
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (result.success) continue;
+      expect(
+        result.error.issues.some((issue) => issue.path.join(".") === "fastForwardMultiplier"),
+      ).toBe(true);
+    }
+  });
 });

@@ -44,6 +44,13 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
         notes: "Non-negative seconds added to every event.at for scheduling. Omit or 0 = no delay. Does not rewrite authored event times.",
       },
       {
+        name: "fastForwardMultiplier",
+        type: "number",
+        required: false,
+        notes:
+          "Compresses schedule relative to the earliest event.at. Omit or 1 = off; allowed range is greater than 1 through 10. When set, each event gets firesAt = anchor + (at − anchor) / multiplier. Does not rewrite authored at.",
+      },
+      {
         name: "priorityTerms",
         type: "string[]",
         required: true,
@@ -68,6 +75,13 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
       },
       { name: "color", type: "string", required: true, notes: "Hex color #RRGGBB." },
       { name: "profile", type: "TargetProfile", required: true },
+      {
+        name: "maxCruiseKnots",
+        type: "number",
+        required: false,
+        notes:
+          "Optional cruise speed override (knots, ≥ 0) for route generation. Clamped to the subtype/category cruise band and category top speed.",
+      },
     ],
   },
   {
@@ -92,6 +106,13 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
       { name: "id", type: "string", required: true, notes: "Unique within the scenario." },
       { name: "targetId", type: "string", required: true, notes: "Must reference a target id." },
       { name: "at", type: "ISO datetime", required: true, notes: "Must include timezone offset." },
+      {
+        name: "firesAt",
+        type: "ISO datetime",
+        required: false,
+        notes:
+          "Present only when scenario.fastForwardMultiplier is set. Compressed schedule time; authored at is unchanged.",
+      },
       {
         name: "position",
         type: "PositionPayload",
@@ -126,6 +147,9 @@ export const SCHEMA_CONSTRAINTS = [
   "Each target must have at least one event.",
   "Datetimes must be ISO 8601 with an explicit offset.",
   "Optional delaySeconds must be >= 0; omit or 0 means no delay.",
+  "Optional maxCruiseKnots on targets must be >= 0 when set.",
+  "Optional fastForwardMultiplier must be > 1 and <= 10; omit or 1 means off.",
+  "Optional event.firesAt is set only while fast-forward is active; stripped when cleared.",
   "Colors must match #RRGGBB.",
   "Optional position speed is stored in knots (builder accepts mph, km/h, m/s, ft/s, mach).",
   "Generated routes set distance from category speed × elapsed time and always author position.speed.",

@@ -123,9 +123,12 @@
     border-radius: 9999px;
     background: transparent;
     color: var(--affiliation-color, var(--foreground));
+    /* transform may be set inline for globe altitude lift */
+    will-change: transform;
     transition:
       width 180ms ease,
-      height 180ms ease;
+      height 180ms ease,
+      transform 180ms ease;
   }
 
   .tracking-marker svg {

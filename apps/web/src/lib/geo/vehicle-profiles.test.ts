@@ -7,6 +7,7 @@ import {
 import {
   categoryFallbackProfile,
   profileCruiseMidpointKnots,
+  resolveGenerationCruiseKnots,
   resolveVehicleProfile,
   VEHICLE_SUBTYPE_PROFILES,
 } from "@/lib/geo/vehicle-profiles";
@@ -78,5 +79,32 @@ describe("vehicle profiles", () => {
     expect(resolveVehicleProfile("aircraft", "Transport").returnsToBase).toBe(true);
     expect(resolveVehicleProfile("car", "Sedan").canLoiter).toBe(false);
     expect(resolveVehicleProfile("car", "Sedan").returnsToBase).toBe(false);
+  });
+
+  it("clamps maxCruiseKnots for generation", () => {
+    const transport = resolveVehicleProfile("aircraft", "Transport");
+    expect(
+      resolveGenerationCruiseKnots({
+        vehicleCategory: "aircraft",
+        vehicleSubtype: "Transport",
+        maxCruiseKnots: 10_000,
+      }),
+    ).toBe(Math.min(transport.maxKnots, CATEGORY_TOP_SPEED_KNOTS.aircraft));
+
+    expect(
+      resolveGenerationCruiseKnots({
+        vehicleCategory: "aircraft",
+        vehicleSubtype: "Transport",
+        maxCruiseKnots: 1,
+      }),
+    ).toBe(transport.cruiseKnots.minKnots);
+
+    expect(
+      resolveGenerationCruiseKnots({
+        vehicleCategory: "aircraft",
+        vehicleSubtype: "Transport",
+        maxCruiseKnots: 450,
+      }),
+    ).toBe(450);
   });
 });

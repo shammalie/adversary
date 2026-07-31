@@ -14,11 +14,11 @@ export function computePreviewRevision(scenario: SimulationScenario): string {
   const eventPart = sortEvents(scenario.events)
     .map(
       (event) =>
-        `${event.id}:${event.targetId}:${event.at}:${JSON.stringify(event.position ?? null)}:${event.message ?? ""}`,
+        `${event.id}:${event.targetId}:${event.at}:${event.firesAt ?? ""}:${JSON.stringify(event.position ?? null)}:${event.message ?? ""}`,
     )
     .join("|");
 
-  return `${targetPart}::${eventPart}::d${scenario.delaySeconds ?? 0}`;
+  return `${targetPart}::${eventPart}::d${scenario.delaySeconds ?? 0}::ff${scenario.fastForwardMultiplier ?? 1}`;
 }
 
 /** Preview range spans from the first to the last scheduled event (effective times). */
@@ -29,8 +29,8 @@ export function getPreviewRangeMs(
   if (sorted.length === 0) return null;
 
   const delaySeconds = scenario.delaySeconds ?? 0;
-  const startMs = effectiveEventAtMs(sorted[0]!.at, delaySeconds);
-  const endMs = effectiveEventAtMs(sorted[sorted.length - 1]!.at, delaySeconds);
+  const startMs = effectiveEventAtMs(sorted[0]!, delaySeconds);
+  const endMs = effectiveEventAtMs(sorted[sorted.length - 1]!, delaySeconds);
   return { startMs, endMs: endMs > startMs ? endMs : startMs + 1_000 };
 }
 

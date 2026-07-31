@@ -1,6 +1,7 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 
 import { parseScenario } from "@/lib/simulation-schema";
+import { applyFastForwardTimes } from "@/lib/scenario-timing";
 import type { SimulationScenario } from "@/types/target";
 
 const DB_NAME = "adversary-simulations";
@@ -202,7 +203,7 @@ export function coerceEditableScenario(payload: unknown, recordId: string): Simu
   if (!payload || typeof payload !== "object") return blank;
 
   const candidate = payload as Partial<SimulationScenario>;
-  return {
+  return applyFastForwardTimes({
     schemaVersion: 2,
     id: recordId,
     name: typeof candidate.name === "string" ? candidate.name : blank.name,
@@ -215,10 +216,33 @@ export function coerceEditableScenario(payload: unknown, recordId: string): Simu
       candidate.delaySeconds >= 0
         ? candidate.delaySeconds
         : undefined,
+    fastForwardMultiplier:
+      typeof candidate.fastForwardMultiplier === "number" &&
+      Number.isFinite(candidate.fastForwardMultiplier) &&
+      candidate.fastForwardMultiplier > 1 &&
+      candidate.fastForwardMultiplier <= 10
+        ? candidate.fastForwardMultiplier
+        : undefined,
     priorityTerms: Array.isArray(candidate.priorityTerms)
       ? candidate.priorityTerms.filter((term): term is string => typeof term === "string")
       : [],
-    targets: Array.isArray(candidate.targets) ? candidate.targets : [],
+    targets: Array.isArray(candidate.targets)
+      ? candidate.targets.map((raw) => {
+          if (!raw || typeof raw !== "object") return raw;
+          const target = { ...(raw as unknown as Record<string, unknown>) };
+          const maxCruise = target.maxCruiseKnots;
+          if (
+            typeof maxCruise === "number" &&
+            Number.isFinite(maxCruise) &&
+            maxCruise >= 0
+          ) {
+            target.maxCruiseKnots = maxCruise;
+          } else {
+            delete target.maxCruiseKnots;
+          }
+          return target as unknown as SimulationScenario["targets"][number];
+        })
+      : [],
     events: Array.isArray(candidate.events) ? candidate.events : [],
-  };
+  });
 }

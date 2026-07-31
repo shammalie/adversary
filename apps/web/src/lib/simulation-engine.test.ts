@@ -123,4 +123,33 @@ describe("simulation engine", () => {
     const reconciled = reconcileRuntime(runtime, new Date("2026-07-24T12:00:01.500Z"));
     expect(reconciled.processedEventIds).toEqual(["event-a"]);
   });
+
+  it("uses firesAt with delaySeconds for due checks without rewriting at", () => {
+    const spedUp = {
+      ...scenario(),
+      delaySeconds: 10,
+      fastForwardMultiplier: 2,
+      events: scenario().events.map((event) => {
+        // Anchor at 12:00:01; event-b/c at +1s authored → firesAt +0.5s
+        if (event.id === "event-a") {
+          return { ...event, firesAt: "2026-07-24T12:00:01.000Z" };
+        }
+        return { ...event, firesAt: "2026-07-24T12:00:01.500Z" };
+      }),
+    };
+    const runtime = createRuntime(spedUp, new Date("2026-07-24T12:00:00.000Z"));
+
+    // Authored at+delay would be 12:00:11 for event-a; firesAt+delay is 12:00:11
+    const before = reconcileRuntime(runtime, new Date("2026-07-24T12:00:10.500Z"));
+    expect(before.processedEventIds).toEqual([]);
+
+    const afterFirst = reconcileRuntime(before, new Date("2026-07-24T12:00:11.000Z"));
+    expect(afterFirst.processedEventIds).toEqual(["event-a"]);
+    expect(afterFirst.ingestedEvents[0]?.at).toBe("2026-07-24T12:00:01.000Z");
+    expect(afterFirst.ingestedEvents[0]?.firesAt).toBe("2026-07-24T12:00:01.000Z");
+
+    // event-b/c firesAt+delay = 12:00:11.500
+    const afterRest = reconcileRuntime(afterFirst, new Date("2026-07-24T12:00:11.500Z"));
+    expect(afterRest.processedEventIds).toEqual(["event-a", "event-b", "event-c"]);
+  });
 });

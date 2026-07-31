@@ -32,6 +32,7 @@ const targetDefinitionSchema = z
     appearOnFirstEvent: z.boolean().default(false),
     color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Choose a valid hex color (#RRGGBB)."),
     profile: targetProfileSchema,
+    maxCruiseKnots: z.number().nonnegative().optional(),
   })
   .superRefine((target, context) => {
     if (target.revealOnFirstEvent && target.appearOnFirstEvent) {
@@ -66,6 +67,7 @@ export const simulationEventSchema = z
     id: idSchema,
     targetId: idSchema,
     at: isoDateSchema,
+    firesAt: isoDateSchema.optional(),
     position: positionPayloadSchema.optional(),
     message: z
       .string()
@@ -99,6 +101,11 @@ export const simulationScenarioSchema = z
     delaySeconds: z
       .number()
       .nonnegative("Delay cannot be negative.")
+      .optional(),
+    fastForwardMultiplier: z
+      .number()
+      .gt(1, "Fast-forward must be greater than 1.")
+      .max(10, "Fast-forward must be 10 or less.")
       .optional(),
     priorityTerms: z.array(z.string().trim().min(1).max(80)),
     targets: z

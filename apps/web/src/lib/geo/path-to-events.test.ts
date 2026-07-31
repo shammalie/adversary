@@ -209,6 +209,82 @@ describe("pathToEvents", () => {
     // Monotonic-ish climb then descent (allow small DP noise).
     expect(altitudes[Math.floor(peakIndex / 2)]!).toBeGreaterThan(altitudes[0]!);
     expect(altitudes[Math.floor((peakIndex + altitudes.length) / 2)]!).toBeLessThan(peak + 1);
+    // No forced zero mid-path once climbed.
+    const midBand = altitudes.slice(
+      Math.floor(altitudes.length * 0.35),
+      Math.floor(altitudes.length * 0.65),
+    );
+    expect(Math.min(...midBand)).toBeGreaterThan(5_000);
+  });
+
+  it("climbs from 0 toward a high end altitude without forced landing", () => {
+    const profile = resolveVehicleProfile("aircraft", "Transport");
+    const endAlt = profile.typicalFlightLevelFt;
+    const path = [
+      { latitude: 50, longitude: 0, altitude: 0 },
+      { latitude: 52, longitude: 4, altitude: endAlt },
+      { latitude: 54, longitude: 8, altitude: endAlt },
+    ];
+    let totalNm = 0;
+    for (let i = 1; i < path.length; i += 1) {
+      totalNm += haversineDistanceNm(path[i - 1]!, path[i]!);
+    }
+    const hours = totalNm / profileCruise(profile);
+    const startAt = "2026-07-27T12:00:00.000Z";
+    const endAt = new Date(Date.parse(startAt) + hours * 3_600_000 * 1.2).toISOString();
+
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt,
+      endAt,
+      vehicleCategory: "aircraft",
+      vehicleSubtype: "Transport",
+      idFactory: idFactory(),
+    });
+
+    const altitudes = events.map((e) => e.position!.altitude!);
+    expect(altitudes[0]).toBe(0);
+    expect(altitudes[altitudes.length - 1]).toBe(endAlt);
+    const peak = Math.max(...altitudes);
+    expect(peak).toBeGreaterThanOrEqual(endAlt * 0.9);
+    // Approaches end: late samples near end altitude, not forced to 0.
+    expect(altitudes[altitudes.length - 2]!).toBeGreaterThan(endAlt * 0.5);
+  });
+
+  it("keeps a flat non-zero cruise when start and end match cruise altitude", () => {
+    const profile = resolveVehicleProfile("aircraft", "Transport");
+    const cruise = profile.typicalFlightLevelFt;
+    const path = [
+      { latitude: 50, longitude: 0, altitude: cruise },
+      { latitude: 51, longitude: 2, altitude: cruise },
+      { latitude: 52, longitude: 4, altitude: cruise },
+    ];
+    let totalNm = 0;
+    for (let i = 1; i < path.length; i += 1) {
+      totalNm += haversineDistanceNm(path[i - 1]!, path[i]!);
+    }
+    const hours = totalNm / profileCruise(profile);
+    const startAt = "2026-07-27T12:00:00.000Z";
+    const endAt = new Date(Date.parse(startAt) + hours * 3_600_000 * 1.15).toISOString();
+
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt,
+      endAt,
+      vehicleCategory: "aircraft",
+      vehicleSubtype: "Transport",
+      idFactory: idFactory(),
+    });
+
+    const altitudes = events.map((e) => e.position!.altitude!);
+    expect(altitudes[0]).toBe(cruise);
+    expect(altitudes[altitudes.length - 1]).toBe(cruise);
+    for (const alt of altitudes) {
+      expect(alt).toBeGreaterThan(cruise * 0.95);
+      expect(alt).toBeLessThan(cruise * 1.05);
+    }
   });
 
   it("rejects a window too short for the routed distance", () => {

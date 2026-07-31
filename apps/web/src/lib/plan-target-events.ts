@@ -11,7 +11,6 @@ import {
 } from "@/lib/demo-scenario";
 import { demoRegionById } from "@/lib/demo-regions";
 import {
-  categoryCruiseMidpointKnots,
   generateRouteEvents,
   MAX_GENERATED_EVENTS,
 } from "@/lib/event-generator";
@@ -25,7 +24,10 @@ import {
 import { createGeoRouterClient } from "@/lib/geo/geo-router-client";
 import type { GeoRouterLngLat } from "@/lib/geo/geo-router-protocol";
 import { pathToEvents, type PathPoint } from "@/lib/geo/path-to-events";
-import { resolveVehicleProfile } from "@/lib/geo/vehicle-profiles";
+import {
+  resolveGenerationCruiseKnots,
+  resolveVehicleProfile,
+} from "@/lib/geo/vehicle-profiles";
 import { destinationPoint } from "@/lib/position-telemetry";
 import type { SimulationEvent, TargetDefinition, VehicleCategory } from "@/types/target";
 
@@ -192,7 +194,11 @@ export async function planTargetRouteEvents(
 
   const endMs = Date.parse(endAt);
   const durationMinutes = Math.max(1, Math.floor((endMs - startMs) / 60_000));
-  const cruise = categoryCruiseMidpointKnots(category);
+  const cruise = resolveGenerationCruiseKnots({
+    vehicleCategory: category,
+    vehicleSubtype: subtype,
+    maxCruiseKnots: options.target.maxCruiseKnots,
+  });
   const durationHours = Math.max(durationMinutes / 60, 1 / 60);
   const maxNm = Math.max(2, cruise * durationHours * 0.72);
   const minNm = Math.min(4, maxNm * 0.35);
@@ -239,7 +245,10 @@ export async function planTargetRouteEvents(
     if (mode === "air") {
       const aerodromes = options.aerodromes ?? loadDefaultAerodromes();
       const profile = resolveVehicleProfile(category, subtype);
-      const kinematics = kinematicsFromProfile(profile);
+      const kinematics = {
+        ...kinematicsFromProfile(profile),
+        cruiseKnots: cruise,
+      };
       const region = placement.regionId ? demoRegionById(placement.regionId) : undefined;
       const result = planAirRoute({
         aerodromes,
@@ -297,7 +306,10 @@ export async function planTargetRouteEvents(
         path = coordinates.map((point) => ({
           latitude: point.latitude,
           longitude: point.longitude,
-          altitude: 0,
+          ...("altitude" in point &&
+          typeof (point as { altitude?: unknown }).altitude === "number"
+            ? { altitude: (point as { altitude: number }).altitude }
+            : { altitude: 0 }),
         }));
       } finally {
         client?.terminate();
@@ -311,6 +323,7 @@ export async function planTargetRouteEvents(
       endAt,
       vehicleCategory: category,
       vehicleSubtype: subtype,
+      cruiseKnots: cruise,
       eventCount,
       idFactory,
     });

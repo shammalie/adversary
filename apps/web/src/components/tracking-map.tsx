@@ -53,7 +53,7 @@ export interface MapTargetDisplay {
   affiliation?: Affiliation;
   vehicleCategory?: VehicleCategory;
   heading?: number;
-  position?: { latitude: number; longitude: number };
+  position?: { latitude: number; longitude: number; altitude?: number };
   trail: Array<{ latitude: number; longitude: number }>;
 }
 
@@ -113,7 +113,11 @@ function toDisplayTarget(target: MapTargetDisplay | RuntimeTargetState): MapTarg
       vehicleCategory: target.profile.vehicleCategory,
       heading: target.position?.heading,
       position: target.position
-        ? { latitude: target.position.latitude, longitude: target.position.longitude }
+        ? {
+            latitude: target.position.latitude,
+            longitude: target.position.longitude,
+            altitude: target.position.altitude,
+          }
         : undefined,
       trail: target.trail.map((point) => ({
         latitude: point.latitude,
@@ -122,6 +126,13 @@ function toDisplayTarget(target: MapTargetDisplay | RuntimeTargetState): MapTarg
     };
   }
   return target;
+}
+
+/** Best-effort visual lift (px) for globe mode from altitude feet. */
+function globeAltitudeOffsetPx(altitudeFt: number | undefined): number {
+  if (altitudeFt === undefined || !Number.isFinite(altitudeFt) || altitudeFt <= 0) return 0;
+  // ~1px per 500 ft, capped so high-FL contacts stay readable at global zoom.
+  return Math.min(48, altitudeFt / 500);
 }
 
 function buildBounds(
@@ -519,6 +530,10 @@ export function TrackingMap({
         target.vehicleCategory,
       );
       element.style.setProperty("--marker-rotate", `${markerRotate}deg`);
+      const altitudeLift =
+        mode === "globe" ? globeAltitudeOffsetPx(position.altitude) : 0;
+      element.style.transform =
+        altitudeLift > 0 ? `translateY(-${altitudeLift.toFixed(1)}px)` : "";
       element.dataset.selected = String(target.targetId === selectedTargetId);
       element.dataset.tracked = String(trackedSet.has(target.targetId));
       element.setAttribute("aria-pressed", String(target.targetId === selectedTargetId));
@@ -549,6 +564,7 @@ export function TrackingMap({
     affiliationTheme,
     continuousMotion,
     mapReady,
+    mode,
     onSelectTarget,
     selectedTargetId,
     targetsMotionKey,
