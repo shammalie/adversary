@@ -59,6 +59,11 @@ export interface PathToEventsOptions {
    * stretch timestamps to fill the window. Default true.
    */
   retimeToWindow?: boolean;
+  /**
+   * When true, skip min/max average-speed feasibility checks and author
+   * geometric speeds even when they fall outside the vehicle band.
+   */
+  ignoreKinematicLimits?: boolean;
 }
 
 interface WalkedPoint {
@@ -609,14 +614,17 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
   }
 
   const floorKnots = profile.cruiseKnots.minKnots;
-  assertFeasiblePathWindow({
-    startMs,
-    endMs,
-    pathLengthNm: totalNm,
-    vehicleCategory: options.vehicleCategory,
-    maxKnots: ceilingKnots,
-    minKnots: floorKnots,
-  });
+  const ignoreKinematicLimits = options.ignoreKinematicLimits === true;
+  if (!ignoreKinematicLimits) {
+    assertFeasiblePathWindow({
+      startMs,
+      endMs,
+      pathLengthNm: totalNm,
+      vehicleCategory: options.vehicleCategory,
+      maxKnots: ceilingKnots,
+      minKnots: floorKnots,
+    });
+  }
 
   const walked = walkPath({ path, profile, cruiseKnots, ceilingKnots });
   const requestedCount =
@@ -756,25 +764,31 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
   // Average speed implied by fitting the simplified path into the window.
   // Re-check after DP — simplification can shorten the path and drop the
   // required average below the cruise floor.
-  const requiredAvg = simplifiedNm / windowHours;
-  if (requiredAvg > ceilingKnots + 1e-6) {
-    throw new Error(
-      `Route requires about ${requiredAvg.toFixed(0)} kt average, above the ${options.vehicleCategory} maximum of ${ceilingKnots} kt. Use a later end time or a shorter distance.`,
-    );
-  }
-  if (requiredAvg < floorKnots - 1e-6) {
-    throw new Error(
-      `Route requires about ${requiredAvg.toFixed(1)} kt average, below the ${options.vehicleCategory} minimum of ${floorKnots} kt. Use an earlier end time or a longer distance.`,
-    );
+  if (!ignoreKinematicLimits) {
+    const requiredAvg = simplifiedNm / windowHours;
+    if (requiredAvg > ceilingKnots + 1e-6) {
+      throw new Error(
+        `Route requires about ${requiredAvg.toFixed(0)} kt average, above the ${options.vehicleCategory} maximum of ${ceilingKnots} kt. Use a later end time or a shorter distance.`,
+      );
+    }
+    if (requiredAvg < floorKnots - 1e-6) {
+      throw new Error(
+        `Route requires about ${requiredAvg.toFixed(1)} kt average, below the ${options.vehicleCategory} minimum of ${floorKnots} kt. Use an earlier end time or a longer distance.`,
+      );
+    }
   }
 
   let scale = 1;
   if (retime && kinematicHours > 1e-9) {
     // Stretch or compress the kinematic schedule into the authored window.
     // Stretch is capped by the cruise floor; compression by the ceiling
-    // (both already checked via requiredAvg).
+    // (both already checked via requiredAvg unless ignoreKinematicLimits).
     scale = windowHours / kinematicHours;
-  } else if (!retime && kinematicHours > windowHours + 1e-9) {
+  } else if (
+    !ignoreKinematicLimits &&
+    !retime &&
+    kinematicHours > windowHours + 1e-9
+  ) {
     throw new Error(
       `Route requires about ${(simplifiedNm / kinematicHours).toFixed(0)} kt average over ${kinematicHours.toFixed(2)} h, which does not fit the authored window.`,
     );
@@ -790,14 +804,20 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
       // Match the first segment's retimed pace so the opener isn't left at the
       // unscaled cruise while later events are stretched/compressed.
       const opening = segmentSpeeds[0] ?? point.speedKnots;
-      speedKnots = Math.min(opening / scale, ceilingKnots);
+      const geometric = opening / scale;
+      speedKnots = ignoreKinematicLimits
+        ? geometric
+        : Math.min(geometric, ceilingKnots);
     } else {
       const segNm = distances[i]! - distances[i - 1]!;
       const baseSpeed = segmentSpeeds[i - 1]!;
       const dt = (segNm / baseSpeed) * scale;
       elapsedHours += dt;
       // Authored speed is the geometric pace on this segment after retiming.
-      speedKnots = dt > 0 ? Math.min(segNm / dt, ceilingKnots) : baseSpeed;
+      const geometric = dt > 0 ? segNm / dt : baseSpeed;
+      speedKnots = ignoreKinematicLimits
+        ? geometric
+        : Math.min(geometric, ceilingKnots);
     }
 
     const atMs =
@@ -815,6 +835,7 @@ export function pathToEvents(options: PathToEventsOptions): SimulationEvent[] {
         altitude: Number(point.altitude.toFixed(1)),
         speed: Number(speedKnots.toFixed(1)),
       } satisfies PositionPayload,
+      ...(ignoreKinematicLimits ? { ignoreKinematicLimits: true as const } : {}),
     });
   }
 

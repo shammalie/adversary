@@ -151,6 +151,7 @@ export function GenerateRouteForm({
     }),
   );
   const [endPointEnabled, setEndPointEnabled] = useState(false);
+  const [ignoreKinematicLimits, setIgnoreKinematicLimits] = useState(false);
   const [pendingSummary, setPendingSummary] = useState<string | null>(null);
   const [pendingEvents, setPendingEvents] = useState<SimulationEvent[]>([]);
   const [attempted, setAttempted] = useState(false);
@@ -207,6 +208,7 @@ export function GenerateRouteForm({
     endPoint.longitude,
     endPoint.altitude,
     endPointEnabled,
+    ignoreKinematicLimits,
   ]);
 
   useEffect(() => {
@@ -276,6 +278,7 @@ export function GenerateRouteForm({
             vehicleSubtype: target.profile.vehicleSubtype,
             cruiseKnots: generationCruise,
             eventCount: Number(count),
+            ignoreKinematicLimits,
           })
         : generateRouteEvents({
             targetId: target.id,
@@ -285,6 +288,7 @@ export function GenerateRouteForm({
             startPoint,
             endPoint: undefined,
             vehicleCategory: target.profile.vehicleCategory,
+            ignoreKinematicLimits,
           });
 
       const resolvedEnd =
@@ -418,6 +422,21 @@ export function GenerateRouteForm({
             </FieldContent>
           </Field>
         ) : null}
+
+        <Field orientation="horizontal">
+          <Switch
+            id="route-ignore-kinematic-limits"
+            checked={ignoreKinematicLimits}
+            disabled={disabled}
+            onCheckedChange={setIgnoreKinematicLimits}
+          />
+          <FieldContent>
+            <FieldLabel htmlFor="route-ignore-kinematic-limits">Ignore speed limits</FieldLabel>
+            <FieldDescription>
+              Allow start/end times that need speeds outside this vehicle&apos;s min/max.
+            </FieldDescription>
+          </FieldContent>
+        </Field>
 
         <Field data-invalid={Boolean(errors.startPoint) || undefined}>
           <FieldLabel>Start (A)</FieldLabel>

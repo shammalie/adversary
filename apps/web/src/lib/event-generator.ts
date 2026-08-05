@@ -42,12 +42,24 @@ export interface GenerateRouteOptions {
    * headings curve inland gradually so contacts arc parallel instead of spiking.
    */
   maxAbsLatitude?: number;
+  /**
+   * When true, skip min/max average-speed feasibility checks and author
+   * geometric speeds even when they fall outside the vehicle band.
+   */
+  ignoreKinematicLimits?: boolean;
   random?: () => number;
   idFactory?: () => string;
 }
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function withIgnoreKinematicLimits(
+  event: SimulationEvent,
+  ignoreKinematicLimits: boolean,
+): SimulationEvent {
+  return ignoreKinematicLimits ? { ...event, ignoreKinematicLimits: true } : event;
 }
 
 function normalizeHeading(heading: number) {
@@ -252,10 +264,12 @@ function generateWanderEvents(options: {
   startPoint: PositionPayload;
   vehicleCategory: VehicleCategory;
   maxAbsLatitude?: number;
+  ignoreKinematicLimits?: boolean;
   random: () => number;
   idFactory: () => string;
 }): SimulationEvent[] {
   const timestamps = distributeTimestamps(options.startMs, options.endMs, options.count);
+  const ignoreKinematicLimits = options.ignoreKinematicLimits === true;
   let heading = options.random() * 360;
   let speed = sampleSpeed(options.vehicleCategory, options.random);
   let current: PositionPayload = {
@@ -296,17 +310,22 @@ function generateWanderEvents(options: {
       };
     }
 
-    events.push({
-      id: options.idFactory(),
-      targetId: options.targetId,
-      at: new Date(timestamps[index] ?? options.startMs).toISOString(),
-      position: {
-        latitude: Number(current.latitude.toFixed(6)),
-        longitude: Number(current.longitude.toFixed(6)),
-        altitude: current.altitude,
-        speed: Number(speed.toFixed(1)),
-      },
-    });
+    events.push(
+      withIgnoreKinematicLimits(
+        {
+          id: options.idFactory(),
+          targetId: options.targetId,
+          at: new Date(timestamps[index] ?? options.startMs).toISOString(),
+          position: {
+            latitude: Number(current.latitude.toFixed(6)),
+            longitude: Number(current.longitude.toFixed(6)),
+            altitude: current.altitude,
+            speed: Number(speed.toFixed(1)),
+          },
+        },
+        ignoreKinematicLimits,
+      ),
+    );
   }
 
   return events;
@@ -321,6 +340,7 @@ function generatePointToPointEvents(options: {
   endPoint: PositionPayload;
   vehicleCategory: VehicleCategory;
   maxAbsLatitude?: number;
+  ignoreKinematicLimits?: boolean;
   random: () => number;
   idFactory: () => string;
 }): SimulationEvent[] {
@@ -332,14 +352,17 @@ function generatePointToPointEvents(options: {
     ...options.endPoint,
     latitude: clampLatitude(options.endPoint.latitude, options.maxAbsLatitude),
   };
+  const ignoreKinematicLimits = options.ignoreKinematicLimits === true;
 
-  assertFeasibleEndWindow({
-    startMs: options.startMs,
-    endMs: options.endMs,
-    startPoint,
-    endPoint,
-    vehicleCategory: options.vehicleCategory,
-  });
+  if (!ignoreKinematicLimits) {
+    assertFeasibleEndWindow({
+      startMs: options.startMs,
+      endMs: options.endMs,
+      startPoint,
+      endPoint,
+      vehicleCategory: options.vehicleCategory,
+    });
+  }
 
   const timestamps = distributeTimestamps(options.startMs, options.endMs, options.count);
   const range = CATEGORY_SPEED_RANGES[options.vehicleCategory];
@@ -347,7 +370,10 @@ function generatePointToPointEvents(options: {
   const totalNm = haversineDistanceNm(startPoint, endPoint);
   const totalHours = Math.max((options.endMs - options.startMs) / 3_600_000, 1 / 3600);
   // Seed near schedule pace (distance / window) so early legs don't burn the route.
-  let speed = clamp(totalNm / totalHours, range.minKnots, range.maxKnots);
+  const schedulePace = totalNm / totalHours;
+  let speed = ignoreKinematicLimits
+    ? schedulePace
+    : clamp(schedulePace, range.minKnots, range.maxKnots);
   let current: PositionPayload = { ...startPoint };
   const events: SimulationEvent[] = [];
   const lastIndex = options.count - 1;
@@ -359,17 +385,22 @@ function generatePointToPointEvents(options: {
     const altitude = lerpAltitude(startPoint.altitude, endPoint.altitude, progress);
 
     if (index === 0) {
-      events.push({
-        id: options.idFactory(),
-        targetId: options.targetId,
-        at: new Date(timestamps[0] ?? options.startMs).toISOString(),
-        position: {
-          latitude: Number(startPoint.latitude.toFixed(6)),
-          longitude: Number(startPoint.longitude.toFixed(6)),
-          altitude,
-          speed: Number(speed.toFixed(1)),
-        },
-      });
+      events.push(
+        withIgnoreKinematicLimits(
+          {
+            id: options.idFactory(),
+            targetId: options.targetId,
+            at: new Date(timestamps[0] ?? options.startMs).toISOString(),
+            position: {
+              latitude: Number(startPoint.latitude.toFixed(6)),
+              longitude: Number(startPoint.longitude.toFixed(6)),
+              altitude,
+              speed: Number(speed.toFixed(1)),
+            },
+          },
+          ignoreKinematicLimits,
+        ),
+      );
       continue;
     }
 
@@ -381,28 +412,35 @@ function generatePointToPointEvents(options: {
     if (index === lastIndex || remainingNm <= arrivalEpsilonNm) {
       const distanceNm = haversineDistanceNm(current, endPoint);
       const geometricSpeed = distanceNm / elapsedHours;
-      if (geometricSpeed > range.maxKnots + 1) {
+      if (!ignoreKinematicLimits && geometricSpeed > range.maxKnots + 1) {
         throw new Error(
           `Final leg requires ${geometricSpeed.toFixed(0)} kt, above the ${options.vehicleCategory} maximum of ${range.maxKnots} kt.`,
         );
       }
-      speed = clamp(geometricSpeed, 0, range.maxKnots);
+      speed = ignoreKinematicLimits
+        ? geometricSpeed
+        : clamp(geometricSpeed, 0, range.maxKnots);
       current = {
         latitude: endPoint.latitude,
         longitude: endPoint.longitude,
         altitude: endPoint.altitude ?? altitude,
       };
-      events.push({
-        id: options.idFactory(),
-        targetId: options.targetId,
-        at: new Date(timestamps[index] ?? options.startMs).toISOString(),
-        position: {
-          latitude: Number(current.latitude.toFixed(6)),
-          longitude: Number(current.longitude.toFixed(6)),
-          altitude: Number((current.altitude ?? altitude).toFixed(1)),
-          speed: Number(speed.toFixed(1)),
-        },
-      });
+      events.push(
+        withIgnoreKinematicLimits(
+          {
+            id: options.idFactory(),
+            targetId: options.targetId,
+            at: new Date(timestamps[index] ?? options.startMs).toISOString(),
+            position: {
+              latitude: Number(current.latitude.toFixed(6)),
+              longitude: Number(current.longitude.toFixed(6)),
+              altitude: Number((current.altitude ?? altitude).toFixed(1)),
+              speed: Number(speed.toFixed(1)),
+            },
+          },
+          ignoreKinematicLimits,
+        ),
+      );
       // Drop leftover timestamps after arrival — no parked zero-speed tail.
       break;
     }
@@ -411,13 +449,16 @@ function generatePointToPointEvents(options: {
     const hoursLeftAfter = Math.max((options.endMs - currentAt) / 3_600_000, 1 / 3600);
     // Time-proportional slice of remaining distance (pace to arrive at endAt, not early).
     const idealStepNm = remainingNm * (elapsedHours / hoursLeftFromPrev);
-    const maxLeaveNm = range.maxKnots * hoursLeftAfter;
+    const maxLeaveNm = ignoreKinematicLimits
+      ? remainingNm
+      : range.maxKnots * hoursLeftAfter;
     const minStepNm = Math.max(0, remainingNm - maxLeaveNm);
     const maxStepNm = Math.max(0, remainingNm - arrivalEpsilonNm);
 
     const noise = (options.random() * 2 - 1) * smoothing.maxSpeedChangeFraction;
     let distanceNm = clamp(idealStepNm * (1 + noise), minStepNm, maxStepNm);
-    speed = clamp(distanceNm / elapsedHours, 0, range.maxKnots);
+    const legPace = distanceNm / elapsedHours;
+    speed = ignoreKinematicLimits ? legPace : clamp(legPace, 0, range.maxKnots);
     // Allow below category min when the authored window is longer than cruise —
     // otherwise minKnots would force early arrival and idle padding.
     distanceNm = Math.min(speed * elapsedHours, maxStepNm);
@@ -448,24 +489,30 @@ function generatePointToPointEvents(options: {
       options.maxAbsLatitude,
       smoothing.maxHeadingChange,
     );
-    speed = clamp(haversineDistanceNm(current, bounded.point) / elapsedHours, 0, range.maxKnots);
+    const actualPace = haversineDistanceNm(current, bounded.point) / elapsedHours;
+    speed = ignoreKinematicLimits ? actualPace : clamp(actualPace, 0, range.maxKnots);
     current = {
       latitude: bounded.point.latitude,
       longitude: bounded.point.longitude,
       altitude,
     };
 
-    events.push({
-      id: options.idFactory(),
-      targetId: options.targetId,
-      at: new Date(timestamps[index] ?? options.startMs).toISOString(),
-      position: {
-        latitude: Number(current.latitude.toFixed(6)),
-        longitude: Number(current.longitude.toFixed(6)),
-        altitude: Number((current.altitude ?? altitude).toFixed(1)),
-        speed: Number(speed.toFixed(1)),
-      },
-    });
+    events.push(
+      withIgnoreKinematicLimits(
+        {
+          id: options.idFactory(),
+          targetId: options.targetId,
+          at: new Date(timestamps[index] ?? options.startMs).toISOString(),
+          position: {
+            latitude: Number(current.latitude.toFixed(6)),
+            longitude: Number(current.longitude.toFixed(6)),
+            altitude: Number((current.altitude ?? altitude).toFixed(1)),
+            speed: Number(speed.toFixed(1)),
+          },
+        },
+        ignoreKinematicLimits,
+      ),
+    );
   }
 
   return events;
@@ -507,6 +554,7 @@ export function generateRouteEvents(options: GenerateRouteOptions): SimulationEv
       endPoint: options.endPoint,
       vehicleCategory: options.vehicleCategory,
       maxAbsLatitude: options.maxAbsLatitude,
+      ignoreKinematicLimits: options.ignoreKinematicLimits,
       random,
       idFactory,
     });
@@ -520,6 +568,7 @@ export function generateRouteEvents(options: GenerateRouteOptions): SimulationEv
     startPoint: options.startPoint,
     vehicleCategory: options.vehicleCategory,
     maxAbsLatitude: options.maxAbsLatitude,
+    ignoreKinematicLimits: options.ignoreKinematicLimits,
     random,
     idFactory,
   });

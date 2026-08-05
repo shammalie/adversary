@@ -46,6 +46,30 @@ describe("simulation schema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects authored speed above 2000 kt by default", () => {
+    const result = simulationEventSchema.safeParse({
+      id: "e1",
+      targetId: "t1",
+      at: "2026-07-24T12:00:00.000Z",
+      position: { latitude: 51, longitude: 0, speed: 2_500 },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => /2,000 kt/i.test(issue.message))).toBe(true);
+    }
+  });
+
+  it("accepts authored speed above 2000 kt when ignoreKinematicLimits is set", () => {
+    const result = simulationEventSchema.safeParse({
+      id: "e1",
+      targetId: "t1",
+      at: "2026-07-24T12:00:00.000Z",
+      ignoreKinematicLimits: true,
+      position: { latitude: 51, longitude: 0, speed: 12_000 },
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("uses friendly messages for empty targets and events", () => {
     const result = validateScenario({
       schemaVersion: 2,

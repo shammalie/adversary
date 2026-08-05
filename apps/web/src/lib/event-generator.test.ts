@@ -250,6 +250,25 @@ describe("event generator", () => {
     ).toThrow(/maximum/i);
   });
 
+  it("accepts an over-max window when ignoreKinematicLimits is set", () => {
+    const events = generateRouteEvents({
+      targetId: "target-ab",
+      count: 8,
+      startAt: "2026-07-24T12:00:00.000Z",
+      endAt: "2026-07-24T12:01:00.000Z",
+      startPoint: { latitude: 51.5, longitude: -0.12, altitude: 8_000 },
+      endPoint: { latitude: 55.0, longitude: 5.0, altitude: 8_000 },
+      vehicleCategory: "aircraft",
+      ignoreKinematicLimits: true,
+      random: () => 0.5,
+      idFactory: () => crypto.randomUUID(),
+    });
+    expect(events.length).toBeGreaterThanOrEqual(2);
+    const speeds = events.map((e) => e.position!.speed!);
+    expect(Math.max(...speeds)).toBeGreaterThan(CATEGORY_SPEED_RANGES.aircraft.maxKnots);
+    expect(events.every((e) => e.ignoreKinematicLimits === true)).toBe(true);
+  });
+
   it("requires end time when no end point is provided", () => {
     expect(() =>
       generateRouteEvents({

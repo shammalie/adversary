@@ -1,16 +1,16 @@
 # Graph Report - adversary  (2026-08-05)
 
 ## Corpus Check
-- 581 files · ~572,551 words
+- 581 files · ~572,938 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4924 nodes · 6922 edges · 453 communities (352 shown, 101 thin omitted)
+- 4924 nodes · 6922 edges · 454 communities (353 shown, 101 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 27 edges (avg confidence: 0.66)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bc29965d`
+- Built from commit: `0bdf5dc3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -429,6 +429,7 @@
 - react-hook-form
 - sonner
 - @tailwindcss/vite
+- cmdk
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 210 edges
@@ -457,7 +458,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (453 total, 101 thin omitted)
+## Communities (454 total, 101 thin omitted)
 
 ### Community 0 - "event-generator.ts"
 Cohesion: 0.04
@@ -477,7 +478,7 @@ Nodes (20): OperationsDashboard(), EventIngestTable(), eventPayloadBadges(), eve
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.06
-Nodes (33): devDependencies, @axe-core/playwright, fake-indexeddb, @playwright/test, postcss, sharp, tailwindcss, @tanstack/router-plugin (+25 more)
+Nodes (33): devDependencies, @adversary/config, @axe-core/playwright, @playwright/test, postcss, sharp, tailwindcss, @tanstack/router-plugin (+25 more)
 
 ### Community 5 - "simulation-storage.ts"
 Cohesion: 0.13
@@ -501,11 +502,11 @@ Nodes (31): @adversary/ui, dependencies, @adversary/env, @adversary/ui, date-fns
 
 ### Community 10 - "position-telemetry.ts"
 Cohesion: 0.06
-Nodes (75): assignTravelGroupIds(), atOffsetIso(), buildTravelPlans(), CALLSIGN_PREFIXES, clamp(), clampDemoLatitude(), createDemoScenario(), CreateDemoScenarioOptions (+67 more)
+Nodes (73): assignTravelGroupIds(), atOffsetIso(), buildTravelPlans(), CALLSIGN_PREFIXES, clamp(), clampDemoLatitude(), createDemoScenario(), CreateDemoScenarioOptions (+65 more)
 
 ### Community 11 - "simulation-engine.ts"
-Cohesion: 0.22
-Nodes (20): applyLatitudeBound(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING, categoryCruiseMidpointKnots(), clamp(), clampLatitude(), deriveEndAtFromDistance(), distributeTimestamps() (+12 more)
+Cohesion: 0.18
+Nodes (23): applyLatitudeBound(), assertFeasibleEndWindow(), CATEGORY_MOVEMENT_SMOOTHING, categoryCruiseMidpointKnots(), clamp(), clampLatitude(), deriveEndAtFromDistance(), distributeTimestamps() (+15 more)
 
 ### Community 12 - "web/components.json"
 Cohesion: 0.09
@@ -545,7 +546,7 @@ Nodes (41): Code actions and code lenses, CodeAction kind reference, Diagnostics
 
 ### Community 21 - "dependencies"
 Cohesion: 0.12
-Nodes (17): class-variance-authority, cmdk, @fontsource-variable/inter, dependencies, class-variance-authority, cmdk, date-fns, @fontsource-variable/inter (+9 more)
+Nodes (17): @base-ui/react, class-variance-authority, @fontsource-variable/inter, dependencies, @base-ui/react, class-variance-authority, date-fns, @fontsource-variable/inter (+9 more)
 
 ### Community 22 - "compilerOptions"
 Cohesion: 0.12
@@ -564,8 +565,8 @@ Cohesion: 0.15
 Nodes (13): devDependencies, @adversary/config, tailwindcss, @tailwindcss/postcss, @types/react, @types/react-dom, typescript, @adversary/config (+5 more)
 
 ### Community 26 - "attachment.tsx"
-Cohesion: 0.16
-Nodes (23): CATEGORY_SET, DemoRegion, demoRegionById(), demoRegionsByIds(), parseRegions(), parseSupports(), regionsSupporting(), kinematicsForSubtype() (+15 more)
+Cohesion: 0.17
+Nodes (22): demoRegionById(), kinematicsForSubtype(), kinematicsFromProfile(), unpackGeoSeedsAerodromes(), categoryFallbackProfile(), profile(), profileCruiseMidpointKnots(), resolveGenerationCruiseKnots() (+14 more)
 
 ### Community 27 - "input-group.tsx"
 Cohesion: 0.07
@@ -872,8 +873,8 @@ Cohesion: 0.07
 Nodes (25): dependencies, godig sample output, imported-by, major-versions, module info, overview, package imports, package info (+17 more)
 
 ### Community 217 - "cmdk"
-Cohesion: 0.23
-Nodes (12): DemoRegionSelectProps, PathToEventsOptions, categoryFallbackProfile(), profile(), profileCruiseMidpointKnots(), EXPECTED_SUBTYPES, VEHICLE_SUBTYPE_PROFILES, VehicleProfile (+4 more)
+Cohesion: 0.19
+Nodes (12): DemoRegionSelectProps, CATEGORY_SET, DemoRegion, demoRegionsByIds(), parseRegions(), parseSupports(), regionsSupporting(), PathToEventsOptions (+4 more)
 
 ### Community 218 - "priority-terms.ts"
 Cohesion: 0.08
@@ -991,6 +992,10 @@ Nodes (16): Additional Resources, Code Review Checklist, Common Mistakes, Cross-
 Cohesion: 0.50
 Nodes (4): APIs, `samber/cc-skills-golang@golang-graphql`, `samber/cc-skills-golang@golang-grpc`, `samber/cc-skills-golang@golang-swagger`
 
+### Community 247 - "event-message-export.ts"
+Cohesion: 0.33
+Nodes (3): [1.0.0] - YYYY-MM-DD, Added, Changelog
+
 ### Community 248 - "Go Data Structures"
 Cohesion: 0.13
 Nodes (15): Arrays, Best Practices Summary, Common Mistakes, container/ Standard Library, Copy Semantics Quick Reference, Cross-References, Generic Collections (Go 1.18+), Go Data Structures (+7 more)
@@ -1021,7 +1026,7 @@ Nodes (14): Custom Scalar, DataLoaders, Disabling Introspection, Error Handling,
 
 ### Community 255 - "Golang skills — full catalog by category"
 Cohesion: 0.14
-Nodes (13): Frameworks, Golang skills — full catalog by category, QA & Performance, `samber/cc-skills-golang@golang-benchmark` 🧠, `samber/cc-skills-golang@golang-observability` ⚙️, `samber/cc-skills-golang@golang-performance` 🧠, `samber/cc-skills-golang@golang-spf13-cobra`, `samber/cc-skills-golang@golang-spf13-viper` (+5 more)
+Nodes (13): Dependency Injection, Frameworks, Golang skills — full catalog by category, `samber/cc-skills-golang@golang-dependency-injection` ⚙️, `samber/cc-skills-golang@golang-google-wire`, `samber/cc-skills-golang@golang-samber-do`, `samber/cc-skills-golang@golang-spf13-cobra`, `samber/cc-skills-golang@golang-spf13-viper` (+5 more)
 
 ### Community 256 - "Competing clusters — deep disambiguation"
 Cohesion: 0.14
@@ -1120,15 +1125,15 @@ Cohesion: 0.10
 Nodes (25): describeEvent(), DEFAULT_POSITION, EditTimelineEvent(), EditTimelineEventProps, firesAtLabel(), issuesForField(), TimelineEventShell(), TimelineEventShellProps (+17 more)
 
 ### Community 280 - "[Unreleased]"
-Cohesion: 0.17
-Nodes (11): [1.0.0] - YYYY-MM-DD, Added, Added, Changed, Changelog, Deprecated, Fixed, Other (dependencies, CI, tools...) (+3 more)
+Cohesion: 0.25
+Nodes (8): Added, Changed, Deprecated, Fixed, Other (dependencies, CI, tools...), Removed, Security, [Unreleased]
 
 ### Community 281 - "Function & Method Doc Comments"
 Cohesion: 0.17
 Nodes (12): Anti-Patterns to Remove on Sight, Deprecated Functions, Error Cases and Limitations, Format, Full Comment Template, Function & Method Doc Comments, Inline Code Examples in Comments, Interface Documentation (+4 more)
 
 ### Community 282 - "Library Documentation"
-Cohesion: 0.17
+Cohesion: 0.18
 Nodes (11): Code Examples in Doc Comments, Documentation Website, Example Test Functions, Go Playground Demos, godoc and pkg.go.dev, Library Documentation, llms.txt, Public vs Private Libraries (+3 more)
 
 ### Community 283 - "Project Documentation"
@@ -1200,8 +1205,8 @@ Cohesion: 0.18
 Nodes (11): Aggregate Root — Order, Application Service — orchestrates a use case, Bounded Contexts, Building Blocks, Code Examples, Domain-Driven Design (DDD) in Go, Project Structure, Repository Interface — defined in domain (+3 more)
 
 ### Community 301 - "🚀 Getting Started"
-Cohesion: 0.18
-Nodes (11): APT (debian/ubuntu), 🤝 Contributing, Docker, Feature Area 1, Feature Area 2, ✨ Features, From source, 🚀 Getting Started (+3 more)
+Cohesion: 0.33
+Nodes (6): APT (debian/ubuntu), Docker, From source, 🚀 Getting Started, Homebrew (macOS), Pre-built binaries
 
 ### Community 302 - "API Documentation"
 Cohesion: 0.18
@@ -1312,8 +1317,8 @@ Cohesion: 0.31
 Nodes (3): Data Handling Patterns, Iterators for Large Data (Go 1.23+), Streaming Large Transfers
 
 ### Community 330 - "golang-documentation/SKILL.md"
-Cohesion: 0.22
-Nodes (6): Code Guidelines, Contributing to {project-name}, Development Workflow, Prerequisites, Quick Start, Reporting Issues
+Cohesion: 0.15
+Nodes (11): Code Guidelines, Contributing to {project-name}, Development Workflow, Prerequisites, Quick Start, Reporting Issues, 🤝 Contributing, Feature Area 1 (+3 more)
 
 ### Community 331 - "Code Quality"
 Cohesion: 0.22
@@ -1367,6 +1372,10 @@ Nodes (9): Authentication Pattern Selection, Defense-in-Depth Layers, Go Impleme
 Cohesion: 0.22
 Nodes (8): Cookie Best Practices Checklist, Cookie Prefix Examples — Low, Cookie Security Rules, CWE References, Gorilla Sessions Cookie Security — High, HTTP-Only Flag Missing — Medium, Insecure Cookie Configuration (Missing Secure Flag) — Medium, SameSite Cookie Protection — Medium
 
+### Community 344 - "@types/react-dom"
+Cohesion: 0.33
+Nodes (6): QA & Performance, `samber/cc-skills-golang@golang-benchmark` 🧠, `samber/cc-skills-golang@golang-observability` ⚙️, `samber/cc-skills-golang@golang-performance` 🧠, `samber/cc-skills-golang@golang-testing` ⭐️ 🧠 ⚙️, `samber/cc-skills-golang@golang-troubleshooting` ⭐️ 🧠
+
 ### Community 345 - "Memory Safety Security Rules"
 Cohesion: 0.22
 Nodes (8): Always Run Race Detector, CWE References, Data Races — High, Integer Overflow — High, math/big.Rat Issues — Low, Memory Aliasing Vulnerability — Medium, Memory Safety Security Rules, Use of unsafe Package — High
@@ -1396,7 +1405,7 @@ Cohesion: 0.24
 Nodes (12): handleCancel(), handlePing(), handleRoute(), inflight, post(), readRoadOptions(), readSeaOptions(), RoadVehicleKind (+4 more)
 
 ### Community 352 - "Transactions, Isolation Levels, and Locking"
-Cohesion: 0.25
+Cohesion: 0.40
 Nodes (5): Basic transaction pattern, Custom isolation level, Locking variants, SELECT FOR UPDATE — prevent race conditions, Transactions, Isolation Levels, and Locking
 
 ### Community 353 - "Architecture Patterns"
@@ -1476,7 +1485,7 @@ Cohesion: 0.29
 Nodes (6): Capacity Growth, `copy()` vs `append()` vs `slices.Clone()`, Growth Cost, Memory Layout, Slice Internals, `slices` Package (Go 1.21+)
 
 ### Community 373 - "Testing Database Code"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (7): Integration Tests, Mock for service-layer tests, sqlmock for Query-Level Testing, Test database with testcontainers-go, Testing Database Code, Unit Tests with Mocks, What to Test
 
 ### Community 374 - "golang-dependency-management/SKILL.md"
@@ -1516,7 +1525,7 @@ Cohesion: 0.50
 Nodes (4): Filter flag, Flags Reference, Input labeling, Projection flags
 
 ### Community 383 - "Struct Scanning and NULLable Columns"
-Cohesion: 0.33
+Cohesion: 0.25
 Nodes (5): JSON Marshaling, NULLable Columns, Struct Scanning and NULLable Columns, Struct Scanning with pgx, Struct Scanning with sqlx
 
 ### Community 384 - "Dependency Conflicts & Resolution"
@@ -1538,10 +1547,6 @@ Nodes (5): Defer Close Immediately, Graceful Shutdown, Resource Management Patte
 ### Community 388 - "Constructors & Initialization"
 Cohesion: 0.33
 Nodes (6): Avoid `init()` and Mutable Globals, Compile Regexp Once, Compile-Time Interface Checks, Constructors & Initialization, Enums: Start at 1, Use `//go:embed` for Static Assets
-
-### Community 389 - "Dependency Injection"
-Cohesion: 0.33
-Nodes (6): Dependency Injection, `samber/cc-skills-golang@golang-dependency-injection` ⚙️, `samber/cc-skills-golang@golang-google-wire`, `samber/cc-skills-golang@golang-samber-do`, `samber/cc-skills-golang@golang-uber-dig`, `samber/cc-skills-golang@golang-uber-fx`
 
 ### Community 390 - "golang-naming/SKILL.md"
 Cohesion: 0.33

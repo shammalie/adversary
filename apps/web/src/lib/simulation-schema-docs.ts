@@ -120,6 +120,13 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
         notes: "See PositionPayload. Latitude/longitude required when present.",
       },
       { name: "message", type: "string", required: false, notes: "1–1000 characters." },
+      {
+        name: "ignoreKinematicLimits",
+        type: "boolean",
+        required: false,
+        notes:
+          "When true, skips the usual 2,000 kt authored-speed ceiling (set by Generate route with Ignore speed limits).",
+      },
     ],
   },
   {
@@ -132,7 +139,8 @@ export const SCHEMA_DOC_SECTIONS: SchemaDocSection[] = [
         name: "speed",
         type: "number",
         required: false,
-        notes: "Knots. 0..2000. Prefer authored speeds from generated routes. When omitted, runtime derives from distance/time and clamps to the vehicle category top speed (aircraft up to 1800 kt for fighters).",
+        notes:
+          "Knots. 0..2000 unless ignoreKinematicLimits is true. Prefer authored speeds from generated routes. When omitted, runtime derives from distance/time and clamps to the vehicle category top speed (aircraft up to 1800 kt for fighters).",
       },
     ],
   },
@@ -152,6 +160,7 @@ export const SCHEMA_CONSTRAINTS = [
   "Optional event.firesAt is set only while fast-forward is active; stripped when cleared.",
   "Colors must match #RRGGBB.",
   "Optional position speed is stored in knots (builder accepts mph, km/h, m/s, ft/s, mach).",
+  "Authored position.speed is normally 0..2000 kt; ignoreKinematicLimits on the event skips that ceiling.",
   "Generated routes set distance from category speed × elapsed time and always author position.speed.",
   "Vehicle category top speeds (kt): aircraft 1800, boat 80, car 130, truck 85, other 100.",
 ];

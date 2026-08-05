@@ -50,6 +50,11 @@ export interface SimulationEvent {
   firesAt?: string;
   position?: PositionPayload;
   message?: string;
+  /**
+   * When true, this event was generated with speed limits ignored, so schema
+   * validation does not enforce the usual 2,000 kt authored-speed ceiling.
+   */
+  ignoreKinematicLimits?: boolean;
 }
 
 export interface SimulationScenario {

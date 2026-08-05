@@ -55,11 +55,7 @@ const positionPayloadSchema = z.object({
     .min(-500, "Altitude must be at least -500 ft.")
     .max(100_000, "Altitude must be 100,000 ft or less.")
     .optional(),
-  speed: z
-    .number()
-    .min(0, "Speed cannot be negative.")
-    .max(2_000, "Speed must be 2,000 kt or less.")
-    .optional(),
+  speed: z.number().min(0, "Speed cannot be negative.").optional(),
 });
 
 export const simulationEventSchema = z
@@ -75,6 +71,7 @@ export const simulationEventSchema = z
       .min(1, "Message text cannot be empty.")
       .max(1_000, "Messages must be 1,000 characters or fewer.")
       .optional(),
+    ignoreKinematicLimits: z.boolean().optional(),
   })
   .superRefine((event, context) => {
     if (!hasEventPayload(event)) {
@@ -82,6 +79,18 @@ export const simulationEventSchema = z
         code: "custom",
         message: "Add a position, a message, or both to this event.",
         path: ["message"],
+      });
+    }
+    const speed = event.position?.speed;
+    if (
+      typeof speed === "number" &&
+      event.ignoreKinematicLimits !== true &&
+      speed > 2_000
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Speed must be 2,000 kt or less.",
+        path: ["position", "speed"],
       });
     }
   });

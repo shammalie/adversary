@@ -345,6 +345,30 @@ describe("pathToEvents", () => {
     ).toThrow(/maximum of/);
   });
 
+  it("accepts a too-short window when ignoreKinematicLimits is set", () => {
+    const path = [
+      { latitude: 51.5, longitude: -0.1 },
+      { latitude: 52.5, longitude: 1.5 },
+      { latitude: 53.5, longitude: 3.0 },
+    ];
+    const profile = resolveVehicleProfile("car", "Sedan");
+    const ceiling = Math.min(profile.maxKnots, CATEGORY_TOP_SPEED_KNOTS.car);
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt: "2026-07-27T12:00:00.000Z",
+      endAt: "2026-07-27T12:05:00.000Z",
+      vehicleCategory: "car",
+      vehicleSubtype: "Sedan",
+      ignoreKinematicLimits: true,
+      idFactory: idFactory(),
+    });
+    expect(events.length).toBeGreaterThanOrEqual(2);
+    const speeds = events.map((e) => e.position!.speed!);
+    expect(Math.max(...speeds)).toBeGreaterThan(ceiling);
+    expect(events.every((e) => e.ignoreKinematicLimits === true)).toBe(true);
+  });
+
   it("rejects a window too long for the profile cruise floor", () => {
     // Short hop stretched over 24 h would author ~1–2 kt — below aircraft min.
     const path = [
@@ -362,6 +386,27 @@ describe("pathToEvents", () => {
         idFactory: idFactory(),
       }),
     ).toThrow(/minimum of/);
+  });
+
+  it("accepts a too-long window when ignoreKinematicLimits is set", () => {
+    const path = [
+      { latitude: 51.47, longitude: -0.46, altitude: 0 },
+      { latitude: 51.5, longitude: -0.2, altitude: 0 },
+    ];
+    const profile = resolveVehicleProfile("aircraft", "Transport");
+    const events = pathToEvents({
+      targetId: "t1",
+      path,
+      startAt: "2026-07-27T12:00:00.000Z",
+      endAt: "2026-07-28T12:00:00.000Z",
+      vehicleCategory: "aircraft",
+      vehicleSubtype: "Transport",
+      ignoreKinematicLimits: true,
+      idFactory: idFactory(),
+    });
+    expect(events.length).toBeGreaterThanOrEqual(2);
+    const speeds = events.map((e) => e.position!.speed!);
+    expect(Math.min(...speeds)).toBeLessThan(profile.cruiseKnots.minKnots);
   });
 
   it("preserves distance ≈ speed × time on consecutive events", () => {
