@@ -2388,7 +2388,7 @@ export function ScenarioBuilder() {
                       events={eventsByTarget.get(previewGraphTarget.id) ?? []}
                       currentEventId={graphCurrentEventId}
                       priorityTerms={scenario.priorityTerms}
-                      fitKey={`${preview.previewRevision}:${previewGraphTarget.id}`}
+                      fitKey={`${preview.previewFitKey}:${previewGraphTarget.id}`}
                       onEventSelect={(eventId, at) => {
                         setHighlightEventId(eventId);
                         preview.seek(Date.parse(at));
@@ -2434,7 +2434,7 @@ export function ScenarioBuilder() {
                       if (mode === "overview" || mode === "pan") setCameraMode(mode);
                     }}
                     availableCameraModes={["overview", "pan"]}
-                    fitTargetsKey={preview.previewRevision}
+                    fitTargetsKey={preview.previewFitKey}
                   />
                 </Suspense>
               )}

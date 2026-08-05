@@ -9,7 +9,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@adversary/ui/components/dialog";
-import { Field, FieldLabel } from "@adversary/ui/components/field";
+import {
+  Field,
+  FieldDescription,
+  FieldLabel,
+} from "@adversary/ui/components/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@adversary/ui/components/select";
 import { toast } from "sonner";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ClipboardCopyIcon, DownloadIcon, RadioIcon } from "lucide-react";
@@ -25,6 +37,7 @@ import type { SimulationScenario } from "@/types/target";
 
 const PREVIEW_LINE_HEIGHT_PX = 20;
 const PREVIEW_OVERSCAN = 8;
+const TIME_MULTIPLIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 function VirtualizedMessagePreview({ lines }: { lines: string[] }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -59,7 +72,9 @@ function VirtualizedMessagePreview({ lines }: { lines: string[] }) {
       aria-label="Message export preview"
     >
       <div className="font-mono text-xs leading-5">
-        {paddingTop > 0 ? <div aria-hidden style={{ height: paddingTop }} /> : null}
+        {paddingTop > 0 ? (
+          <div aria-hidden style={{ height: paddingTop }} />
+        ) : null}
         {virtualItems.map((item) => {
           const line = lines[item.index] ?? "";
           return (
@@ -73,7 +88,9 @@ function VirtualizedMessagePreview({ lines }: { lines: string[] }) {
             </div>
           );
         })}
-        {paddingBottom > 0 ? <div aria-hidden style={{ height: paddingBottom }} /> : null}
+        {paddingBottom > 0 ? (
+          <div aria-hidden style={{ height: paddingBottom }} />
+        ) : null}
       </div>
     </div>
   );
@@ -98,7 +115,10 @@ export function EventMessageExportDialog({
   const lines = useMemo(() => (preview ? preview.split("\n") : []), [preview]);
   const lineCount = lines.length;
 
-  function setOption(key: keyof EventMessageExportOptions, checked: boolean) {
+  function setOption(
+    key: "includeAltitude" | "includeHeading" | "includeSpeed",
+    checked: boolean,
+  ) {
     setOptions((current) => ({ ...current, [key]: checked }));
   }
 
@@ -109,7 +129,9 @@ export function EventMessageExportDialog({
     }
     try {
       await navigator.clipboard.writeText(preview);
-      toast.success(`Copied ${lineCount} message${lineCount === 1 ? "" : "s"}.`);
+      toast.success(
+        `Copied ${lineCount} message${lineCount === 1 ? "" : "s"}.`,
+      );
     } catch {
       toast.error("Could not copy to clipboard.");
     }
@@ -121,7 +143,9 @@ export function EventMessageExportDialog({
       return;
     }
     downloadEventMessages(scenario.name, preview);
-    toast.success(`Exported ${lineCount} message${lineCount === 1 ? "" : "s"}.`);
+    toast.success(
+      `Exported ${lineCount} message${lineCount === 1 ? "" : "s"}.`,
+    );
   }
 
   return (
@@ -132,7 +156,9 @@ export function EventMessageExportDialog({
         if (next) setOptions(DEFAULT_EVENT_MESSAGE_EXPORT_OPTIONS);
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" disabled={disabled} />}>
+      <DialogTrigger
+        render={<Button variant="outline" size="sm" disabled={disabled} />}
+      >
         <RadioIcon data-icon="inline-start" />
         Messages
       </DialogTrigger>
@@ -140,32 +166,77 @@ export function EventMessageExportDialog({
         <DialogHeader>
           <DialogTitle>Export event messages</DialogTitle>
           <DialogDescription>
-            One line per positioned event. Optional altitude, heading, and speed. Messages are
-            included when present.
+            One line per positioned event. Optional altitude, heading, and
+            speed. Messages are included when present.
           </DialogDescription>
         </DialogHeader>
         <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden border-y px-4 py-4">
+          <Field className="shrink-0">
+            <FieldLabel htmlFor="export-time-multiplier">
+              Time multiplier
+            </FieldLabel>
+            <Select
+              value={String(options.timeMultiplier)}
+              onValueChange={(next) => {
+                if (!next) return;
+                const multiplier = Number(next);
+                if (!Number.isFinite(multiplier)) return;
+                setOptions((current) => ({
+                  ...current,
+                  timeMultiplier: multiplier,
+                }));
+              }}
+            >
+              <SelectTrigger
+                id="export-time-multiplier"
+                className="w-full"
+                aria-describedby="export-time-multiplier-hint"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                <SelectGroup>
+                  {TIME_MULTIPLIERS.map((multiplier) => (
+                    <SelectItem key={multiplier} value={String(multiplier)}>
+                      {multiplier}×
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <FieldDescription id="export-time-multiplier-hint">
+              Compresses relative OUT seconds from the first exported line. 1× =
+              off. Authored times stay unchanged.
+            </FieldDescription>
+          </Field>
+
           <Field className="shrink-0">
             <FieldLabel>Include fields</FieldLabel>
             <div className="flex flex-wrap gap-4">
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={options.includeAltitude}
-                  onCheckedChange={(checked) => setOption("includeAltitude", checked === true)}
+                  onCheckedChange={(checked) =>
+                    setOption("includeAltitude", checked === true)
+                  }
                 />
                 ALT
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={options.includeHeading}
-                  onCheckedChange={(checked) => setOption("includeHeading", checked === true)}
+                  onCheckedChange={(checked) =>
+                    setOption("includeHeading", checked === true)
+                  }
                 />
                 HDG
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={options.includeSpeed}
-                  onCheckedChange={(checked) => setOption("includeSpeed", checked === true)}
+                  onCheckedChange={(checked) =>
+                    setOption("includeSpeed", checked === true)
+                  }
                 />
                 SPD
               </label>
@@ -180,7 +251,12 @@ export function EventMessageExportDialog({
           </Field>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" disabled={!preview} onClick={handleCopy}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!preview}
+            onClick={handleCopy}
+          >
             <ClipboardCopyIcon data-icon="inline-start" />
             Copy
           </Button>

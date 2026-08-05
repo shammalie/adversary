@@ -1,7 +1,7 @@
 import { effectiveEventAtMs, sortEvents } from "@/lib/simulation-engine";
 import type { SimulationScenario } from "@/types/target";
 
-/** Stable revision key for preview reset when targets or events change. */
+/** Stable revision key when targets or events change (preview content / map targets). */
 export function computePreviewRevision(scenario: SimulationScenario): string {
   const targetPart = scenario.targets
     .map(
@@ -19,6 +19,22 @@ export function computePreviewRevision(scenario: SimulationScenario): string {
     .join("|");
 
   return `${targetPart}::${eventPart}::d${scenario.delaySeconds ?? 0}::ff${scenario.fastForwardMultiplier ?? 1}`;
+}
+
+/**
+ * Coarse key for map/graph camera refits. Ignores message text and position
+ * tweaks so typing in the timeline does not re-frame the preview.
+ */
+export function computePreviewFitKey(scenario: SimulationScenario): string {
+  const targetIds = scenario.targets
+    .map((target) => target.id)
+    .toSorted()
+    .join(",");
+  const eventIds = sortEvents(scenario.events)
+    .map((event) => event.id)
+    .join(",");
+  const range = getPreviewRangeMs(scenario);
+  return `${targetIds}::${eventIds}::${range?.startMs ?? ""}::${range?.endMs ?? ""}::d${scenario.delaySeconds ?? 0}::ff${scenario.fastForwardMultiplier ?? 1}`;
 }
 
 /** Preview range spans from the first to the last scheduled event (effective times). */

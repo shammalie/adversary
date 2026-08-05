@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { computePreviewRevision, getPreviewRangeMs, getPreviewStartMs } from "@/lib/preview-revision";
+import {
+  clampPreviewTimeMs,
+  computePreviewFitKey,
+  computePreviewRevision,
+  getPreviewRangeMs,
+  getPreviewStartMs,
+} from "@/lib/preview-revision";
 import { buildPreviewTargetStates, buildInterpolatedPreviewTargetStates, getEventsDueByTime } from "@/lib/simulation-engine";
 import type { SimulationScenario } from "@/types/target";
 
@@ -297,5 +303,27 @@ describe("builder preview helpers", () => {
       ],
     });
     expect(computePreviewRevision(edited)).not.toBe(computePreviewRevision(scenario));
+  });
+
+  it("keeps scrub time inside range when content edits change the revision", () => {
+    const range = getPreviewRangeMs(baseScenario())!;
+    const mid = Date.parse("2026-07-24T12:05:00.000Z");
+    expect(clampPreviewTimeMs(mid, range)).toBe(mid);
+    expect(clampPreviewTimeMs(mid, range)).not.toBe(range.startMs);
+  });
+
+  it("does not change fit key when only an event message is edited", () => {
+    const scenario = baseScenario();
+    const edited = baseScenario({
+      events: [
+        scenario.events[0]!,
+        {
+          ...scenario.events[1]!,
+          message: "updated note",
+        },
+      ],
+    });
+    expect(computePreviewRevision(edited)).not.toBe(computePreviewRevision(scenario));
+    expect(computePreviewFitKey(edited)).toBe(computePreviewFitKey(scenario));
   });
 });

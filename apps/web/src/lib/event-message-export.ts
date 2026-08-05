@@ -11,13 +11,21 @@ export interface EventMessageExportOptions {
   includeAltitude: boolean;
   includeHeading: boolean;
   includeSpeed: boolean;
+  /** Dialog-only speed-up for OUT relative seconds (1 = off). Independent of scenario fast-forward. */
+  timeMultiplier: number;
 }
 
 export const DEFAULT_EVENT_MESSAGE_EXPORT_OPTIONS: EventMessageExportOptions = {
   includeAltitude: true,
   includeHeading: true,
   includeSpeed: true,
+  timeMultiplier: 1,
 };
+
+function normalizeTimeMultiplier(value: number | undefined): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 1) return 1;
+  return Math.min(10, Math.max(1, Math.round(value)));
+}
 
 function formatLatitude(latitude: number) {
   return `${Math.abs(latitude).toFixed(2)}${latitude >= 0 ? "N" : "S"}`;
@@ -44,7 +52,9 @@ function formatOrdinal(n: number) {
  * Export positioned scenario events as tactical message lines.
  * Message-only events (no position) are skipped and do not consume ordinals.
  * Each line ends with cumulative relative seconds from the first exported line
- * in the whole file (`OUT 0`, then `OUT 90`, …).
+ * in the whole file (`OUT 0`, then `OUT 90`, …), optionally compressed by
+ * `timeMultiplier` (floored). Successive OUT values increase by ≥1 except
+ * origin-start firsts per target, which may share OUT 0.
  */
 export function formatEventMessages(
   scenario: SimulationScenario,
@@ -53,15 +63,28 @@ export function formatEventMessages(
   const targetMap = targetsById(scenario.targets);
   const previousByTarget = new Map<string, PositionSnapshot>();
   const ordinalByTarget = new Map<string, number>();
+  const exportedTargets = new Set<string>();
   const lines: string[] = [];
+  const multiplier = normalizeTimeMultiplier(options.timeMultiplier);
   let fileOriginMs: number | undefined;
+  let lastOut: number | undefined;
 
   for (const event of sortEvents(scenario.events)) {
+    if (!event.position || !targetMap.has(event.targetId)) continue;
+
     const eventMs = Date.parse(event.at);
-    const relativeSeconds =
-      fileOriginMs === undefined
-        ? 0
-        : Math.round((eventMs - fileOriginMs) / 1000);
+    if (!Number.isFinite(eventMs)) continue;
+
+    if (fileOriginMs === undefined) {
+      fileOriginMs = eventMs;
+    }
+
+    const floored = Math.floor((eventMs - fileOriginMs) / multiplier / 1000);
+    const isOriginFirst =
+      !exportedTargets.has(event.targetId) && eventMs === fileOriginMs;
+    const relativeSeconds = isOriginFirst
+      ? 0
+      : Math.max(floored, (lastOut ?? -1) + 1);
 
     const line = formatPositionedEventLine(
       event,
@@ -73,9 +96,8 @@ export function formatEventMessages(
     );
     if (!line) continue;
 
-    if (fileOriginMs === undefined) {
-      fileOriginMs = eventMs;
-    }
+    exportedTargets.add(event.targetId);
+    lastOut = relativeSeconds;
     lines.push(line);
   }
 

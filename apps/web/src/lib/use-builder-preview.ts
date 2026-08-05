@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   clampPreviewTimeMs,
+  computePreviewFitKey,
   computePreviewRevision,
   getPreviewRangeMs,
   getPreviewStartMs,
@@ -19,6 +20,7 @@ export type PreviewSpeed = (typeof PREVIEW_SPEEDS)[number];
 
 export function useBuilderPreview(scenario: SimulationScenario) {
   const previewRevision = useMemo(() => computePreviewRevision(scenario), [scenario]);
+  const previewFitKey = useMemo(() => computePreviewFitKey(scenario), [scenario]);
   const previewRange = useMemo(() => getPreviewRangeMs(scenario), [scenario]);
   const [previewTimeMs, setPreviewTimeMs] = useState(
     () => previewRange?.startMs ?? Date.now(),
@@ -29,9 +31,12 @@ export function useBuilderPreview(scenario: SimulationScenario) {
   const previewRangeRef = useRef(previewRange);
   previewRangeRef.current = previewRange;
 
+  // Keep the scrubber where the author left it across edits; only clamp into the
+  // new range (e.g. first/last event moved). Always pause so mid-edit playback
+  // does not keep advancing against a changing schedule.
   useEffect(() => {
     if (previewRange) {
-      setPreviewTimeMs(previewRange.startMs);
+      setPreviewTimeMs((current) => clampPreviewTimeMs(current, previewRange));
     }
     setPlaying(false);
   }, [previewRevision, previewRange]);
@@ -108,6 +113,7 @@ export function useBuilderPreview(scenario: SimulationScenario) {
 
   return {
     previewRevision,
+    previewFitKey,
     previewRange,
     previewTimeMs,
     playing,
@@ -135,4 +141,9 @@ export function describePreviewEvent(event: SimulationEvent) {
   return parts.join(" · ");
 }
 
-export { computePreviewRevision, getPreviewRangeMs, getPreviewStartMs };
+export {
+  computePreviewFitKey,
+  computePreviewRevision,
+  getPreviewRangeMs,
+  getPreviewStartMs,
+};

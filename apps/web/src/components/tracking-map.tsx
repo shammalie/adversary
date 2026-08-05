@@ -244,8 +244,17 @@ function createEventPointElement(
   element.type = "button";
   element.className = "tracking-event-point";
   element.style.setProperty("--event-point-color", point.color);
-  element.setAttribute("aria-label", `Select event at ${point.latitude.toFixed(4)}, ${point.longitude.toFixed(4)}`);
+  element.setAttribute(
+    "aria-label",
+    `Select event at ${point.latitude.toFixed(4)}, ${point.longitude.toFixed(4)}`,
+  );
   element.dataset.eventId = point.id;
+  // Visual lives on an inner node so highlight scale never touches the root
+  // transform MapLibre uses for lat/lng placement.
+  const visual = document.createElement("span");
+  visual.className = "tracking-event-point-visual";
+  visual.setAttribute("aria-hidden", "true");
+  element.append(visual);
   if (onClick) {
     element.addEventListener("click", (event) => {
       event.stopPropagation();

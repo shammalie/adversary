@@ -38,8 +38,19 @@ function scenario(
 const alpha = baseTarget({ id: "alpha", callsign: "ALPHA" });
 const bravo = baseTarget({ id: "bravo", callsign: "BRAVO" });
 
+const telemetryOff: EventMessageExportOptions = {
+  includeAltitude: false,
+  includeHeading: false,
+  includeSpeed: false,
+  timeMultiplier: 1,
+};
+
 function at(minute: number) {
   return `2026-07-28T12:${String(minute).padStart(2, "0")}:00.000Z`;
+}
+
+function atSeconds(minute: number, second: number) {
+  return `2026-07-28T12:${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}.000Z`;
 }
 
 describe("formatEventMessages", () => {
@@ -104,12 +115,7 @@ describe("formatEventMessages", () => {
       },
     ];
 
-    const off: EventMessageExportOptions = {
-      includeAltitude: false,
-      includeHeading: false,
-      includeSpeed: false,
-    };
-    expect(formatEventMessages(scenario([bravo], events), off)).toBe(
+    expect(formatEventMessages(scenario([bravo], events), telemetryOff)).toBe(
       "BRAVO 001 POS 58.50N 23.90E CONTACT LOST OUT 0",
     );
 
@@ -136,12 +142,7 @@ describe("formatEventMessages", () => {
       },
     ];
 
-    const off: EventMessageExportOptions = {
-      includeAltitude: false,
-      includeHeading: false,
-      includeSpeed: false,
-    };
-    const lines = formatEventMessages(scenario([bravo], events), off).split("\n");
+    const lines = formatEventMessages(scenario([bravo], events), telemetryOff).split("\n");
     expect(lines[1]).toBe("BRAVO 002 POS 58.55N 23.95E OUT 60");
   });
 
@@ -173,12 +174,7 @@ describe("formatEventMessages", () => {
       },
     ];
 
-    const off: EventMessageExportOptions = {
-      includeAltitude: false,
-      includeHeading: false,
-      includeSpeed: false,
-    };
-    expect(formatEventMessages(scenario([alpha, bravo], events), off)).toBe(
+    expect(formatEventMessages(scenario([alpha, bravo], events), telemetryOff)).toBe(
       ["BRAVO 001 POS 58.50N 23.90E OUT 0", "BRAVO 002 POS 58.55N 23.95E OUT 120"].join("\n"),
     );
   });
@@ -204,12 +200,7 @@ describe("formatEventMessages", () => {
         position: { latitude: 58.7, longitude: 24.2 },
       },
     ];
-    const off: EventMessageExportOptions = {
-      includeAltitude: false,
-      includeHeading: false,
-      includeSpeed: false,
-    };
-    expect(formatEventMessages(scenario([alpha, bravo], events), off)).toBe(
+    expect(formatEventMessages(scenario([alpha, bravo], events), telemetryOff)).toBe(
       [
         "ALPHA 001 POS 58.50N 24.00E OUT 0",
         "BRAVO 001 POS 58.60N 24.10E OUT 90",
@@ -233,11 +224,144 @@ describe("formatEventMessages", () => {
     );
   });
 
-  it("defaults all telemetry checkboxes on", () => {
+  it("defaults telemetry on and time multiplier 1×", () => {
     expect(DEFAULT_EVENT_MESSAGE_EXPORT_OPTIONS).toEqual({
       includeAltitude: true,
       includeHeading: true,
       includeSpeed: true,
+      timeMultiplier: 1,
     });
+  });
+
+  it("compresses OUT seconds with time multiplier (10× → 60s becomes 6)", () => {
+    const events: SimulationEvent[] = [
+      {
+        id: "a1",
+        targetId: "alpha",
+        at: atSeconds(0, 0),
+        position: { latitude: 58.5, longitude: 24.0 },
+      },
+      {
+        id: "a2",
+        targetId: "alpha",
+        at: atSeconds(1, 0),
+        position: { latitude: 58.6, longitude: 24.1 },
+      },
+    ];
+    const options: EventMessageExportOptions = { ...telemetryOff, timeMultiplier: 10 };
+    expect(formatEventMessages(scenario([alpha], events), options)).toBe(
+      ["ALPHA 001 POS 58.50N 24.00E OUT 0", "ALPHA 002 POS 58.60N 24.10E OUT 6"].join("\n"),
+    );
+  });
+
+  it("floors compressed OUT seconds (90s at 4× → 22)", () => {
+    const events: SimulationEvent[] = [
+      {
+        id: "a1",
+        targetId: "alpha",
+        at: "2026-07-28T12:00:00.000Z",
+        position: { latitude: 58.5, longitude: 24.0 },
+      },
+      {
+        id: "a2",
+        targetId: "alpha",
+        at: "2026-07-28T12:01:30.000Z",
+        position: { latitude: 58.6, longitude: 24.1 },
+      },
+    ];
+    const options: EventMessageExportOptions = { ...telemetryOff, timeMultiplier: 4 };
+    expect(formatEventMessages(scenario([alpha], events), options)).toBe(
+      ["ALPHA 001 POS 58.50N 24.00E OUT 0", "ALPHA 002 POS 58.60N 24.10E OUT 22"].join("\n"),
+    );
+  });
+
+  it("allows shared OUT 0 for origin-start firsts per callsign", () => {
+    const start = "2026-07-28T12:00:00.000Z";
+    const events: SimulationEvent[] = [
+      {
+        id: "a1",
+        targetId: "alpha",
+        at: start,
+        position: { latitude: 58.5, longitude: 24.0 },
+      },
+      {
+        id: "b1",
+        targetId: "bravo",
+        at: start,
+        position: { latitude: 58.6, longitude: 24.1 },
+      },
+      {
+        id: "a2",
+        targetId: "alpha",
+        at: "2026-07-28T12:01:00.000Z",
+        position: { latitude: 58.7, longitude: 24.2 },
+      },
+    ];
+    expect(formatEventMessages(scenario([alpha, bravo], events), telemetryOff)).toBe(
+      [
+        "ALPHA 001 POS 58.50N 24.00E OUT 0",
+        "BRAVO 001 POS 58.60N 24.10E OUT 0",
+        "ALPHA 002 POS 58.70N 24.20E OUT 60",
+      ].join("\n"),
+    );
+  });
+
+  it("bumps OUT by at least 1s when compression would duplicate", () => {
+    const events: SimulationEvent[] = [
+      {
+        id: "a1",
+        targetId: "alpha",
+        at: atSeconds(0, 0),
+        position: { latitude: 58.5, longitude: 24.0 },
+      },
+      {
+        id: "a2",
+        targetId: "alpha",
+        at: atSeconds(0, 5),
+        position: { latitude: 58.55, longitude: 24.05 },
+      },
+      {
+        id: "a3",
+        targetId: "alpha",
+        at: atSeconds(0, 9),
+        position: { latitude: 58.6, longitude: 24.1 },
+      },
+    ];
+    // 5s and 9s at 10× both floor to 0; bump → OUT 0, 1, 2
+    const options: EventMessageExportOptions = { ...telemetryOff, timeMultiplier: 10 };
+    expect(formatEventMessages(scenario([alpha], events), options)).toBe(
+      [
+        "ALPHA 001 POS 58.50N 24.00E OUT 0",
+        "ALPHA 002 POS 58.55N 24.05E OUT 1",
+        "ALPHA 003 POS 58.60N 24.10E OUT 2",
+      ].join("\n"),
+    );
+  });
+
+  it("ignores scenario fastForwardMultiplier and firesAt for OUT timing", () => {
+    const events: SimulationEvent[] = [
+      {
+        id: "a1",
+        targetId: "alpha",
+        at: atSeconds(0, 0),
+        firesAt: "2026-07-28T12:00:00.000Z",
+        position: { latitude: 58.5, longitude: 24.0 },
+      },
+      {
+        id: "a2",
+        targetId: "alpha",
+        at: atSeconds(1, 0),
+        firesAt: "2026-07-28T12:00:06.000Z",
+        position: { latitude: 58.6, longitude: 24.1 },
+      },
+    ];
+    const withScenarioFf = {
+      ...scenario([alpha], events),
+      fastForwardMultiplier: 10,
+    };
+    // Export multiplier 1× uses authored at (60s), not firesAt (6s)
+    expect(formatEventMessages(withScenarioFf, telemetryOff)).toBe(
+      ["ALPHA 001 POS 58.50N 24.00E OUT 0", "ALPHA 002 POS 58.60N 24.10E OUT 60"].join("\n"),
+    );
   });
 });
